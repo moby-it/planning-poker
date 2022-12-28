@@ -11,7 +11,7 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{roomdId}/{username}", core.Connect)
+	r.HandleFunc("/{roomId}/{username}", core.Connect)
 	r.HandleFunc("/createRoom", core.CreateRoom)
 	srv := &http.Server{
 		Handler: r,

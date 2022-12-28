@@ -7,5 +7,17 @@
   "settings": {},
   "extensions": {
     "recommendations": ["golang.go", "Dart-Code.flutter"]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch file",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${file}"
+      }
+    ]
   }
 }

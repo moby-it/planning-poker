@@ -1,9 +1,9 @@
 package core
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -16,50 +16,51 @@ var upgrader = websocket.Upgrader{
 
 func Connect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	roomId, ok := vars["roodId"]
+	roomId, ok := vars["roomId"]
 	if !ok {
 		log.Println("missing room id from request")
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	username, ok := vars["roodId"]
+	username, ok := vars["username"]
 	if !ok {
 		log.Println("missing username from request")
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	if RoomExists(roomId) {
 		conn, err := upgrader.Upgrade(w, r, nil)
-		socketId := r.Header.Get("Sec-WebSocket-Key")
-		client := Client{roomId: roomId, username: username, connection: conn}
-		Clients[socketId] = &client
-		ConnectToRoom(&client, "voter")
 		if err != nil {
 			log.Println(err)
 			return
 		}
+		socketId := r.Header.Get("Sec-WebSocket-Key")
+		client := Client{roomId: roomId, username: username, connection: conn, id: socketId}
+		Clients[socketId] = &client
+		ConnectToRoom(&client, "voter")
+		go readMessage(&client)
 	}
 }
-func readMessage(username string, conn *websocket.Conn) {
+func readMessage(client *Client) {
 	defer func() {
-		conn.Close()
-		// delete(Clients,)
+		client.connection.Close()
+		delete(Clients, client.id)
 	}()
 	for {
-		_, message, err := conn.ReadMessage()
+		_, message, err := client.connection.ReadMessage()
 		if err != nil {
 			log.Printf("error: %v", err)
 			break
 		}
-		var vote Vote
-		err = json.Unmarshal(message, &vote)
-		if err != nil {
-			VoteRoom(vote.RoundId, username, vote.StoryPoints)
+		storyPoints, err := strconv.Atoi(string(message))
+		if err == nil {
+			VoteRoom(client.roomId, client.username, storyPoints)
 			continue
 		}
-		// var revealRound
-		err = json.Unmarshal(message, &vote)
 
 	}
 }
-func writeMessage(message []byte, conn *websocket.Conn) {
 
-}
+// func writeMessage(message []byte, conn *websocket.Conn) {
+//
+// }

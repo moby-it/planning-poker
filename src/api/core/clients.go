@@ -3,6 +3,7 @@ package core
 import "github.com/gorilla/websocket"
 
 type Client struct {
+	id         string
 	roomId     string
 	username   string
 	connection *websocket.Conn

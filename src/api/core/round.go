@@ -5,11 +5,6 @@ import (
 	"fmt"
 )
 
-type Vote struct {
-	RoundId     string
-	StoryPoints int
-}
-
 // A round always belongs to a room and has a certain number of votes
 type Round struct {
 	Room  *Room
