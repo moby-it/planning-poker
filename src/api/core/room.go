@@ -15,12 +15,13 @@ type Room struct {
 	Voters     []*Client
 	Spectators []*Client
 	Round      *Round
+	broadcast  chan string
 }
 
 func NewRoom() *Room {
 	roomId := uuid.New().String()
 	round := NewRound()
-	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: round}
+	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: round, broadcast: make(chan string)}
 	round.Room = &room
 	Rooms[roomId] = &room
 	return &room
@@ -28,7 +29,7 @@ func NewRoom() *Room {
 func (r Room) Close() {
 	delete(Rooms, r.Id)
 }
-func VoteRoom(roomId string, username string, storyPoints int) {
+func Vote(roomId string, username string, storyPoints int) {
 	room := Rooms[roomId]
 	room.Round.Votes[username] = storyPoints
 }

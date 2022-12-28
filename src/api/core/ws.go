@@ -54,7 +54,7 @@ func readMessage(client *Client) {
 		}
 		storyPoints, err := strconv.Atoi(string(message))
 		if err == nil {
-			VoteRoom(client.roomId, client.username, storyPoints)
+			Vote(client.roomId, client.username, storyPoints)
 			continue
 		}
 
