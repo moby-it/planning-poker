@@ -2,6 +2,7 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -15,18 +16,26 @@ type Room struct {
 	Voters     []*Client
 	Spectators []*Client
 	Round      *Round
-	broadcast  chan string
+	broadcast  chan []byte
 }
 
 func NewRoom() *Room {
 	roomId := uuid.New().String()
 	round := NewRound()
-	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: round, broadcast: make(chan string)}
+	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: round, broadcast: make(chan []byte)}
 	round.Room = &room
 	Rooms[roomId] = &room
+	go func() {
+		for p := range room.broadcast {
+			for _, client := range append(room.Voters, room.Spectators...) {
+				client.connection.WriteJSON(p)
+			}
+		}
+	}()
 	return &room
 }
 func (r Room) Close() {
+	close(r.broadcast)
 	delete(Rooms, r.Id)
 }
 func Vote(roomId string, username string, storyPoints int) {
@@ -47,6 +56,11 @@ func ConnectToRoom(client *Client, role string) error {
 	default:
 		return fmt.Errorf("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
+	payload, err := json.Marshal(UserConnectedEvent{Username: client.username, Voter: role == "voter"})
+	if err != nil {
+		return err
+	}
+	room.broadcast <- payload
 	return nil
 }
 func CreateRoom(w http.ResponseWriter, r *http.Request) {

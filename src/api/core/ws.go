@@ -31,7 +31,7 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	if RoomExists(roomId) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Println(err)
+			w.Write([]byte(err.Error()))
 			return
 		}
 		socketId := r.Header.Get("Sec-WebSocket-Key")
@@ -39,6 +39,8 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 		Clients[socketId] = &client
 		ConnectToRoom(&client, "voter")
 		go readMessage(&client)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 func readMessage(client *Client) {
