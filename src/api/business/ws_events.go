@@ -1,4 +1,4 @@
-package core
+package business
 
 type UserConnectedEvent struct {
 	Username string

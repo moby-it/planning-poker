@@ -1,4 +1,4 @@
-package core
+package business
 
 import "github.com/gorilla/websocket"
 

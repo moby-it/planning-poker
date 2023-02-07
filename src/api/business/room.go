@@ -1,9 +1,8 @@
 // A room represents the place in which many users gather to plan a set of tasks/stories
-package core
+package business
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ type Room struct {
 	broadcast  chan []byte
 }
 
-func NewRoom() *Room {
+func newRoom() *Room {
 	roomId := uuid.New().String()
 	round := NewRound()
 	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: round, broadcast: make(chan []byte)}
@@ -46,6 +45,8 @@ func RoomExists(roomId string) bool {
 	_, ok := Rooms[roomId]
 	return ok
 }
+
+// a client can either connect as a "voter" or a "spectator". Any other role will result in panic
 func ConnectToRoom(client *Client, role string) error {
 	room := Rooms[client.roomId]
 	switch role {
@@ -54,7 +55,7 @@ func ConnectToRoom(client *Client, role string) error {
 	case "spectator":
 		room.Spectators = append(room.Spectators, client)
 	default:
-		return fmt.Errorf("incorrect role flag. Please send 'spectator' or 'voter'")
+		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
 	payload, err := json.Marshal(UserConnectedEvent{Username: client.username, Voter: role == "voter"})
 	if err != nil {
@@ -68,6 +69,6 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	room := NewRoom()
+	room := newRoom()
 	w.Write([]byte(room.Id))
 }

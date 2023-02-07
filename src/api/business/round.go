@@ -1,5 +1,5 @@
 // Round represents a Poker Planning round for a single Story/Task
-package core
+package business
 
 import (
 	"fmt"
