@@ -3,7 +3,6 @@ package web
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -38,34 +37,9 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		socketId := r.Header.Get("Sec-WebSocket-Key")
 		client := Client{RoomId: roomId, Username: username, Connection: conn, Id: socketId}
 		Clients[socketId] = &client
-		AddClientToRoom(&client, "voter")
-		go readMessage(&client, room)
+		room.AddClient(&client, "voter")
 	} else {
 		log.Println("room does not exist")
 		w.WriteHeader(http.StatusNotFound)
 	}
-}
-func readMessage(client *Client, room *Room) {
-	defer func() {
-		client.Connection.Close()
-		delete(Clients, client.Id)
-	}()
-	for {
-		_, message, err := client.Connection.ReadMessage()
-		if err != nil {
-			log.Printf("error: %v", err)
-			room.RemoveClientFromRoom(client)
-			break
-		}
-		storyPoints, err := strconv.Atoi(string(message))
-		if err == nil {
-			Vote(client.RoomId, client.Username, storyPoints)
-			continue
-		}
-
-	}
-}
-
-func writeMessage(message []byte, conn *websocket.Conn) {
-
 }

@@ -3,7 +3,9 @@ package web
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -56,32 +58,20 @@ func (r Room) Close() {
 func Vote(roomId string, username string, storyPoints int) {
 	room := Rooms[roomId]
 	room.Round.Votes[username] = storyPoints
+	payload, err := json.Marshal(UserVotedEvent{Username: username})
+	if err != nil {
+		log.Println(err)
+	}
+	room.Round.isRevealable()
+	room.broadcast <- payload
 }
 func RoomExists(roomId string) bool {
 	_, ok := Rooms[roomId]
 	return ok
 }
-func (r Room) notifyUsers() error {
-	var err error
-	for _, client := range r.Voters {
-		err = client.Connection.WriteJSON(r.Round.Votes)
-		if err != nil {
-			return err
-		}
-	}
-	for _, client := range r.Spectators {
-
-		err = client.Connection.WriteJSON(r.Round.Votes)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 // a client can either connect as a "voter" or a "spectator". Any other role will result in panic
-func AddClientToRoom(client *Client, role string) error {
-	room := Rooms[client.RoomId]
+func (room *Room) AddClient(client *Client, role string) error {
 	switch role {
 	case "voter":
 		room.Voters = append(room.Voters, client)
@@ -100,10 +90,11 @@ func AddClientToRoom(client *Client, role string) error {
 		return err
 	}
 	room.broadcast <- payload
+	go room.readMessage(client)
 	return nil
 }
 
-func (room *Room) RemoveClientFromRoom(client *Client) {
+func (room *Room) RemoveClient(client *Client) {
 	for i, c := range room.Voters {
 		if c == client {
 			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
@@ -118,11 +109,14 @@ func (room *Room) RemoveClientFromRoom(client *Client) {
 }
 
 func (room *Room) emitUsers() {
-	usernames := make([]string, 0)
-	for _, client := range append(room.Voters, room.Spectators...) {
-		usernames = append(usernames, client.Username)
+	usernames := make([]User, 0)
+	for _, client := range room.Voters {
+		usernames = append(usernames, User{Username: client.Username, IsVoter: true})
 	}
-	payload, err := json.Marshal(usernames)
+	for _, client := range room.Spectators {
+		usernames = append(usernames, User{Username: client.Username, IsVoter: false})
+	}
+	payload, err := json.Marshal(UsersUpdated{Users: usernames})
 	if err != nil {
 		return
 	}
@@ -136,3 +130,27 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 	room := newRoom()
 	w.Write([]byte(room.Id))
 }
+func (room *Room) readMessage(client *Client) {
+	defer func() {
+		client.Connection.Close()
+		delete(Clients, client.Id)
+	}()
+	for {
+		_, message, err := client.Connection.ReadMessage()
+		if err != nil {
+			log.Printf("error: %v", err)
+			room.RemoveClient(client)
+			break
+		}
+		storyPoints, err := strconv.Atoi(string(message))
+		if err == nil {
+			Vote(client.RoomId, client.Username, storyPoints)
+			continue
+		}
+
+	}
+}
+
+// func writeMessage(message []byte, conn *websocket.Conn) {
+
+// }
