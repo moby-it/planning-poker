@@ -64,7 +64,7 @@ func TestCreateRoom(t *testing.T) {
 	}
 }
 func TestConnectUser(t *testing.T) {
-	t.Log("Given a user lands on the platform")
+	t.Log("Given a user lands on the platform via a link")
 	{
 		t.Log("\tWhen the user tries to connect to a room")
 		r := mux.NewRouter()
@@ -93,12 +93,27 @@ func TestConnectUser(t *testing.T) {
 			if room.Voters[0].Username != username {
 				t.Fatal("\t\tUser should be added to the room. Expected username: ", username, "Got: ", room.Voters[0].Username)
 			}
-			t.Log("\t\tUser should be added to the room")
+			t.Logf("\t\tUser named %v should be added to the room", username)
 		}
 	}
 
 }
-func TestUserJoinsRoom(t *testing.T) {}
+func TestUserJoinsRoom(t *testing.T) {
+	t.Log("Given a room is already created and a user is connected to it")
+	roomId := CreateRoomAndGetId(t)
+	usename := "fasolakis"
+	ws := ConnectUserToRoom(t, string(roomId), usename)
+	defer ws.Close()
+	{
+		t.Log("\tWhen another user connects to the room")
+		{
+			username := "george"
+			ws2 := ConnectUserToRoom(t, string(roomId), username)
+			defer ws2.Close()
+
+		}
+	}
+}
 func TestUserVotes(t *testing.T) {
 
 }
