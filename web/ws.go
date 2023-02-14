@@ -29,7 +29,7 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if RoomExists(roomId) {
-		broadcast := Rooms[roomId].broadcast
+		room := Rooms[roomId]
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -39,13 +39,13 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		client := Client{RoomId: roomId, Username: username, Connection: conn, Id: socketId}
 		Clients[socketId] = &client
 		AddClientToRoom(&client, "voter")
-		go readMessage(&client, broadcast)
+		go readMessage(&client, room)
 	} else {
 		log.Println("room does not exist")
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
-func readMessage(client *Client, broadcast chan<- []byte) {
+func readMessage(client *Client, room *Room) {
 	defer func() {
 		client.Connection.Close()
 		delete(Clients, client.Id)
@@ -54,7 +54,7 @@ func readMessage(client *Client, broadcast chan<- []byte) {
 		_, message, err := client.Connection.ReadMessage()
 		if err != nil {
 			log.Printf("error: %v", err)
-			// broadcast <- []byte(client.Id)
+			room.RemoveClientFromRoom(client)
 			break
 		}
 		storyPoints, err := strconv.Atoi(string(message))
