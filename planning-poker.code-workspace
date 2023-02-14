@@ -27,7 +27,14 @@
     "peacock.color": "#6997d5"
   },
   "extensions": {
-    "recommendations": ["golang.go"]
+    "recommendations": [
+      "angular.ng-template",
+      "nrwl.angular-console",
+      "esbenp.prettier-vscode",
+      "firsttris.vscode-jest-runner",
+      "dbaeumer.vscode-eslint",
+      "golang.go"
+    ]
   },
   "launch": {
     "version": "0.2.0",
