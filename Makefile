@@ -7,7 +7,8 @@ build:
 	go build -o bin/
 
 test:
-	go test ./...
+	go test ./... -v
+	# staticcheck ./...
 
 tidy:
 	go mod tidy

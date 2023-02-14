@@ -20,14 +20,14 @@ func (r Round) isReadyForReveal() bool {
 func (r Round) notifyUsers() error {
 	var err error
 	for _, client := range r.Room.Voters {
-		err = client.connection.WriteJSON(r.Votes)
+		err = client.Connection.WriteJSON(r.Votes)
 		if err != nil {
 			return err
 		}
 	}
 	for _, client := range r.Room.Spectators {
 
-		err = client.connection.WriteJSON(r.Votes)
+		err = client.Connection.WriteJSON(r.Votes)
 		if err != nil {
 			return err
 		}

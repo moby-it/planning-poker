@@ -27,7 +27,7 @@ func newRoom() *Room {
 	go func() {
 		for p := range room.broadcast {
 			for _, client := range append(room.Voters, room.Spectators...) {
-				client.connection.WriteJSON(p)
+				client.Connection.WriteJSON(p)
 			}
 		}
 	}()
@@ -47,8 +47,8 @@ func RoomExists(roomId string) bool {
 }
 
 // a client can either connect as a "voter" or a "spectator". Any other role will result in panic
-func ConnectToRoom(client *Client, role string) error {
-	room := Rooms[client.roomId]
+func AddClientToRoom(client *Client, role string) error {
+	room := Rooms[client.RoomId]
 	switch role {
 	case "voter":
 		room.Voters = append(room.Voters, client)
@@ -57,7 +57,7 @@ func ConnectToRoom(client *Client, role string) error {
 	default:
 		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
-	payload, err := json.Marshal(UserConnectedEvent{Username: client.username, Voter: role == "voter"})
+	payload, err := json.Marshal(UserConnectedEvent{Username: client.Username, Voter: role == "voter"})
 	if err != nil {
 		return err
 	}

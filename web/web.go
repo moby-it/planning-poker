@@ -17,7 +17,7 @@ func StartApp() error {
 	// v1 Handlers
 	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
 	v1Router.HandleFunc("/createRoom", CreateRoom).Methods("POST")
-	v1Router.HandleFunc("/joinRoom/{roomId}/{username}", Connect).Methods("GET")
+	v1Router.HandleFunc("/joinRoom/{roomId}/{username}", ConnectToRoom).Methods("GET")
 
 	srv := &http.Server{
 		Handler: r,

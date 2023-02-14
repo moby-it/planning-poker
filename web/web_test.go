@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func CreateRoomAndGetId(t *testing.T) ([]byte, error) {
+func CreateRoomAndGetId(t *testing.T) []byte {
 	t.Helper()
 	r := httptest.NewRequest(http.MethodPost, "/createRoom", nil)
 	w := httptest.NewRecorder()
@@ -23,45 +23,88 @@ func CreateRoomAndGetId(t *testing.T) ([]byte, error) {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return []byte{}, err
+		t.Fatal("A room should be created", err)
 	}
-	return data, nil
+	t.Log("Room should be created")
+	return data
+}
+func ConnectUserToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
+	t.Helper()
+	r := mux.NewRouter()
+	r.HandleFunc("/{roomId}/{username}", web.ConnectToRoom)
+	s := httptest.NewServer(r)
+	defer s.Close()
+	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v", wsURL, roomId, username), nil)
+	if err != nil {
+		t.Fatalf("User should be able to connect to the room %v", err)
+	}
+	defer ws.Close()
+	return ws
 }
 func TestCreateRoom(t *testing.T) {
-	roomId, err := CreateRoomAndGetId(t)
-	if err != nil {
-		t.Fatalf("expected error to be nil got %v", err)
-	}
-	if !utf8.Valid(roomId) {
-		t.Errorf("invalid room id. Value is not string: %v", err)
-	}
-	if len(web.Rooms) != 1 {
-		t.Error("expected rooms to have length of 1")
+	t.Log("Given a user lands on the platform")
+	{
+		t.Log("\tWhen the user creates a room")
+		{
+			roomId := CreateRoomAndGetId(t)
+			t.Log("\t\tThen the room should be created")
+
+			if !utf8.Valid(roomId) {
+				t.Fatalf("\t\tinvalid room id. Value is not string: %v", roomId)
+			}
+			t.Log("\t\tRoom id should be a string")
+
+			if len(web.Rooms) != 1 {
+				t.Fatal("\t\tRoom should be added to the Rooms map. Expected length of 1. Got: ", len(web.Rooms))
+			}
+			t.Log("\t\tRoom should be added to the Rooms map")
+
+		}
 	}
 }
 func TestConnectUser(t *testing.T) {
-	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}", web.Connect)
-	s := httptest.NewServer(r)
-	defer s.Close()
-	data, err := CreateRoomAndGetId(t)
-	if err != nil {
-		t.Fatal("Test Connect User: failed to create room")
-	}
-	if !utf8.Valid(data) {
-		t.Errorf("invalid room id. Value is not string: %v", err)
-	}
-	roomId := string(data)
-	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+	t.Log("Given a user lands on the platform")
+	{
+		t.Log("\tWhen the user tries to connect to a room")
+		r := mux.NewRouter()
+		r.HandleFunc("/{roomId}/{username}", web.ConnectToRoom)
+		s := httptest.NewServer(r)
+		defer s.Close()
+		data := CreateRoomAndGetId(t)
+		{
+			roomId := string(data)
+			wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+			username := "fasolakis"
+			ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v", wsURL, roomId, username), nil)
+			if err != nil {
+				t.Fatalf("\t\tUser should be able to connect to the room %v", err)
+			}
+			t.Log("\t\tUser should be able to connect to the room")
 
-	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/fasolakis", wsURL, roomId), nil)
+			defer ws.Close()
 
-	if err != nil {
-		t.Fatalf("%v", err)
+			room := web.Rooms[roomId]
+			if len(room.Voters) != 1 {
+				t.Fatal("\t\tRoom should have one voter. Expected length of 1. Got: ", len(room.Voters))
+			}
+			t.Log("\t\tRoom should have one voter")
+
+			if room.Voters[0].Username != username {
+				t.Fatal("\t\tUser should be added to the room. Expected username: ", username, "Got: ", room.Voters[0].Username)
+			}
+			t.Log("\t\tUser should be added to the room")
+		}
 	}
-	defer ws.Close()
-	room := web.Rooms[roomId]
-	if len(room.Voters) != 1 {
-		t.Error("expected room voters to have length of 1")
-	}
+
+}
+func TestUserJoinsRoom(t *testing.T) {}
+func TestUserVotes(t *testing.T) {
+
+}
+func TestUserReceivesVote(t *testing.T) {
+
+}
+func TestRoundReveal(t *testing.T) {
+
 }

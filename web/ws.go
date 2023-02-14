@@ -14,7 +14,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func Connect(w http.ResponseWriter, r *http.Request) {
+func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	roomId, ok := vars["roomId"]
 	if !ok {
@@ -35,9 +35,9 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		socketId := r.Header.Get("Sec-WebSocket-Key")
-		client := Client{roomId: roomId, username: username, connection: conn, id: socketId}
+		client := Client{RoomId: roomId, Username: username, Connection: conn, Id: socketId}
 		Clients[socketId] = &client
-		ConnectToRoom(&client, "voter")
+		AddClientToRoom(&client, "voter")
 		go readMessage(&client)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -45,18 +45,18 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 }
 func readMessage(client *Client) {
 	defer func() {
-		client.connection.Close()
-		delete(Clients, client.id)
+		client.Connection.Close()
+		delete(Clients, client.Id)
 	}()
 	for {
-		_, message, err := client.connection.ReadMessage()
+		_, message, err := client.Connection.ReadMessage()
 		if err != nil {
 			log.Printf("error: %v", err)
 			break
 		}
 		storyPoints, err := strconv.Atoi(string(message))
 		if err == nil {
-			Vote(client.roomId, client.username, storyPoints)
+			Vote(client.RoomId, client.Username, storyPoints)
 			continue
 		}
 
