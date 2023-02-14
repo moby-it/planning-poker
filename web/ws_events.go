@@ -4,7 +4,7 @@ type User struct {
 	Username string `json:"username"`
 	IsVoter  bool   `json:"isVoter"`
 }
-type UsersUpdated struct {
+type UsersUpdatedEvent struct {
 	Users []User `json:"users"`
 }
 

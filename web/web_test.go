@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,7 +26,6 @@ func CreateRoomAndGetId(t *testing.T) []byte {
 	if err != nil {
 		t.Fatal("A room should be created", err)
 	}
-	t.Log("Room should be created")
 	return data
 }
 func ConnectUserToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
@@ -39,7 +39,6 @@ func ConnectUserToRoom(t *testing.T, roomId string, username string) *websocket.
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
 	}
-	defer ws.Close()
 	return ws
 }
 func TestCreateRoom(t *testing.T) {
@@ -100,19 +99,31 @@ func TestConnectUser(t *testing.T) {
 }
 func TestUserJoinsRoom(t *testing.T) {
 	t.Log("Given a room is already created and a user is connected to it")
-	roomId := CreateRoomAndGetId(t)
-	usename := "fasolakis"
-	ws := ConnectUserToRoom(t, string(roomId), usename)
-	defer ws.Close()
 	{
-		t.Log("\tWhen another user connects to the room")
+		roomId := CreateRoomAndGetId(t)
+		usename := "fasolakis"
+		ws := ConnectUserToRoom(t, string(roomId), usename)
 		{
-			username := "george"
-			ws2 := ConnectUserToRoom(t, string(roomId), username)
-			defer ws2.Close()
-
+			t.Log("\tWhen another user connects to the room")
+			{
+				username := "george"
+				ws2 := ConnectUserToRoom(t, string(roomId), username)
+				defer ws2.Close()
+				_, msg, err := ws.ReadMessage()
+				if err != nil {
+					t.Fatal("\t\tUser should receive a message", err)
+				}
+				var event web.UsersUpdatedEvent
+				err = json.Unmarshal(msg, &event)
+				if err != nil {
+					t.Fatal("\t\tUser should receive a message", err)
+				}
+				t.Log("\t\tUser should receive a message")
+			}
 		}
+		defer ws.Close()
 	}
+
 }
 func TestUserVotes(t *testing.T) {
 

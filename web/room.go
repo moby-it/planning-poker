@@ -12,21 +12,21 @@ import (
 
 var Rooms = make(map[string]*Room)
 
-func init() {
-	// create a room for testing
-	roomId := "b63fe33a-fc3a-4cb9-9307-c8bcbc23156f"
-	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: nil, broadcast: make(chan []byte)}
-	round := NewRound(&room)
-	room.Round = round
-	Rooms[roomId] = &room
-	go func() {
-		for p := range room.broadcast {
-			for _, client := range append(room.Voters, room.Spectators...) {
-				client.Connection.WriteJSON(string(p))
-			}
-		}
-	}()
-}
+// func init() {
+// 	// create a room for testing
+// 	roomId := "b63fe33a-fc3a-4cb9-9307-c8bcbc23156f"
+// 	room := Room{Id: roomId, Voters: make([]*Client, 0), Spectators: make([]*Client, 0), Round: nil, broadcast: make(chan []byte)}
+// 	round := NewRound(&room)
+// 	room.Round = round
+// 	Rooms[roomId] = &room
+// 	go func() {
+// 		for p := range room.broadcast {
+// 			for _, client := range append(room.Voters, room.Spectators...) {
+// 				client.Connection.WriteMessage(1, p)
+// 			}
+// 		}
+// 	}()
+// }
 
 type Room struct {
 	Id         string
@@ -45,7 +45,7 @@ func newRoom() *Room {
 	go func() {
 		for p := range room.broadcast {
 			for _, client := range append(room.Voters, room.Spectators...) {
-				client.Connection.WriteJSON(p)
+				client.Connection.WriteMessage(1, p)
 			}
 		}
 	}()
@@ -80,16 +80,7 @@ func (room *Room) AddClient(client *Client, role string) error {
 	default:
 		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
-	// get usernames out of room spectators and voters
-	usernames := make([]string, 0)
-	for _, client := range append(room.Voters, room.Spectators...) {
-		usernames = append(usernames, client.Username)
-	}
-	payload, err := json.Marshal(usernames)
-	if err != nil {
-		return err
-	}
-	room.broadcast <- payload
+	room.emitUsers()
 	go room.readMessage(client)
 	return nil
 }
@@ -109,14 +100,14 @@ func (room *Room) RemoveClient(client *Client) {
 }
 
 func (room *Room) emitUsers() {
-	usernames := make([]User, 0)
+	users := make([]User, 0)
 	for _, client := range room.Voters {
-		usernames = append(usernames, User{Username: client.Username, IsVoter: true})
+		users = append(users, User{Username: client.Username, IsVoter: true})
 	}
 	for _, client := range room.Spectators {
-		usernames = append(usernames, User{Username: client.Username, IsVoter: false})
+		users = append(users, User{Username: client.Username, IsVoter: false})
 	}
-	payload, err := json.Marshal(UsersUpdated{Users: usernames})
+	payload, err := json.Marshal(UsersUpdatedEvent{Users: users})
 	if err != nil {
 		return
 	}
