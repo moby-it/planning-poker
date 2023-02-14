@@ -141,7 +141,3 @@ func (room *Room) readMessage(client *Client) {
 
 	}
 }
-
-// func writeMessage(message []byte, conn *websocket.Conn) {
-
-// }
