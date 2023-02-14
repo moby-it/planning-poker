@@ -8,10 +8,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const prefix = "/api"
+
 func StartApp() error {
 	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}", Connect)
-	r.HandleFunc("/createRoom", CreateRoom)
+	apiRouter := r.PathPrefix(prefix).Subrouter()
+
+	// v1 Handlers
+	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
+	v1Router.HandleFunc("/createRoom", CreateRoom).Methods("POST")
+	v1Router.HandleFunc("/joinRoom/{roomId}/{username}", Connect).Methods("GET")
+
 	srv := &http.Server{
 		Handler: r,
 		Addr:    "127.0.0.1:8080",
