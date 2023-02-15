@@ -62,8 +62,8 @@ func Vote(roomId string, username string, storyPoints int) {
 	if err != nil {
 		log.Println(err)
 	}
-	room.Round.isRevealable()
 	room.broadcast <- payload
+	room.Round.emitIfRevealable()
 }
 func RoomExists(roomId string) bool {
 	_, ok := Rooms[roomId]

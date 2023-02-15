@@ -16,7 +16,7 @@ type Round struct {
 func NewRound(room *Room) *Round {
 	return &Round{Votes: make(map[string]int), Room: room}
 }
-func (r Round) isRevealable() {
+func (r Round) emitIfRevealable() {
 	if len(r.Room.Voters) == len(r.Votes) {
 		payload, err := json.Marshal(RoundRevealAvailableEvent{RevealAvailable: true})
 		if err != nil {
