@@ -5,39 +5,20 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/George-Spanos/poker-planning/business/actions"
+	"github.com/George-Spanos/poker-planning/business/events"
 	"github.com/George-Spanos/poker-planning/business/user"
 	"github.com/google/uuid"
 )
-
-var rooms = make(map[string]*Room)
 
 type Room struct {
 	Id           string
 	Voters       []*user.Connection
 	Spectators   []*user.Connection
 	CurrentRound *Round
-	broadcast    chan []byte
 }
 
-func (r Room) Broadcast(message []byte) {
-	r.broadcast <- message
-}
-
-func New() *Room {
-	roomId := uuid.New().String()
-	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil, broadcast: make(chan []byte)}
-	round := NewRound()
-	room.CurrentRound = round
-	rooms[roomId] = &room
-	go func() {
-		for p := range room.broadcast {
-			for _, connection := range append(room.Voters, room.Spectators...) {
-				connection.WriteMessage(1, p)
-			}
-		}
-	}()
-	return &room
-}
+var rooms = make(map[string]*Room)
 
 func Get(roomId string) (*Room, bool) {
 	room, found := rooms[roomId]
@@ -46,23 +27,33 @@ func Get(roomId string) (*Room, bool) {
 func GetLength() int {
 	return len(rooms)
 }
+
+func New() *Room {
+	roomId := uuid.New().String()
+	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}
+	round := NewRound()
+	room.CurrentRound = round
+	rooms[roomId] = &room
+	return &room
+}
+
+func (room *Room) Connections() []*user.Connection {
+	return append(room.Voters, room.Spectators...)
+}
+func (room *Room) IsEmpty() bool {
+	return len(room.Voters) == 0 && len(room.Spectators) == 0
+}
+
 func (r Room) Close() {
-	close(r.broadcast)
 	delete(rooms, r.Id)
 }
 func (room *Room) vote(username string, storyPoints int) {
 	room.CurrentRound.Votes[username] = storyPoints
-	payload, err := json.Marshal(user.UserVotedEvent{Username: username, Event: user.Event{Type: user.UserVoted}})
-	if err != nil {
-		log.Println(err)
-	}
-	room.broadcast <- payload
+	event := events.UserVotedEvent{Username: username, Event: events.Event{Type: events.UserVoted}}
+	events.Broadcast(event, room.Connections()...)
 	if room.CurrentRound.IsRevealable(len(room.Voters)) {
-		payload, err := json.Marshal(user.RoundRevealAvailableEvent{Event: user.Event{Type: user.RoundRevealAvailable}, RevealAvailable: true})
-		if err != nil {
-			log.Println(err)
-		}
-		room.broadcast <- payload
+		event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: true}
+		events.Broadcast(event, room.Connections()...)
 	}
 }
 
@@ -94,7 +85,10 @@ func (room *Room) removeClient(client *user.Connection) {
 	}
 	room.emitUsers()
 }
-
+func (room *Room) revealCurrentRound() {
+	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
+	events.Broadcast(event, room.Connections()...)
+}
 func (room *Room) emitUsers() {
 	users := make([]user.User, 0)
 	for _, client := range room.Voters {
@@ -103,11 +97,8 @@ func (room *Room) emitUsers() {
 	for _, client := range room.Spectators {
 		users = append(users, user.User{Username: client.Username, IsVoter: false})
 	}
-	payload, err := json.Marshal(user.UsersUpdatedEvent{Users: users, Event: user.Event{Type: user.UsersUpdated}})
-	if err != nil {
-		return
-	}
-	room.broadcast <- payload
+	event := events.UsersUpdatedEvent{Users: users, Event: events.Event{Type: events.UsersUpdated}}
+	events.Broadcast(event, room.Connections()...)
 }
 
 func (room *Room) readMessage(client *user.Connection) {
@@ -119,41 +110,33 @@ func (room *Room) readMessage(client *user.Connection) {
 		if err != nil {
 			log.Printf("error: %v", err)
 			room.removeClient(client)
+			if room.IsEmpty() {
+				log.Printf("room %s is empty. Closing room", room.Id)
+				room.Close()
+			}
 			break
 		}
-		// should broadcast message if it fits any user event type
-		var event user.Event
-		err = json.Unmarshal(message, &event)
+		var a actions.Action
+		err = json.Unmarshal(message, &a)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		switch event.Type {
-		case user.UserVoted:
-			var userVotedEvent user.UserVotedEvent
-			err = json.Unmarshal(message, &userVotedEvent)
+		switch a.Type {
+		case actions.UserToVote:
+			var action actions.UserToVoteAction
+			err = json.Unmarshal(message, &action)
 			if err != nil {
 				log.Println(err)
 				continue
 			}
-			room.vote(userVotedEvent.Username, userVotedEvent.StoryPoints)
-		case user.RoundRevealed:
-			var roundRevealedEvent user.RoundRevealedEvent
-			err = json.Unmarshal(message, &roundRevealedEvent)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			votes := make(map[string]int)
-			for _, voter := range room.Voters {
-				votes[voter.Username] = room.CurrentRound.Votes[voter.Username]
-			}
-			payload, err := json.Marshal(user.RoundRevealedEvent{Votes: votes, Event: user.Event{Type: user.RoundRevealed}})
-			if err != nil {
-				log.Println(err)
-			}
-			room.broadcast <- payload
+			room.vote(client.Username, action.StoryPoints)
+		case actions.RoundToReveal:
+			room.revealCurrentRound()
+		case actions.RoundToStart:
+			room.CurrentRound = NewRound()
+			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
+			events.Broadcast(event, room.Connections()...)
 		}
-
 	}
 }

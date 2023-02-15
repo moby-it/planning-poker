@@ -38,6 +38,17 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	role, ok := vars["role"]
+	if !ok {
+		log.Println("missing role from request")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if role != "voter" && role != "spectator" {
+		log.Println("invalid role")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	room, roomExists := room.Get(roomId)
 	if roomExists {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -45,8 +56,8 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		client := user.Connection{User: user.User{Username: username, IsVoter: true}, Conn: conn}
-		room.AddClient(&client, "voter")
+		client := user.Connection{User: user.User{Username: username, IsVoter: role == "voter"}, Conn: conn}
+		room.AddClient(&client, role)
 	} else {
 		log.Println("room does not exist")
 		w.WriteHeader(http.StatusNotFound)

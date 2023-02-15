@@ -10,9 +10,8 @@ import (
 	"testing"
 	"unicode/utf8"
 
+	"github.com/George-Spanos/poker-planning/business/events"
 	"github.com/George-Spanos/poker-planning/business/room"
-	"github.com/George-Spanos/poker-planning/business/user"
-	"github.com/George-Spanos/poker-planning/web"
 	"github.com/George-Spanos/poker-planning/web/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -31,14 +30,27 @@ func CreateRoomAndGetId(t *testing.T) []byte {
 	}
 	return data
 }
-func ConnectUserToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
+func ConnectVoterToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
 	t.Helper()
 	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}", handlers.ConnectToRoom)
+	r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 	s := httptest.NewServer(r)
 	defer s.Close()
 	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
-	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v", wsURL, roomId, username), nil)
+	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "voter"), nil)
+	if err != nil {
+		t.Fatalf("User should be able to connect to the room %v", err)
+	}
+	return ws
+}
+func ConnectSpectatorToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
+	t.Helper()
+	r := mux.NewRouter()
+	r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
+	s := httptest.NewServer(r)
+	defer s.Close()
+	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "spectator"), nil)
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
 	}
@@ -65,23 +77,19 @@ func TestCreateRoom(t *testing.T) {
 		}
 	}
 }
-func TestConnectUser(t *testing.T) {
+func TestConnectVoter(t *testing.T) {
 	t.Log("Given a user lands on the platform via a link")
 	{
 		t.Log("\tWhen the user tries to connect to a room")
 		r := mux.NewRouter()
-		r.HandleFunc("/{roomId}/{username}", web.ConnectToRoom)
+		r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 		s := httptest.NewServer(r)
 		defer s.Close()
 		data := CreateRoomAndGetId(t)
 		{
 			roomId := string(data)
-			wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
 			username := "fasolakis"
-			ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v", wsURL, roomId, username), nil)
-			if err != nil {
-				t.Fatalf("\t\tUser should be able to connect to the room %v", err)
-			}
+			ws := ConnectVoterToRoom(t, roomId, username)
 			t.Log("\t\tUser should be able to connect to the room")
 
 			defer ws.Close()
@@ -100,28 +108,32 @@ func TestConnectUser(t *testing.T) {
 	}
 
 }
-func TestUserJoinsRoom(t *testing.T) {
+func TestSpectatorJoinsRoom(t *testing.T) {
 	t.Log("Given a room is already created and a user is connected to it")
 	{
 		roomId := CreateRoomAndGetId(t)
 		usename := "fasolakis"
-		ws := ConnectUserToRoom(t, string(roomId), usename)
+		ws := ConnectVoterToRoom(t, string(roomId), usename)
 		{
 			t.Log("\tWhen another user connects to the room")
 			{
 				username := "george"
-				ws2 := ConnectUserToRoom(t, string(roomId), username)
+				ws2 := ConnectSpectatorToRoom(t, string(roomId), username)
 				defer ws2.Close()
 				_, msg, err := ws.ReadMessage()
 				if err != nil {
 					t.Fatal("\t\tUser should receive a message", err)
 				}
-				var event user.UsersUpdatedEvent
+				var event events.UsersUpdatedEvent
 				err = json.Unmarshal(msg, &event)
 				if err != nil {
 					t.Fatal("\t\tUser should receive a message", err)
 				}
 				t.Log("\t\tUser should receive a message")
+			}
+			t.Log("\t\tUser should receive a message")
+			{
+
 			}
 		}
 		defer ws.Close()
