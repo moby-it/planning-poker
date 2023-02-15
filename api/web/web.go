@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/George-Spanos/poker-planning/web/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -17,8 +18,8 @@ func StartApp() error {
 
 	// v1 Handlers
 	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
-	v1Router.HandleFunc("/createRoom", CreateRoom).Methods("POST")
-	v1Router.HandleFunc("/joinRoom/{roomId}/{username}", ConnectToRoom)
+	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
+	v1Router.HandleFunc("/joinRoom/{roomId}/{username}", handlers.ConnectToRoom)
 
 	srv := &http.Server{
 		Handler: r,

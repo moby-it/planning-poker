@@ -1,4 +1,4 @@
-package web
+package handlers
 
 import (
 	"log"
@@ -9,6 +9,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
+
+func CreateRoom(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	room := room.New()
+	w.Write([]byte(room.Id))
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,

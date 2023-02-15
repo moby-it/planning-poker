@@ -10,7 +10,10 @@ import (
 	"testing"
 	"unicode/utf8"
 
+	"github.com/George-Spanos/poker-planning/business/room"
+	"github.com/George-Spanos/poker-planning/business/user"
 	"github.com/George-Spanos/poker-planning/web"
+	"github.com/George-Spanos/poker-planning/web/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -19,7 +22,7 @@ func CreateRoomAndGetId(t *testing.T) []byte {
 	t.Helper()
 	r := httptest.NewRequest(http.MethodPost, "/createRoom", nil)
 	w := httptest.NewRecorder()
-	web.CreateRoom(w, r)
+	handlers.CreateRoom(w, r)
 	res := w.Result()
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
@@ -31,7 +34,7 @@ func CreateRoomAndGetId(t *testing.T) []byte {
 func ConnectUserToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
 	t.Helper()
 	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}", web.ConnectToRoom)
+	r.HandleFunc("/{roomId}/{username}", handlers.ConnectToRoom)
 	s := httptest.NewServer(r)
 	defer s.Close()
 	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
@@ -54,8 +57,8 @@ func TestCreateRoom(t *testing.T) {
 			}
 			t.Log("\t\tRoom id should be a string")
 
-			if len(web.Rooms) != 1 {
-				t.Fatal("\t\tRoom should be added to the Rooms map. Expected length of 1. Got: ", len(web.Rooms))
+			if room.GetLength() != 1 {
+				t.Fatal("\t\tRoom should be added to the Rooms map. Expected length of 1. Got: ", room.GetLength())
 			}
 			t.Log("\t\tRoom should be added to the Rooms map")
 
@@ -83,7 +86,7 @@ func TestConnectUser(t *testing.T) {
 
 			defer ws.Close()
 
-			room := web.Rooms[roomId]
+			room, _ := room.Get(roomId)
 			if len(room.Voters) != 1 {
 				t.Fatal("\t\tRoom should have one voter. Expected length of 1. Got: ", len(room.Voters))
 			}
@@ -113,7 +116,7 @@ func TestUserJoinsRoom(t *testing.T) {
 				if err != nil {
 					t.Fatal("\t\tUser should receive a message", err)
 				}
-				var event web.UsersUpdatedEvent
+				var event user.UsersUpdatedEvent
 				err = json.Unmarshal(msg, &event)
 				if err != nil {
 					t.Fatal("\t\tUser should receive a message", err)
