@@ -47,7 +47,7 @@ func (room *Room) IsEmpty() bool {
 func (r Room) Close() {
 	delete(rooms, r.Id)
 }
-func (room *Room) vote(username string, storyPoints int) {
+func (room *Room) Vote(username string, storyPoints int) {
 	room.CurrentRound.Votes[username] = storyPoints
 	event := events.UserVotedEvent{Username: username, Event: events.Event{Type: events.UserVoted}}
 	events.Broadcast(event, room.Connections()...)
@@ -111,7 +111,6 @@ func (room *Room) readMessage(client *user.Connection) {
 			log.Printf("error: %v", err)
 			room.removeClient(client)
 			if room.IsEmpty() {
-				log.Printf("room %s is empty. Closing room", room.Id)
 				room.Close()
 			}
 			break
@@ -130,7 +129,7 @@ func (room *Room) readMessage(client *user.Connection) {
 				log.Println(err)
 				continue
 			}
-			room.vote(client.Username, action.StoryPoints)
+			room.Vote(client.Username, action.StoryPoints)
 		case actions.RoundToReveal:
 			room.revealCurrentRound()
 		case actions.RoundToStart:
