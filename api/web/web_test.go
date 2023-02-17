@@ -70,12 +70,11 @@ func UserVotesOnRoom(t *testing.T, connection *user.Connection, roomId string, u
 // testing if connection will receive the given event in the next 10 seconds
 func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expectedEvent string) {
 	t.Helper()
-	timeout := time.After(10 * time.Second)
-	ticker := time.NewTicker(300 * time.Millisecond)
-	select {
-	case <-timeout:
-		t.Fatalf("User %v should receive event %v", connection.Username, expectedEvent)
-	case <-ticker.C:
+	for {
+		err := connection.SetReadDeadline(time.Now().Add(3 * time.Second))
+		if err != nil {
+			t.Fatalf("User should receive an event %v", err)
+		}
 		_, data, err := connection.ReadMessage()
 		if err != nil {
 			t.Fatalf("User should receive an event %v", err)
@@ -85,13 +84,12 @@ func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expected
 		if err != nil {
 			t.Fatalf("User should receive an event %v", err)
 		}
-		t.Log("Received event: ", event.Type)
-		t.Log("Expected event: ", expectedEvent)
 		if event.Type == expectedEvent {
-			t.Logf("User %v got expected event %v", connection.Username, expectedEvent)
-			ticker.Stop()
+			t.Logf("\tUser %v got expected event %v", connection.Username, expectedEvent)
+			break
 		}
 	}
+
 }
 func TestCreateRoom(t *testing.T) {
 	t.Log("Given a user lands on the platform")
@@ -195,7 +193,7 @@ func TestUserVotes(t *testing.T) {
 			UserVotesOnRoom(t, connection, string(roomId), usename, 1)
 			ConnectionReceivedEvent(t, connection, events.UserVoted)
 			ConnectionReceivedEvent(t, connection2, events.UserVoted)
-			ConnectionReceivedEvent(t, connection3, events.RoundStarted) // should fail
+			ConnectionReceivedEvent(t, connection3, events.UserVoted)
 			t.Log("\t\tUsers should reveive a vote update event")
 		}
 	}
@@ -215,9 +213,9 @@ func TestRoundReveal(t *testing.T) {
 		UserVotesOnRoom(t, connection, string(roomId), usename, 3)
 		connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
 		UserVotesOnRoom(t, connection2, string(roomId), username2, 2)
+		room, _ := room.Get(string(roomId))
 		{
 			{
-				room, _ := room.Get(string(roomId))
 				if !room.CurrentRound.IsRevealable(len(room.Voters)) {
 					t.Fatal("\t\tRound should be revealable. Expected round to be revealable. Got: ", room.CurrentRound.IsRevealable(len(room.Voters)))
 				}
@@ -228,6 +226,13 @@ func TestRoundReveal(t *testing.T) {
 				ConnectionReceivedEvent(t, connection, events.RoundRevealAvailable)
 				ConnectionReceivedEvent(t, connection2, events.RoundRevealAvailable)
 				t.Log("\tUsers should receive a round revealable event")
+			}
+			t.Log("\tWhen a user reveals the round")
+			room.RevealCurrentRound()
+			{
+				ConnectionReceivedEvent(t, connection, events.RoundRevealed)
+				ConnectionReceivedEvent(t, connection2, events.RoundRevealed)
+				t.Log("\tUsers should receive a round revealed event")
 			}
 		}
 	}

@@ -85,7 +85,7 @@ func (room *Room) removeClient(client *user.Connection) {
 	}
 	room.emitUsers()
 }
-func (room *Room) revealCurrentRound() {
+func (room *Room) RevealCurrentRound() {
 	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
 	events.Broadcast(event, room.Connections()...)
 }
@@ -131,7 +131,7 @@ func (room *Room) readMessage(client *user.Connection) {
 			}
 			room.Vote(client.Username, action.StoryPoints)
 		case actions.RoundToReveal:
-			room.revealCurrentRound()
+			room.RevealCurrentRound()
 		case actions.RoundToStart:
 			room.CurrentRound = NewRound()
 			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
