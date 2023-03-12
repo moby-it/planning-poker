@@ -86,6 +86,10 @@ func (room *Room) removeClient(client *user.Connection) {
 	room.emitUsers()
 }
 func (room *Room) RevealCurrentRound() {
+	if !room.CurrentRound.IsRevealable(len(room.Voters)) {
+		log.Println("Cannot reveal round. Not enough votes")
+		return
+	}
 	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
 	events.Broadcast(event, room.Connections()...)
 }
@@ -126,7 +130,7 @@ func (room *Room) readMessage(client *user.Connection) {
 			var action actions.UserToVoteAction
 			err = json.Unmarshal(message, &action)
 			if err != nil {
-				log.Println(err)
+				log.Println("Error parsing user vote:", err)
 				continue
 			}
 			room.Vote(client.Username, action.StoryPoints)

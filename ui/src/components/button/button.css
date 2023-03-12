@@ -1,0 +1,20 @@
+.btn {
+  display: block;
+  width: 164px;
+  height: 46px;
+  border-radius: 6px;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+  font-family: "Sora", sans-serif;
+}
+.btn.primary:hover {
+  background-color: var(--primary--hover);
+}
+.btn.primary:active {
+  background-color: var(--primary--active);
+}
+.btn.primary {
+  color: var(--white);
+  background-color: var(--primary);
+}

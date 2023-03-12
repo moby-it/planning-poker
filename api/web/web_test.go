@@ -67,7 +67,7 @@ func UserVotesOnRoom(t *testing.T, connection *user.Connection, roomId string, u
 	}
 }
 
-// testing if connection will receive the given event in the next 10 seconds
+// testing if connection will receive the given event in the next 3 seconds
 func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expectedEvent string) {
 	t.Helper()
 	for {
@@ -148,7 +148,7 @@ func TestConnectVoter(t *testing.T) {
 
 }
 func TestSpectatorJoinsRoom(t *testing.T) {
-	t.Log("Given a room is already created and a user is connected to it ασ α voter")
+	t.Log("Given a room is already created and a user is connected to it as a voter")
 	{
 		roomId := CreateRoomAndGetId(t)
 		usename := "fasolakis"
@@ -199,7 +199,7 @@ func TestUserVotes(t *testing.T) {
 	}
 }
 func TestRoundReveal(t *testing.T) {
-	t.Log("Given a room is created, user have joined and already voted")
+	t.Log("Given a room is created and users have already joined and already voted")
 	roomId := CreateRoomAndGetId(t)
 	usename := "fasolakis"
 	ws := ConnectVoterToRoom(t, string(roomId), usename)

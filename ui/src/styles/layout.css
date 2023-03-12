@@ -1,0 +1,30 @@
+:root {
+  --max--width: 1440px;
+}
+#root {
+  padding: 24px 46px;
+}
+@media screen and (min-width: 1439px) {
+  #root {
+    padding: 24px 138px;
+  }
+}
+.row {
+  display: flex;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+}
+.align-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-end {
+  justify-content: flex-end;
+}

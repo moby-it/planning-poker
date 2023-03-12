@@ -5,7 +5,6 @@
     }
   ],
   "settings": {
-    "makefile.makefilePath": "api/Makefile",
     "workbench.colorCustomizations": {
       "activityBar.activeBackground": "#91b3e0",
       "activityBar.background": "#91b3e0",
@@ -25,7 +24,10 @@
       "titleBar.inactiveBackground": "#6997d599",
       "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#6997d5"
+    "peacock.color": "#6997d5",
+    "yaml.schemas": {
+      "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "**/*/docker-stack.yml"
+    }
   },
   "extensions": {
     "recommendations": [
@@ -41,11 +43,11 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Launch file",
+        "name": "Web Api",
         "type": "go",
         "request": "launch",
         "mode": "debug",
-        "program": "${workspaceFolder}/src/api/main.go"
+        "program": "${workspaceFolder}/api/main.go"
       }
     ]
   }

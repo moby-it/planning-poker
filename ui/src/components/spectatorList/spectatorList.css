@@ -1,0 +1,18 @@
+.spectators {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.spectators li:first-child {
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--primary--dark);
+}
+.spectators li {
+  font-size: 14px;
+  line-height: 27px;
+  color: var(--primary--gray);
+}

@@ -6,24 +6,25 @@ import (
 	"time"
 
 	"github.com/George-Spanos/poker-planning/web/handlers"
+	h "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-const prefix = "/api"
-
 func StartApp() error {
 	r := mux.NewRouter()
+
 	// attachProfiler(r)
-	apiRouter := r.PathPrefix(prefix).Subrouter()
 
 	// v1 Handlers
-	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
+	v1Router := r.PathPrefix("/v1").Subrouter()
 	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
 	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 
+	originsOk := h.AllowedOrigins([]string{"*"})
+
 	srv := &http.Server{
-		Handler: r,
-		Addr:    "127.0.0.1:8080",
+		Handler: h.CORS(originsOk)(r),
+		Addr:    "0.0.0.0:8080",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

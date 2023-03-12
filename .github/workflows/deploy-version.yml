@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test api
+        working-directory: api
+        run: make test
+  build-api:
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.CONTAINER_USERNAME }}
+          password: ${{ secrets.CONTAINER_PASSWORD }}
+      - name: Build and Push image
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: ./api
+          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
+  build-ui:
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.CONTAINER_USERNAME }}
+          password: ${{ secrets.CONTAINER_PASSWORD }}
+      - name: 'Create env file'
+        run: |
+          echo "${{ secrets.UI_ENV }}" > ui/.env
+      - name: Build and Push image
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: ./ui
+          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:stable
+  deploy:
+    needs: [build-ui, build-api]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Change docker stack tag
+        run: |
+          sed -i "s/\${TAG}/${{ github.ref_name }}/g" docker-stack.yml
+      - name: Deploy Stack
+        uses: kitconcept/docker-stack-deploy@v1.0.1
+        with:
+          remote_host: ${{ secrets.HOST }}
+          remote_user: ${{ secrets.USERNAME }}
+          remote_private_key: ${{ secrets.KEY }}
+          registry: "docker.io"
+          deploy_timeout: 180
+          username: ${{ secrets.CONTAINER_USERNAME }}
+          password: ${{ secrets.CONTAINER_PASSWORD }}
+          stack_file: "docker-stack.yml"
+          stack_name: "planning-poker"
