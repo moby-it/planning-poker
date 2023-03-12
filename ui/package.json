@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.7.0",
-    "solid-js": "^1.6.10"
+    "solid-js": "^1.6.10",
+    "zod": "^3.21.4"
   }
 }

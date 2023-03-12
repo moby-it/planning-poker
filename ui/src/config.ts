@@ -8,3 +8,9 @@ export const SessionStorageKeys = {
 };
 
 export const [roomId, setRoomId] = createSignal("");
+export const [isSpectator, setIsSpectator] = createSignal(
+  Boolean(sessionStorage.getItem(SessionStorageKeys.isSpectator))
+);
+export const [username, setUsername] = createSignal(
+  sessionStorage.getItem(SessionStorageKeys.username) ?? ""
+);

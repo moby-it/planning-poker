@@ -2,7 +2,14 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { Component, createSignal } from "solid-js";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
-import { apiV1Url, SessionStorageKeys, roomId, setRoomId } from "../../config";
+import {
+  apiV1Url,
+  SessionStorageKeys,
+  roomId,
+  setRoomId,
+  username,
+  setUsername,
+} from "../../config";
 import "./prejoinForm.css";
 const PrejoinForm: Component = () => {
   const navigate = useNavigate();
@@ -10,15 +17,14 @@ const PrejoinForm: Component = () => {
   const isCreatingRoom = Boolean(params.create);
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
-  const [username, setUsername] = createSignal(
-    sessionStorage.getItem(SessionStorageKeys.username) ?? ""
-  );
   const [isSpectator, setIsSpectator] = createSignal(
     Boolean(sessionStorage.getItem(SessionStorageKeys.isSpectator))
   );
   const handleInputChanged = (event: KeyboardEvent) => {
     // @ts-ignore
-    setUsername(event?.target?.value);
+    const username: string = event?.target?.value;
+    setUsername(username);
+    sessionStorage.setItem(SessionStorageKeys.username, username);
   };
   async function createRoom() {
     const createRoomUrl = apiV1Url + "/createRoom";
@@ -46,10 +52,10 @@ const PrejoinForm: Component = () => {
       </div>
       <div class="is-spectator">
         <div class="is-spectator-switch">
-          <label for="isSpectator">Join as Spectator</label>
           <Toggle
             name="isSpectator"
             checked={isSpectator()}
+            label="Join as Spectator"
             action={() => setIsSpectator((v) => !v)}
           ></Toggle>
         </div>

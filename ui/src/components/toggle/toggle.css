@@ -1,3 +1,8 @@
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 /* The switch - the box around the slider */
 .switch {
   position: relative;

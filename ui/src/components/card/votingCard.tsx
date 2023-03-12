@@ -1,8 +1,9 @@
-import { Component, Match, mergeProps, Show, Switch } from "solid-js";
+import { Component, Match, mergeProps, Switch } from "solid-js";
 import "./card.css";
-export const VotingCard: Component<{ selected?: boolean; points: number }> = (
-  _props
-) => {
+export const VotingCard: Component<{
+  selected?: boolean;
+  points: number;
+}> = (_props) => {
   const props = mergeProps({ selected: false }, _props);
   return (
     <div classList={{ "voting-card": true, selected: props.selected }}>

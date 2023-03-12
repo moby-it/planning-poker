@@ -1,5 +1,6 @@
 import { Component, Match, mergeProps, Show, Switch } from "solid-js";
 import "./card.css";
+
 export const Card: Component<{ voted?: boolean; points?: number }> = (
   _props
 ) => {

@@ -18,3 +18,6 @@ h3 {
 h4 {
   font-size: 20px;
 }
+span.primary {
+  color: var(--primary);
+}

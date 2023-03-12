@@ -1,0 +1,21 @@
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.room-header {
+  width: 100%;
+  height: 87px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.voting-area {
+  height: 583px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 42px 0 0;
+}

@@ -1,29 +1,60 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import { Component, createResource, createSignal, Show } from "solid-js";
-import { roomId, SessionStorageKeys, setRoomId, wsv1Url } from "../../config";
+import {
+  Component,
+  createEffect,
+  createResource,
+  createSignal,
+  Match,
+  Show,
+  Switch,
+} from "solid-js";
+import { Board } from "../../components/board/board";
+import { Button } from "../../components/button/button";
+import { Toggle } from "../../components/toggle/toggle";
+import { VotingCardList } from "../../components/votingCardList/votingCardList";
+import {
+  isSpectator,
+  roomId,
+  setIsSpectator,
+  setRoomId,
+  username,
+  wsv1Url,
+} from "../../config";
+import "./room.css";
+import {
+  averageScore,
+  handleWsMessage,
+  reavalable,
+  revealed,
+  revealing,
+  voters,
+} from "./roomState";
+
+const roomHeaders = {
+  Voting: "Voting is in session!",
+  Ready: "Everyone's Ready",
+  Revealing: "Revealing in",
+  Revealed: "Average Score",
+} as const;
 
 const Room: Component = () => {
   const [storyPoints, setStoryPoints] = createSignal(0);
+  const [roomHeader, setRoomHeader] = createSignal<string>(roomHeaders.Voting);
+  createEffect(() => {
+    if (reavalable()) setRoomHeader(roomHeaders.Ready);
+    if (revealed()) setRoomHeader(roomHeaders.Revealed + " " + averageScore());
+    if (!revealed() && !reavalable()) setRoomHeader(roomHeaders.Voting);
+  });
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
   setRoomId(roomId);
-  const username =
-    params["username"] ?? sessionStorage.getItem(SessionStorageKeys.username);
-  if (!username) {
+  if (!username()) {
     navigate("/prejoin");
     return;
   }
-  const [socket] = createResource(() => connectToRoom({ username }));
-  const handleStoryPointsChanged = (event: KeyboardEvent) => {
-    if (
-      event.target &&
-      "value" in event.target &&
-      typeof event.target.value === "string"
-    ) {
-      setStoryPoints(+event?.target.value);
-    }
-  };
+  const [socket] = createResource(() => connectToRoom());
+
   function userVotes() {
     const ws = socket();
     if (socket.loading || socket.error || !ws) {
@@ -68,42 +99,56 @@ const Room: Component = () => {
   return (
     <Show
       when={!socket.loading}
-      fallback={<p data-testid="loading">loading</p>}
+      fallback={<p data-testid="loading">Connecting...</p>}
     >
-      <div
-        style="display:flex; flex-direction:column; gap:14px;align-items:flex-start; padding:24px;"
-        data-testid="room"
-      >
-        <input
-          type="number"
-          onKeyUp={handleStoryPointsChanged}
-          value={storyPoints()}
-        />
-        <button onClick={userVotes}>User Votes</button>
-        <button onClick={revealRound}>Reveal Round</button>
-        <button onClick={startNewRound}>Start New Round</button>
+      <div class="room" data-testid="room">
+        <h2 class="room-header">{roomHeader()}</h2>
+        <div class="row justify-between">
+          <span class="primary cursor-pointer">Copy Invite Link</span>
+          <Toggle
+            name="isSpectator"
+            label="Join as Spectator"
+            action={() => setIsSpectator((v) => !v)}
+            checked={!isSpectator()}
+          />
+        </div>
+        <div class="voting-area">
+          <Board users={voters} />
+          <Switch>
+            <Match when={reavalable()}>
+              <Button action={revealRound}>
+                <span>Reveal Cards</span>
+              </Button>
+            </Match>
+            <Match when={averageScore()}>
+              <Button action={startNewRound}>
+                <span>Start New Round</span>
+              </Button>
+            </Match>
+            <Match when={revealing()}>
+              <Button>
+                <span>Cancel Reveal</span>
+              </Button>
+            </Match>
+          </Switch>
+          <VotingCardList />
+        </div>
       </div>
     </Show>
   );
 };
-async function connectToRoom({
-  username,
-}: {
-  username: string;
-}): Promise<WebSocket> {
+async function connectToRoom(): Promise<WebSocket> {
   const navigate = useNavigate();
   return new Promise((resolve, reject) => {
-    console.log("user", username, "should connect to room", roomId());
+    console.log("user", username(), "should connect to room", roomId());
     const socket = new WebSocket(
-      `${wsv1Url}/joinRoom/${roomId()}/${username}/voter`
+      `${wsv1Url}/joinRoom/${roomId()}/${username()}/voter`
     );
     socket.addEventListener("open", function (event) {
       console.log("connected", event);
       resolve(socket);
     });
-    socket.addEventListener("message", (event) => {
-      console.log("Message from server ", JSON.parse(event.data));
-    });
+    socket.addEventListener("message", handleWsMessage);
     socket.addEventListener("error", (event) => {
       console.log("Error from server ", event);
       navigate("/");

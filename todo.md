@@ -1,9 +1,6 @@
 ## Components
 
-- need to create board component
-- need to create voting cards list component
+- Bind vote action to card
 - need to create progress bar component
-
-## Pages
-
-- create board page
+- voted card styles
+- revealing countdown

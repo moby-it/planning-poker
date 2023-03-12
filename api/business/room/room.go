@@ -27,7 +27,10 @@ func Get(roomId string) (*Room, bool) {
 func GetLength() int {
 	return len(rooms)
 }
-
+func (room *Room) UserHasVoted(username string) bool {
+	_, found := room.CurrentRound.Votes[username]
+	return found
+}
 func New() *Room {
 	roomId := uuid.New().String()
 	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}
@@ -96,7 +99,7 @@ func (room *Room) RevealCurrentRound() {
 func (room *Room) emitUsers() {
 	users := make([]user.User, 0)
 	for _, client := range room.Voters {
-		users = append(users, user.User{Username: client.Username, IsVoter: true})
+		users = append(users, user.User{Username: client.Username, IsVoter: true, HasVoted: room.UserHasVoted(client.Username)})
 	}
 	for _, client := range room.Spectators {
 		users = append(users, user.User{Username: client.Username, IsVoter: false})
