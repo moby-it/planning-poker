@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
+    "makefile.makefilePath": "api/Makefile",
     "workbench.colorCustomizations": {
       "activityBar.activeBackground": "#91b3e0",
       "activityBar.background": "#91b3e0",
