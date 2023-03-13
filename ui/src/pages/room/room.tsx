@@ -80,14 +80,16 @@ const Room: Component = () => {
   createEffect(() => {
     if (selectedCard()) userVotes();
   });
-  createEffect(() => {
+  createEffect((prev) => {
+    if (prev === isSpectator()) return;
     if (isSpectator()) {
       changeRole("spectator");
       setSelectedCard(null);
     } else {
       changeRole("voter");
     }
-  });
+    return isSpectator();
+  }, isSpectator());
   function userVotes() {
     const ws = socket();
     if (socket.loading || socket.error || !ws) {

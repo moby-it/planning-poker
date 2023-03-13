@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { batch, createSignal } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { username } from "../../common/state";
 import { User } from "../../common/user";
@@ -60,27 +60,31 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
   } else if (isRoundRevealed(data)) {
     setRevealing(true);
     setTimeout(() => {
-      setVoters(
-        produce((voters) =>
-          voters.map((voter) => {
-            voter.points = data.votes[voter.username];
-            return voter;
-          })
-        )
-      );
       const averageScore =
         // @ts-ignore
         Object.values(data.votes).reduce((a, b) => a + b, 0) /
         Object.values(data.votes).length;
-      setAverageScore(averageScore);
-      setRevealed(true);
-      setRevealing(false);
+      batch(() => {
+        setAverageScore(averageScore);
+        setRevealed(true);
+        setRevealing(false);
+        setVoters(
+          produce((voters) =>
+            voters.map((voter) => {
+              voter.points = data.votes[voter.username];
+              return voter;
+            })
+          )
+        );
+      });
     }, ProgressBarDefaultDuration);
   } else if (isRoundStarted(data)) {
-    setRevealed(false);
-    setRevealable(false);
-    setVoters(voters.map((v) => ({ ...v, voted: false, points: undefined })));
-    setAverageScore(null);
+    batch(() => {
+      setRevealed(false);
+      setRevealable(false);
+      setVoters(voters.map((v) => ({ ...v, voted: false, points: undefined })));
+      setAverageScore(null);
+    });
   } else {
     console.log("Unhandled message", data);
   }
