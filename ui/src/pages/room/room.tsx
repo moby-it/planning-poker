@@ -93,7 +93,6 @@ const Room: Component = () => {
     if (socket.loading || socket.error || !ws) {
       throw new Error("No socket connection");
     }
-    setRevealed(false);
     ws.send(
       JSON.stringify({
         type: "roundToStart",
