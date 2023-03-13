@@ -9,6 +9,7 @@ import {
   isUsersUpdated,
   isUserVoted,
 } from "../../common/ws-events";
+import { ProgressBarDefaultDuration } from "../../components/progressBar/progressBar";
 export const [voters, setVoters] = createStore<User[]>([]);
 export const [spectators, setSpectators] = createStore<User[]>([]);
 export const [reavalable, setRevealable] = createSignal(false);
@@ -57,19 +58,24 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
       })
     );
   } else if (isRoundRevealed(data)) {
-    setVoters(
-      produce((voters) =>
-        voters.map((voter) => {
-          voter.points = data.votes[voter.username];
-          return voter;
-        })
-      )
-    );
-    const averageScore =
-      Object.values(data.votes).reduce((a, b) => a + b, 0) /
-      Object.values(data.votes).length;
-    setAverageScore(averageScore);
-    setRevealed(true);
+    setRevealing(true);
+    setTimeout(() => {
+      setVoters(
+        produce((voters) =>
+          voters.map((voter) => {
+            voter.points = data.votes[voter.username];
+            return voter;
+          })
+        )
+      );
+      const averageScore =
+        // @ts-ignore
+        Object.values(data.votes).reduce((a, b) => a + b, 0) /
+        Object.values(data.votes).length;
+      setAverageScore(averageScore);
+      setRevealed(true);
+      setRevealing(false);
+    }, ProgressBarDefaultDuration);
   } else if (isRoundStarted(data)) {
     setRevealed(false);
     setRevealable(false);

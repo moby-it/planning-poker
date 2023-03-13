@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import {
   Component,
   createEffect,
+  createRenderEffect,
   createResource,
   createSignal,
   Match,
@@ -18,6 +19,10 @@ import {
 } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { Button } from "../../components/button/button";
+import {
+  ProgressBar,
+  ProgressBarDefaultDuration,
+} from "../../components/progressBar/progressBar";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import { Toggle } from "../../components/toggle/toggle";
 import {
@@ -49,6 +54,19 @@ const Room: Component = () => {
     if (reavalable()) setRoomHeader(roomHeaders.Ready);
     if (revealed()) setRoomHeader(roomHeaders.Revealed + " " + averageScore());
     if (!revealed() && !reavalable()) setRoomHeader(roomHeaders.Voting);
+  });
+  createEffect(() => {
+    if (revealing()) {
+      let i = ProgressBarDefaultDuration / 1000;
+      setRoomHeader(roomHeaders.Revealing + " " + i);
+      const interval = setInterval(() => {
+        if (i === 0) {
+          clearInterval(interval);
+          return;
+        }
+        setRoomHeader(roomHeaders.Revealing + " " + --i);
+      }, 1000);
+    }
   });
   const navigate = useNavigate();
   const params = useParams();
@@ -128,7 +146,12 @@ const Room: Component = () => {
       fallback={<p data-testid="loading">Connecting...</p>}
     >
       <div class="room" data-testid="room">
-        <h2 class="room-header">{roomHeader()}</h2>
+        <div class="room-header">
+          <h2>{roomHeader()}</h2>
+          <Show when={revealing()}>
+            <ProgressBar />
+          </Show>
+        </div>
         <div class="row justify-between">
           <span
             class="primary cursor-pointer"
@@ -153,7 +176,13 @@ const Room: Component = () => {
           <div class="voting-area">
             <Board users={voters} />
             <Switch>
-              <Match when={reavalable() && typeof averageScore() !== "number"}>
+              <Match
+                when={
+                  reavalable() &&
+                  typeof averageScore() !== "number" &&
+                  !revealing()
+                }
+              >
                 <Button action={revealRound}>
                   <span>Reveal Cards</span>
                 </Button>
@@ -163,11 +192,11 @@ const Room: Component = () => {
                   <span>Start New Round</span>
                 </Button>
               </Match>
-              <Match when={revealing()}>
+              {/* <Match when={revealing()}>
                 <Button>
                   <span>Cancel Reveal</span>
                 </Button>
-              </Match>
+              </Match> */}
             </Switch>
             <VotingCardList />
           </div>

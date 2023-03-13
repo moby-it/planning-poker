@@ -30,7 +30,7 @@ const RoundRevealed = z.object({
   type: z.literal("roundRevealed"),
   votes: z.record(z.string(), z.number()),
 });
-type RoundRevealed = z.infer<typeof RoundRevealed>;
+export type RoundRevealed = z.infer<typeof RoundRevealed>;
 export function isRoundRevealed(data: unknown): data is RoundRevealed {
   const { success } = RoundRevealed.safeParse(data);
   return success;
