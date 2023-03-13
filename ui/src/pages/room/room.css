@@ -12,10 +12,14 @@
   justify-content: center;
   gap: 24px;
 }
+.room-subheader {
+  display: flex;
+  justify-content: space-between;
+}
 .voting-area {
-  flex: 1;
   margin-left: 180px;
-  height: 583px;
+  flex: 1;
+  min-height: 583px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -25,6 +29,24 @@
 .voting-area-wrapper {
   display: flex;
 }
+@media screen and (max-width: 768px) {
+  .voting-area-wrapper {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .voting-area {
+    margin: 0;
+
+    gap: 10px;
+  }
+  .room-subheader {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+}
+
 .spectators {
   width: 180px;
 }

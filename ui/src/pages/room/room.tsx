@@ -154,7 +154,7 @@ const Room: Component = () => {
             <ProgressBar />
           </Show>
         </div>
-        <div class="row justify-between">
+        <div class="room-subheader">
           <span
             class="primary cursor-pointer"
             onClick={() => {
@@ -175,6 +175,7 @@ const Room: Component = () => {
           />
         </div>
         <div class="voting-area-wrapper">
+          <div class="placeholder"></div>
           <div class="voting-area">
             <Board users={voters} />
             <Switch>

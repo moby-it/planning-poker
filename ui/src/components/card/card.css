@@ -23,12 +23,12 @@
   color: var(--primary--dark);
 }
 .card span {
-  font-size: 28px;
+  font-size: 1.75rem;
   line-height: 35px;
 }
 
 .voting-card span {
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 28px;
 }
 .voting-card.selected {

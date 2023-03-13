@@ -10,7 +10,7 @@
 }
 .prejoin-form label {
   color: var(--primary--dark);
-  font-size: 20px;
+  font-size: 1.25rem;
   line-height: 25px;
 }
 .prejoin-form input {
@@ -31,6 +31,6 @@
   width: 270px;
 }
 #change-later {
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 20px;
 }
