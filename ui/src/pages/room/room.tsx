@@ -8,6 +8,7 @@ import {
   Show,
   Switch,
 } from "solid-js";
+import toast from "solid-toast";
 import {
   isSpectator,
   roomId,
@@ -17,6 +18,7 @@ import {
 } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { Button } from "../../components/button/button";
+import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import { Toggle } from "../../components/toggle/toggle";
 import {
   selectedCard,
@@ -30,7 +32,6 @@ import {
   reavalable,
   revealed,
   revealing,
-  setRevealed,
   voters,
 } from "./roomState";
 
@@ -110,7 +111,13 @@ const Room: Component = () => {
         <div class="row justify-between">
           <span
             class="primary cursor-pointer"
-            onClick={() => navigator.clipboard.writeText(location.href)}
+            onClick={() => {
+              navigator.clipboard.writeText(location.href);
+              toast.success("Link Copied", {
+                // icon is of primary color
+                iconTheme: { primary: "#7cb7b0" },
+              });
+            }}
           >
             Copy Invite Link
           </span>
@@ -118,7 +125,7 @@ const Room: Component = () => {
             name="isSpectator"
             label="Join as Spectator"
             action={() => setIsSpectator((v) => !v)}
-            checked={!isSpectator()}
+            checked={isSpectator()}
           />
         </div>
         <div class="voting-area">
@@ -142,6 +149,9 @@ const Room: Component = () => {
           </Switch>
           <VotingCardList />
         </div>
+        <div class="spectators">
+          <SpectatorList />
+        </div>
       </div>
     </Show>
   );
@@ -151,7 +161,9 @@ async function connectToRoom(): Promise<WebSocket> {
   return new Promise((resolve, reject) => {
     console.log("user", username(), "should connect to room", roomId());
     const socket = new WebSocket(
-      `${wsv1Url}/joinRoom/${roomId()}/${username()}/voter`
+      `${wsv1Url}/joinRoom/${roomId()}/${username()}/${
+        isSpectator() ? "spectator" : "voter"
+      }`
     );
     socket.addEventListener("open", function (event) {
       console.log("connected", event);
