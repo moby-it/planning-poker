@@ -18,6 +18,10 @@
 .voted {
   background-color: var(--primary);
 }
+.revealed {
+  background-color: var(--white);
+  color: var(--primary--dark);
+}
 .card span {
   font-size: 28px;
   line-height: 35px;

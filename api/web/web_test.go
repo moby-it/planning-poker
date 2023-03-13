@@ -11,6 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/George-Spanos/poker-planning/business/actions"
 	"github.com/George-Spanos/poker-planning/business/events"
 	"github.com/George-Spanos/poker-planning/business/room"
 	"github.com/George-Spanos/poker-planning/business/user"
@@ -62,6 +63,14 @@ func UserVotesOnRoom(t *testing.T, connection *user.Connection, roomId string, u
 	t.Helper()
 	room, found := room.Get(roomId)
 	room.Vote(username, storyPoints)
+	if !found {
+		t.Fatalf("Room %v should exist", roomId)
+	}
+}
+func UserChangesRole(t *testing.T, connection *user.Connection, roomId string, username string, role string) {
+	t.Helper()
+	room, found := room.Get(roomId)
+	room.ConvertUserRole(username, role)
 	if !found {
 		t.Fatalf("Room %v should exist", roomId)
 	}
@@ -125,13 +134,12 @@ func TestConnectVoter(t *testing.T) {
 	defer s.Close()
 	t.Log("\tWhen the user tries to connect to a room as a voter")
 	{
+		roomId := string(data)
+		username := "fasolakis"
+		ws := ConnectVoterToRoom(t, roomId, username)
+		defer ws.Close()
+		t.Log("\t\tUser should be able to connect to the room")
 		{
-			roomId := string(data)
-			username := "fasolakis"
-			ws := ConnectVoterToRoom(t, roomId, username)
-			t.Log("\t\tUser should be able to connect to the room")
-
-			defer ws.Close()
 
 			room, _ := room.Get(roomId)
 			if len(room.Voters) != 1 {
@@ -196,6 +204,28 @@ func TestUserVotes(t *testing.T) {
 			ConnectionReceivedEvent(t, connection3, events.UserVoted)
 			t.Log("\t\tUsers should reveive a vote update event")
 		}
+	}
+}
+func TestUserChangesRole(t *testing.T) {
+	t.Log("Given a room is already created and a user is connected to it as a voter")
+	{
+		roomId := CreateRoomAndGetId(t)
+		usename := "fasolakis"
+		ws := ConnectVoterToRoom(t, string(roomId), usename)
+		username2 := "george"
+		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2)
+		t.Log("\tWhen a user changes role")
+		{
+			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
+			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
+			connection.WriteJSON(actions.ChangeRoleAction{Username: usename, Role: "spectator"})
+			t.Log("\t\tUsers should receive users list")
+			{
+				ConnectionReceivedEvent(t, connection, events.UsersUpdated)
+				ConnectionReceivedEvent(t, connection2, events.UsersUpdated)
+			}
+		}
+
 	}
 }
 func TestRoundReveal(t *testing.T) {

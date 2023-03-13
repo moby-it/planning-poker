@@ -4,6 +4,7 @@ const (
 	UserToVote    = "userToVote"
 	RoundToReveal = "roundToReveal"
 	RoundToStart  = "roundToStart"
+	ChangeRole    = "changeRole"
 )
 
 type Action struct {
@@ -17,6 +18,11 @@ type UserToVoteAction struct {
 }
 type RoundToRevealAction struct {
 	Action
+}
+type ChangeRoleAction struct {
+	Action
+	Username string `json:"username"`
+	Role     string `json:"role"`
 }
 type RoundToStartAction struct {
 	Action

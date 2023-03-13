@@ -22,6 +22,7 @@ import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import { Toggle } from "../../components/toggle/toggle";
 import {
   selectedCard,
+  setSelectedCard,
   VotingCardList,
 } from "../../components/votingCardList/votingCardList";
 import { wsv1Url } from "../../config";
@@ -61,6 +62,14 @@ const Room: Component = () => {
   createEffect(() => {
     if (selectedCard()) userVotes();
   });
+  createEffect(() => {
+    if (isSpectator()) {
+      changeRole("spectator");
+      setSelectedCard(null);
+    } else {
+      changeRole("voter");
+    }
+  });
   function userVotes() {
     const ws = socket();
     if (socket.loading || socket.error || !ws) {
@@ -69,13 +78,25 @@ const Room: Component = () => {
     ws.send(
       JSON.stringify({
         type: "userToVote",
-        username: username,
+        username: username(),
         storyPoints: selectedCard(),
         roomId,
       })
     );
   }
-
+  function changeRole(role: string) {
+    const ws = socket();
+    if (socket.loading || socket.error || !ws) {
+      throw new Error("No socket connection");
+    }
+    ws.send(
+      JSON.stringify({
+        type: "changeRole",
+        username: username(),
+        role,
+      })
+    );
+  }
   function revealRound() {
     const ws = socket();
 
@@ -128,29 +149,31 @@ const Room: Component = () => {
             checked={isSpectator()}
           />
         </div>
-        <div class="voting-area">
-          <Board users={voters} />
-          <Switch>
-            <Match when={reavalable() && typeof averageScore() !== "number"}>
-              <Button action={revealRound}>
-                <span>Reveal Cards</span>
-              </Button>
-            </Match>
-            <Match when={typeof averageScore() === "number"}>
-              <Button action={startNewRound}>
-                <span>Start New Round</span>
-              </Button>
-            </Match>
-            <Match when={revealing()}>
-              <Button>
-                <span>Cancel Reveal</span>
-              </Button>
-            </Match>
-          </Switch>
-          <VotingCardList />
-        </div>
-        <div class="spectators">
-          <SpectatorList />
+        <div class="voting-area-wrapper">
+          <div class="voting-area">
+            <Board users={voters} />
+            <Switch>
+              <Match when={reavalable() && typeof averageScore() !== "number"}>
+                <Button action={revealRound}>
+                  <span>Reveal Cards</span>
+                </Button>
+              </Match>
+              <Match when={typeof averageScore() === "number"}>
+                <Button action={startNewRound}>
+                  <span>Start New Round</span>
+                </Button>
+              </Match>
+              <Match when={revealing()}>
+                <Button>
+                  <span>Cancel Reveal</span>
+                </Button>
+              </Match>
+            </Switch>
+            <VotingCardList />
+          </div>
+          <div class="spectators">
+            <SpectatorList />
+          </div>
         </div>
       </div>
     </Show>

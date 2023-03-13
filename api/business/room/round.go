@@ -11,5 +11,5 @@ func NewRound() *Round {
 }
 
 func (r Round) IsRevealable(currentVotes int) bool {
-	return currentVotes == len(r.Votes)
+	return currentVotes > 0 && currentVotes == len(r.Votes)
 }

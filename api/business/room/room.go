@@ -4,6 +4,7 @@ package room
 import (
 	"encoding/json"
 	"log"
+	"sync"
 
 	"github.com/George-Spanos/poker-planning/business/actions"
 	"github.com/George-Spanos/poker-planning/business/events"
@@ -16,10 +17,30 @@ type Room struct {
 	Voters       []*user.Connection
 	Spectators   []*user.Connection
 	CurrentRound *Round
+	mu           sync.Mutex
 }
 
 var rooms = make(map[string]*Room)
 
+func (room *Room) convertSpectatorToVoter(username string) {
+	for i, spectator := range room.Spectators {
+		if spectator.Username == username {
+			room.Spectators = append(room.Spectators[:i], room.Spectators[i+1:]...)
+			room.Voters = append(room.Voters, spectator)
+			break
+		}
+	}
+}
+func (room *Room) convertVoterToSpectator(username string) {
+	for i, voter := range room.Voters {
+		if voter.Username == username {
+			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
+			room.Spectators = append(room.Spectators, voter)
+			delete(room.CurrentRound.Votes, voter.Username)
+			break
+		}
+	}
+}
 func Get(roomId string) (*Room, bool) {
 	room, found := rooms[roomId]
 	return room, found
@@ -52,15 +73,24 @@ func New() *Room {
 	rooms[roomId] = &room
 	return &room
 }
-
+func (room *Room) ConvertUserRole(username string, role string) {
+	if role == "voter" {
+		room.convertSpectatorToVoter(username)
+	} else {
+		room.convertVoterToSpectator(username)
+	}
+	room.emitUsersAndRevealableRound()
+}
 func (room *Room) Connections() []*user.Connection {
+	room.mu.Lock()
+	defer room.mu.Unlock()
 	return append(room.Voters, room.Spectators...)
 }
 func (room *Room) IsEmpty() bool {
 	return len(room.Voters) == 0 && len(room.Spectators) == 0
 }
 
-func (r Room) Close() {
+func (r *Room) Close() {
 	delete(rooms, r.Id)
 }
 func (room *Room) Vote(username string, storyPoints int) {
@@ -75,15 +105,18 @@ func (room *Room) Vote(username string, storyPoints int) {
 func (room *Room) AddClient(client *user.Connection, role string) error {
 	switch role {
 	case "voter":
+		room.mu.Lock()
 		room.Voters = append(room.Voters, client)
+		room.mu.Unlock()
 	case "spectator":
+		room.mu.Lock()
 		room.Spectators = append(room.Spectators, client)
+		room.mu.Unlock()
 	default:
 		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
-	room.emitUsers()
-	event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
-	events.Broadcast(event, room.Connections()...)
+	room.emitUsersAndRevealableRound()
+
 	go room.readMessage(client)
 	return nil
 }
@@ -100,9 +133,7 @@ func (room *Room) removeClient(client *user.Connection) {
 			room.Spectators = append(room.Spectators[:i], room.Spectators[i+1:]...)
 		}
 	}
-	room.emitUsers()
-	event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
-	events.Broadcast(event, room.Connections()...)
+	room.emitUsersAndRevealableRound()
 }
 func (room *Room) RevealCurrentRound() {
 	if !room.CurrentRound.IsRevealable(len(room.Voters)) {
@@ -112,7 +143,7 @@ func (room *Room) RevealCurrentRound() {
 	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
 	events.Broadcast(event, room.Connections()...)
 }
-func (room *Room) emitUsers() {
+func (room *Room) emitUsersAndRevealableRound() {
 	users := make([]user.User, 0)
 	for _, client := range room.Voters {
 		users = append(users, user.User{Username: client.Username, IsVoter: true, HasVoted: room.UserHasVoted(client.Username)})
@@ -122,6 +153,8 @@ func (room *Room) emitUsers() {
 	}
 	event := events.UsersUpdatedEvent{Users: users, Event: events.Event{Type: events.UsersUpdated}}
 	events.Broadcast(event, room.Connections()...)
+	revealableEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+	events.Broadcast(revealableEvent, room.Connections()...)
 }
 
 func (room *Room) readMessage(client *user.Connection) {
@@ -159,6 +192,14 @@ func (room *Room) readMessage(client *user.Connection) {
 			room.CurrentRound = NewRound()
 			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
 			events.Broadcast(event, room.Connections()...)
+		case actions.ChangeRole:
+			var action actions.ChangeRoleAction
+			err = json.Unmarshal(message, &action)
+			if err != nil {
+				log.Println("Error parsing user vote:", err)
+				continue
+			}
+			room.ConvertUserRole(client.Username, action.Role)
 		}
 	}
 }

@@ -1,6 +1,8 @@
 package user
 
 import (
+	"sync"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -11,5 +13,6 @@ type User struct {
 }
 type Connection struct {
 	*websocket.Conn
+	Mu sync.RWMutex
 	User
 }
