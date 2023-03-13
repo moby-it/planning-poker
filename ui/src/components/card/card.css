@@ -28,6 +28,7 @@
   line-height: 28px;
 }
 .voting-card.selected {
+  color: var(--white);
   background-color: var(--primary);
 }
 .voting-card:hover {

@@ -54,10 +54,8 @@ func (room *Room) Vote(username string, storyPoints int) {
 	room.CurrentRound.Votes[username] = storyPoints
 	event := events.UserVotedEvent{Username: username, Event: events.Event{Type: events.UserVoted}}
 	events.Broadcast(event, room.Connections()...)
-	if room.CurrentRound.IsRevealable(len(room.Voters)) {
-		event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: true}
-		events.Broadcast(event, room.Connections()...)
-	}
+	revealEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+	events.Broadcast(revealEvent, room.Connections()...)
 }
 
 // a client can either connect as a "voter" or a "spectator". Any other role will result in panic
@@ -71,6 +69,8 @@ func (room *Room) AddClient(client *user.Connection, role string) error {
 		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
 	room.emitUsers()
+	event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+	events.Broadcast(event, room.Connections()...)
 	go room.readMessage(client)
 	return nil
 }
@@ -79,6 +79,7 @@ func (room *Room) removeClient(client *user.Connection) {
 	for i, c := range room.Voters {
 		if c == client {
 			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
+			delete(room.CurrentRound.Votes, c.Username)
 		}
 	}
 	for i, c := range room.Spectators {
@@ -87,6 +88,8 @@ func (room *Room) removeClient(client *user.Connection) {
 		}
 	}
 	room.emitUsers()
+	event := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+	events.Broadcast(event, room.Connections()...)
 }
 func (room *Room) RevealCurrentRound() {
 	if !room.CurrentRound.IsRevealable(len(room.Voters)) {

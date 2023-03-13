@@ -8,6 +8,7 @@ import {
   isUsersUpdated,
   isUserVoted,
 } from "../../common/ws-events";
+import { username } from "../../config";
 export const [voters, setVoters] = createStore<User[]>([]);
 export const [spectators, setSpectators] = createStore<User[]>([]);
 export const [reavalable, setRevealable] = createSignal(false);
@@ -16,6 +17,14 @@ export const [revealed, setRevealed] = createSignal(false);
 export const [averageScore, setAverageScore] = createSignal<number | null>(
   null
 );
+export function addPointsVoter(points: number) {
+  setVoters(
+    (voter) => voter.username === username(),
+    produce((voter) => {
+      voter.points = points;
+    })
+  );
+}
 export function handleWsMessage(event: MessageEvent<unknown>): void {
   let data: any = event.data;
   try {
@@ -49,10 +58,12 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
     );
   } else if (isRoundRevealed(data)) {
     setVoters(
-      voters.map((voter) => {
-        voter.points = data.votes[voter.username];
-        return voter;
-      })
+      produce((voters) =>
+        voters.map((voter) => {
+          voter.points = data.votes[voter.username];
+          return voter;
+        })
+      )
     );
     const averageScore =
       Object.values(data.votes).reduce((a, b) => a + b, 0) /

@@ -11,7 +11,10 @@ import {
 import { Board } from "../../components/board/board";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
-import { VotingCardList } from "../../components/votingCardList/votingCardList";
+import {
+  selectedCard,
+  VotingCardList,
+} from "../../components/votingCardList/votingCardList";
 import {
   isSpectator,
   roomId,
@@ -27,6 +30,7 @@ import {
   reavalable,
   revealed,
   revealing,
+  setRevealed,
   voters,
 } from "./roomState";
 
@@ -38,7 +42,6 @@ const roomHeaders = {
 } as const;
 
 const Room: Component = () => {
-  const [storyPoints, setStoryPoints] = createSignal(0);
   const [roomHeader, setRoomHeader] = createSignal<string>(roomHeaders.Voting);
   createEffect(() => {
     if (reavalable()) setRoomHeader(roomHeaders.Ready);
@@ -54,7 +57,9 @@ const Room: Component = () => {
     return;
   }
   const [socket] = createResource(() => connectToRoom());
-
+  createEffect(() => {
+    if (selectedCard()) userVotes();
+  });
   function userVotes() {
     const ws = socket();
     if (socket.loading || socket.error || !ws) {
@@ -64,7 +69,7 @@ const Room: Component = () => {
       JSON.stringify({
         type: "userToVote",
         username: username,
-        storyPoints: storyPoints(),
+        storyPoints: selectedCard(),
         roomId,
       })
     );
@@ -88,7 +93,7 @@ const Room: Component = () => {
     if (socket.loading || socket.error || !ws) {
       throw new Error("No socket connection");
     }
-    setStoryPoints(0);
+    setRevealed(false);
     ws.send(
       JSON.stringify({
         type: "roundToStart",
@@ -104,7 +109,12 @@ const Room: Component = () => {
       <div class="room" data-testid="room">
         <h2 class="room-header">{roomHeader()}</h2>
         <div class="row justify-between">
-          <span class="primary cursor-pointer">Copy Invite Link</span>
+          <span
+            class="primary cursor-pointer"
+            onClick={() => navigator.clipboard.writeText(location.href)}
+          >
+            Copy Invite Link
+          </span>
           <Toggle
             name="isSpectator"
             label="Join as Spectator"
@@ -115,12 +125,12 @@ const Room: Component = () => {
         <div class="voting-area">
           <Board users={voters} />
           <Switch>
-            <Match when={reavalable()}>
+            <Match when={reavalable() && typeof averageScore() !== "number"}>
               <Button action={revealRound}>
                 <span>Reveal Cards</span>
               </Button>
             </Match>
-            <Match when={averageScore()}>
+            <Match when={typeof averageScore() === "number"}>
               <Button action={startNewRound}>
                 <span>Start New Round</span>
               </Button>

@@ -9,7 +9,7 @@ export const Board: Component<{ users: User[] }> = (props) => {
         {(user) => (
           <div class="vote">
             <Card points={user.points} voted={user.voted} />
-            <span>{user.username}</span>
+            <span class="username">{user.username}</span>
           </div>
         )}
       </For>
