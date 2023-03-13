@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { createStore, produce } from "solid-js/store";
+import { username } from "../../common/state";
 import { User } from "../../common/user";
 import {
   isRoundRevealAvailable,
@@ -8,7 +9,6 @@ import {
   isUsersUpdated,
   isUserVoted,
 } from "../../common/ws-events";
-import { username } from "../../config";
 export const [voters, setVoters] = createStore<User[]>([]);
 export const [spectators, setSpectators] = createStore<User[]>([]);
 export const [reavalable, setRevealable] = createSignal(false);

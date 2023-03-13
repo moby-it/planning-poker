@@ -52,16 +52,24 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	room, roomExists := room.Get(roomId)
 	if roomExists {
+		if room.IncludeUsername(username) {
+			log.Println("username already exists")
+			w.WriteHeader(http.StatusConflict)
+			w.Write([]byte("username already exists"))
+			return
+		}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println("error upgrading connection to websocket", err.Error())
 			w.Write([]byte(err.Error()))
 			return
 		}
+
 		client := user.Connection{User: user.User{Username: username, IsVoter: role == "voter"}, Conn: conn}
 		room.AddClient(&client, role)
 	} else {
 		log.Println("room does not exist")
 		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("room does not exist"))
 	}
 }

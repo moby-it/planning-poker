@@ -8,6 +8,13 @@ import {
   Show,
   Switch,
 } from "solid-js";
+import {
+  isSpectator,
+  roomId,
+  setIsSpectator,
+  setRoomId,
+  username,
+} from "../../common/state";
 import { Board } from "../../components/board/board";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
@@ -15,14 +22,7 @@ import {
   selectedCard,
   VotingCardList,
 } from "../../components/votingCardList/votingCardList";
-import {
-  isSpectator,
-  roomId,
-  setIsSpectator,
-  setRoomId,
-  username,
-  wsv1Url,
-} from "../../config";
+import { wsv1Url } from "../../config";
 import "./room.css";
 import {
   averageScore,
@@ -160,7 +160,7 @@ async function connectToRoom(): Promise<WebSocket> {
     });
     socket.addEventListener("message", handleWsMessage);
     socket.addEventListener("error", (event) => {
-      console.log("Error from server ", event);
+      console.log("Error from ws connection ", event);
       navigate("/");
       reject(event);
     });

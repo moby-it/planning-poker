@@ -31,6 +31,19 @@ func (room *Room) UserHasVoted(username string) bool {
 	_, found := room.CurrentRound.Votes[username]
 	return found
 }
+func (room *Room) IncludeUsername(username string) bool {
+	for _, voter := range room.Voters {
+		if voter.Username == username {
+			return true
+		}
+	}
+	for _, spectator := range room.Spectators {
+		if spectator.Username == username {
+			return true
+		}
+	}
+	return false
+}
 func New() *Room {
 	roomId := uuid.New().String()
 	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}

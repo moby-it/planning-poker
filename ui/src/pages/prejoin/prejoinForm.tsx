@@ -1,15 +1,17 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
+import {
+  BrowserStorageKeys,
+  isSpectator,
+  roomId,
+  setIsSpectator,
+  setRoomId,
+  setUsername,
+  username,
+} from "../../common/state";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
-import {
-  apiV1Url,
-  SessionStorageKeys,
-  roomId,
-  setRoomId,
-  username,
-  setUsername,
-} from "../../config";
+import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
 const PrejoinForm: Component = () => {
   const navigate = useNavigate();
@@ -17,14 +19,11 @@ const PrejoinForm: Component = () => {
   const isCreatingRoom = Boolean(params.create);
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
-  const [isSpectator, setIsSpectator] = createSignal(
-    Boolean(sessionStorage.getItem(SessionStorageKeys.isSpectator))
-  );
   const handleInputChanged = (event: KeyboardEvent) => {
     // @ts-ignore
     const username: string = event?.target?.value;
     setUsername(username);
-    sessionStorage.setItem(SessionStorageKeys.username, username);
+    sessionStorage.setItem(BrowserStorageKeys.username, username);
   };
   async function createRoom() {
     const createRoomUrl = apiV1Url + "/createRoom";
@@ -33,8 +32,6 @@ const PrejoinForm: Component = () => {
     });
     const data = await response.text();
     setRoomId(data);
-    sessionStorage.setItem("username", username());
-    sessionStorage.setItem("isSpectator", isSpectator() ? "1" : "0");
     navigate(`/room/${roomId()}`);
   }
   return (
