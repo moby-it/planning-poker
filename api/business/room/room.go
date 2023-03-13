@@ -105,13 +105,9 @@ func (room *Room) Vote(username string, storyPoints int) {
 func (room *Room) AddClient(client *user.Connection, role string) error {
 	switch role {
 	case "voter":
-		room.mu.Lock()
 		room.Voters = append(room.Voters, client)
-		room.mu.Unlock()
 	case "spectator":
-		room.mu.Lock()
 		room.Spectators = append(room.Spectators, client)
-		room.mu.Unlock()
 	default:
 		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}

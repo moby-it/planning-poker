@@ -33,26 +33,26 @@ func CreateRoomAndGetId(t *testing.T) []byte {
 	}
 	return data
 }
-func ConnectVoterToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
+func CreateTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	r := mux.NewRouter()
+	r.HandleFunc("/createRoom", handlers.CreateRoom)
 	r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
-	s := httptest.NewServer(r)
-	defer s.Close()
-	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+	return httptest.NewServer(r)
+}
+
+func ConnectVoterToRoom(t *testing.T, roomId string, username string, url string) *websocket.Conn {
+	t.Helper()
+	wsURL := "ws" + strings.TrimPrefix(url, "http")
 	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "voter"), nil)
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
 	}
 	return ws
 }
-func ConnectSpectatorToRoom(t *testing.T, roomId string, username string) *websocket.Conn {
+func ConnectSpectatorToRoom(t *testing.T, roomId string, username string, url string) *websocket.Conn {
 	t.Helper()
-	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
-	s := httptest.NewServer(r)
-	defer s.Close()
-	wsURL := "ws" + strings.TrimPrefix(s.URL, "http")
+	wsURL := "ws" + strings.TrimPrefix(url, "http")
 	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "spectator"), nil)
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
@@ -125,19 +125,20 @@ func TestCreateRoom(t *testing.T) {
 		}
 	}
 }
+
 func TestConnectVoter(t *testing.T) {
 	t.Log("Given a user lands on the platform via a link")
 	data := CreateRoomAndGetId(t)
-	r := mux.NewRouter()
-	r.HandleFunc("/{roomId}/{username}/{role}", handlers.ConnectToRoom)
-	s := httptest.NewServer(r)
+	s := CreateTestServer(t)
 	defer s.Close()
 	t.Log("\tWhen the user tries to connect to a room as a voter")
 	{
 		roomId := string(data)
 		username := "fasolakis"
-		ws := ConnectVoterToRoom(t, roomId, username)
+		ws := ConnectVoterToRoom(t, roomId, username, s.URL)
 		defer ws.Close()
+		connection := &user.Connection{Conn: ws, User: user.User{Username: username, IsVoter: true}}
+		ConnectionReceivedEvent(t, connection, events.UsersUpdated)
 		t.Log("\t\tUser should be able to connect to the room")
 		{
 
@@ -155,44 +156,46 @@ func TestConnectVoter(t *testing.T) {
 	}
 
 }
+
 func TestSpectatorJoinsRoom(t *testing.T) {
+
 	t.Log("Given a room is already created and a user is connected to it as a voter")
 	{
 		roomId := CreateRoomAndGetId(t)
-		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename)
+		s := CreateTestServer(t)
+		defer s.Close()
+		username1 := "fasolakis"
+		username2 := "george"
+		ws1 := ConnectVoterToRoom(t, string(roomId), username1, s.URL)
+		// defer ws1.Close()
+		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2, s.URL)
+		// defer ws2.Close()
+		connection1 := &user.Connection{Conn: ws1, User: user.User{Username: username1, IsVoter: true}}
+		connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: false}}
 		{
 			t.Log("\tWhen another user connects to the room")
 			{
-				username := "george"
-				ws2 := ConnectSpectatorToRoom(t, string(roomId), username)
-				defer ws2.Close()
-				_, msg, err := ws.ReadMessage()
-				if err != nil {
-					t.Fatal("\t\tUsers should reveive a userList update event", err)
-				}
-				var event events.UsersUpdatedEvent
-				err = json.Unmarshal(msg, &event)
-				if err != nil {
-					t.Fatal("\t\tUsers should reveive a userList update event", err)
-				}
+				ConnectionReceivedEvent(t, connection1, events.UsersUpdated)
+				ConnectionReceivedEvent(t, connection2, events.UsersUpdated)
 			}
 			t.Log("\t\tUsers should reveive a userList update event")
 		}
-		defer ws.Close()
+
 	}
 
 }
+
 func TestUserVotes(t *testing.T) {
 	t.Log("Given a room is already created and three users are connected to it")
 	{
+		s := CreateTestServer(t)
 		roomId := CreateRoomAndGetId(t)
 		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename)
+		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
 		username2 := "george"
-		ws2 := ConnectVoterToRoom(t, string(roomId), username2)
+		ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
 		username3 := "spiros"
-		ws3 := ConnectVoterToRoom(t, string(roomId), username3)
+		ws3 := ConnectVoterToRoom(t, string(roomId), username3, s.URL)
 		t.Log("\tWhen a user votes")
 		{
 			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
@@ -206,14 +209,16 @@ func TestUserVotes(t *testing.T) {
 		}
 	}
 }
+
 func TestUserChangesRole(t *testing.T) {
 	t.Log("Given a room is already created and a user is connected to it as a voter")
 	{
+		s := CreateTestServer(t)
 		roomId := CreateRoomAndGetId(t)
 		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename)
+		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
 		username2 := "george"
-		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2)
+		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2, s.URL)
 		t.Log("\tWhen a user changes role")
 		{
 			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
@@ -231,12 +236,13 @@ func TestUserChangesRole(t *testing.T) {
 func TestRoundReveal(t *testing.T) {
 	t.Log("Given a room is created and users have already joined and already voted")
 	roomId := CreateRoomAndGetId(t)
+	s := CreateTestServer(t)
 	usename := "fasolakis"
-	ws := ConnectVoterToRoom(t, string(roomId), usename)
+	ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
 	username2 := "george"
-	ws2 := ConnectVoterToRoom(t, string(roomId), username2)
+	ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
 	username3 := "spiros"
-	_ = ConnectSpectatorToRoom(t, string(roomId), username3)
+	_ = ConnectSpectatorToRoom(t, string(roomId), username3, s.URL)
 	t.Log("\tAfter users have voted")
 	{
 		connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}

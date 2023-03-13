@@ -44,6 +44,8 @@ type RoundStartedEvent struct {
 
 func Broadcast[T Broadcastable](event T, connections ...*user.Connection) {
 	for _, connection := range connections {
+		connection.Mu.Lock()
+		defer connection.Mu.Unlock()
 		if err := connection.WriteJSON(event); err != nil {
 			log.Println(err)
 		}
