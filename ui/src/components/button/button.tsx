@@ -4,14 +4,20 @@ export const Button: Component<{
   color?: string;
   text?: string;
   action?: () => void;
+  disabled?: boolean;
   children?: JSXElement;
 }> = (_props) => {
-  const props = mergeProps({ color: "primary" }, _props);
+  const props = mergeProps({ color: "primary", disabled: false }, _props);
   const c = children(() => props.children);
   return (
     <button
       type="button"
-      classList={{ btn: true, primary: props.color === "primary" }}
+      disabled={props.disabled}
+      classList={{
+        btn: true,
+        primary: props.color === "primary",
+        disabled: props.disabled,
+      }}
       onClick={props.action}
     >
       {c()}

@@ -5,16 +5,21 @@
   border-radius: 6px;
   font-size: 1rem;
   line-height: 20px;
-  cursor: pointer;
   font-family: "Sora", sans-serif;
 }
-.btn.primary:hover {
+.btn:enabled {
+  cursor: pointer;
+}
+.btn.primary:hover:enabled {
   background-color: var(--primary--hover);
 }
-.btn.primary:active {
+.btn.primary:active:enabled {
   background-color: var(--primary--active);
 }
 .btn.primary {
   color: var(--white);
   background-color: var(--primary);
+}
+.btn:disabled {
+  background-color: var(--primary--gray);
 }

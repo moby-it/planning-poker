@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { Component } from "solid-js";
+import { Component, createSignal, Show } from "solid-js";
 import {
   BrowserStorageKeys,
   isSpectator,
@@ -19,10 +19,16 @@ const PrejoinForm: Component = () => {
   const isCreatingRoom = Boolean(params.create);
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
+  const [usernameError, setUsernameError] = createSignal<string | null>(null);
   const handleInputChanged = (event: KeyboardEvent) => {
     try {
       // @ts-ignore
       const username: string = event?.target?.value;
+      if (username.length > 12) {
+        setUsernameError("Username must be less than 12 characters");
+        return;
+      }
+      setUsernameError(null);
       setUsername(username);
       sessionStorage.setItem(BrowserStorageKeys.username, username);
     } catch (e) {
@@ -41,7 +47,7 @@ const PrejoinForm: Component = () => {
   return (
     <div class="prejoin-form">
       <h2>{title}</h2>
-      <div>
+      <div class="input-wrapper">
         <label for="username">Username</label>
         <input
           data-testid="username-input"
@@ -50,6 +56,9 @@ const PrejoinForm: Component = () => {
           onKeyUp={handleInputChanged}
           value={username()}
         />
+        <Show when={usernameError()}>
+          <span class="error">{usernameError()}</span>
+        </Show>
       </div>
       <div class="is-spectator">
         <div class="is-spectator-switch">
@@ -64,6 +73,7 @@ const PrejoinForm: Component = () => {
       </div>
       <Button
         data-testid="createRoomBtn"
+        disabled={!!usernameError()}
         action={async () =>
           isCreatingRoom ? await createRoom() : navigate(`/room/${roomId()}`)
         }

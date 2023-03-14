@@ -89,6 +89,6 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
       setAverageScore(null);
     });
   } else {
-    console.log("Unhandled message", data);
+    console.error("Unhandled message", data);
   }
 }

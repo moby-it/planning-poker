@@ -17,6 +17,16 @@
   border-bottom: 3px solid var(--primary);
   width: 360px;
 }
+.prejoin-form .input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 92px;
+}
+.prejoin-form .error {
+  color: var(--error);
+  font-size: 0.75rem;
+}
 .prejoin-form .is-spectator-switch {
   display: flex;
   align-items: center;

@@ -216,19 +216,17 @@ const Room: Component = () => {
 async function connectToRoom(): Promise<WebSocket> {
   const navigate = useNavigate();
   return new Promise((resolve, reject) => {
-    console.log("user", username(), "should connect to room", roomId());
     const socket = new WebSocket(
       `${wsv1Url}/joinRoom/${roomId()}/${username()}/${
         isSpectator() ? "spectator" : "voter"
       }`
     );
     socket.addEventListener("open", function (event) {
-      console.log("connected", event);
       resolve(socket);
     });
     socket.addEventListener("message", handleWsMessage);
     socket.addEventListener("error", (event) => {
-      console.log("Error from ws connection ", event);
+      console.error("Error from ws connection ", event);
       navigate("/");
       reject(event);
     });
