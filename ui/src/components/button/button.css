@@ -10,11 +10,23 @@
 .btn:enabled {
   cursor: pointer;
 }
-.btn.primary:hover:enabled {
+.btn.primary:hover:enabled,
+.btn.default:hover:enabled {
+  color: var(--white);
   background-color: var(--primary--hover);
+  border: none;
 }
-.btn.primary:active:enabled {
+.btn.primary:active:enabled,
+.btn.default:active:enabled {
+  color: var(--white);
   background-color: var(--primary--active);
+  border: none;
+}
+.btn.primary:active,
+.btn.default:active {
+  color: var(--white);
+  background-color: var(--primary--active);
+  border: none;
 }
 .btn.primary {
   color: var(--white);
@@ -22,4 +34,9 @@
 }
 .btn:disabled {
   background-color: var(--primary--gray);
+}
+.btn.default {
+  color: var(--primary);
+  background-color: var(--white);
+  border: 2px solid var(--primary);
 }

@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal } from "solid-js";
 import { isSpectator } from "../../common/state";
-import { revealed } from "../../pages/room/roomState";
+import { revealed, revealing } from "../../pages/room/roomState";
 import { VotingCard } from "../card/votingCard";
 import "./votingCardList.css";
 export const [selectedCard, setSelectedCard] = createSignal<number | null>(
@@ -21,7 +21,7 @@ export const VotingCardList: Component = () => {
         <VotingCard
           points={v}
           selected={selectedCard() === v}
-          action={() => (!isSpectator() ? setSelectedCard(v) : null)}
+          action={() => (!isSpectator() && !revealing() ? setSelectedCard(v) : null)}
         />
       ))}
     </div>

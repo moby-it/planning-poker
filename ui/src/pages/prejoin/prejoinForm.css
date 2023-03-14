@@ -20,8 +20,8 @@
 .prejoin-form .input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  min-height: 92px;
+  gap: 16px;
+  min-height: 120px;
 }
 .prejoin-form .error {
   color: var(--error);

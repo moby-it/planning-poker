@@ -16,6 +16,7 @@ export const Button: Component<{
       classList={{
         btn: true,
         primary: props.color === "primary",
+        default: props.color === "default",
         disabled: props.disabled,
       }}
       onClick={props.action}

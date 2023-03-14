@@ -2,7 +2,6 @@ import { useNavigate, useParams } from "@solidjs/router";
 import {
   Component,
   createEffect,
-  createRenderEffect,
   createResource,
   createSignal,
   Match,
@@ -34,10 +33,13 @@ import { wsv1Url } from "../../config";
 import "./room.css";
 import {
   averageScore,
+  cancelTimeout,
   handleWsMessage,
-  reavalable,
+  revealable,
   revealed,
   revealing,
+  roundStatus,
+  RoundStatuses,
   voters,
 } from "./roomState";
 
@@ -49,23 +51,37 @@ const roomHeaders = {
 } as const;
 
 const Room: Component = () => {
+  let interval: NodeJS.Timer | undefined;
   const [roomHeader, setRoomHeader] = createSignal<string>(roomHeaders.Voting);
   createEffect(() => {
-    if (reavalable()) setRoomHeader(roomHeaders.Ready);
-    if (revealed()) setRoomHeader(roomHeaders.Revealed + " " + averageScore());
-    if (!revealed() && !reavalable()) setRoomHeader(roomHeaders.Voting);
+    switch (roundStatus()) {
+      case RoundStatuses.Started:
+        setRoomHeader(roomHeaders.Voting);
+      case RoundStatuses.Revealable:
+        setRoomHeader(roomHeaders.Ready);
+        break;
+      case RoundStatuses.Revealing:
+        setRoomHeader(roomHeaders.Revealing);
+        break;
+      case RoundStatuses.Revealed:
+        setRoomHeader(roomHeaders.Revealed + " " + averageScore());
+        break;
+    }
   });
   createEffect(() => {
     if (revealing()) {
       let i = ProgressBarDefaultDuration / 1000;
       setRoomHeader(roomHeaders.Revealing + " " + i);
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if (i === 0) {
           clearInterval(interval);
           return;
         }
         setRoomHeader(roomHeaders.Revealing + " " + --i);
       }, 1000);
+    } else {
+      setRoomHeader(roomHeaders.Voting);
+      if (interval) clearInterval(interval);
     }
   });
   const navigate = useNavigate();
@@ -150,7 +166,7 @@ const Room: Component = () => {
       <div class="room" data-testid="room">
         <div class="room-header">
           <h2>{roomHeader()}</h2>
-          <Show when={revealing()}>
+          <Show when={roundStatus() === RoundStatuses.Revealing}>
             <ProgressBar />
           </Show>
         </div>
@@ -180,27 +196,21 @@ const Room: Component = () => {
             <Board users={voters} />
             <Show when={!isSpectator()}>
               <Switch>
-                <Match
-                  when={
-                    reavalable() &&
-                    typeof averageScore() !== "number" &&
-                    !revealing()
-                  }
-                >
+                <Match when={revealable()}>
                   <Button action={revealRound}>
                     <span>Reveal Cards</span>
                   </Button>
                 </Match>
-                <Match when={typeof averageScore() === "number"}>
+                <Match when={revealed()}>
                   <Button action={startNewRound}>
                     <span>Start New Round</span>
                   </Button>
                 </Match>
-                {/* <Match when={revealing()}>
-                <Button>
-                  <span>Cancel Reveal</span>
-                </Button>
-              </Match> */}
+                <Match when={revealing()}>
+                  <Button color="default" action={() => cancelTimeout()}>
+                    <span>Cancel Reveal</span>
+                  </Button>
+                </Match>
               </Switch>
             </Show>
             <VotingCardList />
