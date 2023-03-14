@@ -191,7 +191,6 @@ const Room: Component = () => {
           />
         </div>
         <div class="voting-area-wrapper">
-          <div class="placeholder"></div>
           <div class="voting-area">
             <Board users={voters} />
             <Show when={!isSpectator()}>
