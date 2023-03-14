@@ -7,7 +7,7 @@ export const BrowserStorageKeys = {
 
 export const [roomId, setRoomId] = createSignal("");
 export const [isSpectator, setIsSpectator] = createSignal(
-  Boolean(localStorage.getItem(BrowserStorageKeys.isSpectator))
+  Boolean(Number(localStorage.getItem(BrowserStorageKeys.isSpectator)))
 );
 export const [username, setUsername] = createSignal(
   localStorage.getItem(BrowserStorageKeys.username) ?? ""
