@@ -8,6 +8,7 @@ import {
   isRoundStarted,
   isUsersUpdated,
   isUserVoted,
+  RoundRevealed,
 } from "../../common/ws-events";
 import { ProgressBarDefaultDuration } from "../../components/progressBar/progressBar";
 export const [voters, setVoters] = createStore<User[]>([]);
@@ -59,25 +60,27 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
     );
   } else if (isRoundRevealed(data)) {
     setRevealing(true);
-    setTimeout(() => {
-      const averageScore =
-        // @ts-ignore
-        Object.values(data.votes).reduce((a, b) => a + b, 0) /
-        Object.values(data.votes).length;
-      batch(() => {
-        setAverageScore(averageScore);
-        setRevealed(true);
-        setRevealing(false);
-        setVoters(
-          produce((voters) =>
-            voters.map((voter) => {
-              voter.points = data.votes[voter.username];
-              return voter;
-            })
-          )
-        );
-      });
-    }, ProgressBarDefaultDuration);
+    ((data: RoundRevealed) => {
+      setTimeout(() => {
+        const averageScore =
+          Object.values(data.votes).reduce((a, b) => a + b, 0) /
+          Object.values(data.votes).length;
+        batch(() => {
+          setAverageScore(averageScore);
+          setRevealed(true);
+          setRevealing(false);
+          setVoters(
+            produce((voters) =>
+              voters.map((voter) => {
+                voter.points = data.votes[voter.username];
+                return voter;
+              })
+            )
+          );
+        });
+      }, ProgressBarDefaultDuration);
+    })(data);
+
   } else if (isRoundStarted(data)) {
     batch(() => {
       setRevealed(false);
