@@ -178,29 +178,31 @@ const Room: Component = () => {
           <div class="placeholder"></div>
           <div class="voting-area">
             <Board users={voters} />
-            <Switch>
-              <Match
-                when={
-                  reavalable() &&
-                  typeof averageScore() !== "number" &&
-                  !revealing()
-                }
-              >
-                <Button action={revealRound}>
-                  <span>Reveal Cards</span>
-                </Button>
-              </Match>
-              <Match when={typeof averageScore() === "number"}>
-                <Button action={startNewRound}>
-                  <span>Start New Round</span>
-                </Button>
-              </Match>
-              {/* <Match when={revealing()}>
+            <Show when={!isSpectator()}>
+              <Switch>
+                <Match
+                  when={
+                    reavalable() &&
+                    typeof averageScore() !== "number" &&
+                    !revealing()
+                  }
+                >
+                  <Button action={revealRound}>
+                    <span>Reveal Cards</span>
+                  </Button>
+                </Match>
+                <Match when={typeof averageScore() === "number"}>
+                  <Button action={startNewRound}>
+                    <span>Start New Round</span>
+                  </Button>
+                </Match>
+                {/* <Match when={revealing()}>
                 <Button>
                   <span>Cancel Reveal</span>
                 </Button>
               </Match> */}
-            </Switch>
+              </Switch>
+            </Show>
             <VotingCardList />
           </div>
           <div class="spectators">
