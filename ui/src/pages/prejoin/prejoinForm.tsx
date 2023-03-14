@@ -20,10 +20,14 @@ const PrejoinForm: Component = () => {
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
   const handleInputChanged = (event: KeyboardEvent) => {
-    // @ts-ignore
-    const username: string = event?.target?.value;
-    setUsername(username);
-    sessionStorage.setItem(BrowserStorageKeys.username, username);
+    try {
+      // @ts-ignore
+      const username: string = event?.target?.value;
+      setUsername(username);
+      sessionStorage.setItem(BrowserStorageKeys.username, username);
+    } catch (e) {
+      console.error(e);
+    }
   };
   async function createRoom() {
     const createRoomUrl = apiV1Url + "/createRoom";
