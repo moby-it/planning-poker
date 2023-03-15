@@ -57,7 +57,7 @@ jobs:
         run: |
           sed -i "s/\${TAG}/${{ github.ref_name }}/g" docker-stack.yml
       - name: Deploy Stack
-        uses: kitconcept/docker-stack-deploy@v1.0.1
+        uses: kitconcept/docker-stack-deploy@v1.2.0
         with:
           remote_host: ${{ secrets.HOST }}
           remote_user: ${{ secrets.USERNAME }}
