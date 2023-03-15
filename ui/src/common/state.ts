@@ -4,6 +4,8 @@ export const BrowserStorageKeys = {
   username: "username",
   isSpectator: "isSpectator",
 };
+const storageUsername = localStorage.getItem(BrowserStorageKeys.username);
+if (typeof storageUsername === 'string' && storageUsername.length > 12) localStorage.removeItem(BrowserStorageKeys.username);
 
 export const [roomId, setRoomId] = createSignal("");
 export const [isSpectator, setIsSpectator] = createSignal(
