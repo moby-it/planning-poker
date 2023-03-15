@@ -9,13 +9,15 @@ import (
 const (
 	UsersUpdated         = "usersUpdated"
 	UserVoted            = "userVoted"
+	RoundToReveal        = "roundToReveal"
+	CancelReveal         = "cancelReveal"
 	RoundRevealed        = "roundRevealed"
 	RoundRevealAvailable = "roundRevealAvailable"
 	RoundStarted         = "roundStarted"
 )
 
 type Broadcastable interface {
-	UserVotedEvent | RoundRevealedEvent | RoundRevealAvailableEvent | RoundStartedEvent | UsersUpdatedEvent
+	UserVotedEvent | RoundRevealedEvent | RoundRevealAvailableEvent | RoundStartedEvent | UsersUpdatedEvent | CancelRevealEvent | RoundToRevealEvent
 }
 type Event struct {
 	Type string `json:"type"`
@@ -37,6 +39,14 @@ type RoundRevealedEvent struct {
 type RoundRevealAvailableEvent struct {
 	Event
 	RevealAvailable bool `json:"revealAvailable"`
+}
+type RoundToRevealEvent struct {
+	Event
+	After int `json:"after"` // in seconds
+}
+
+type CancelRevealEvent struct {
+	Event
 }
 type RoundStartedEvent struct {
 	Event

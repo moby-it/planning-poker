@@ -2,9 +2,11 @@
 package room
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/George-Spanos/poker-planning/business/actions"
 	"github.com/George-Spanos/poker-planning/business/events"
@@ -17,6 +19,7 @@ type Room struct {
 	Voters       []*user.Connection
 	Spectators   []*user.Connection
 	CurrentRound *Round
+	cancelReveal chan bool
 	mu           sync.Mutex
 }
 
@@ -67,7 +70,7 @@ func (room *Room) IncludeUsername(username string) bool {
 }
 func New() *Room {
 	roomId := uuid.New().String()
-	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}
+	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil, cancelReveal: make(chan bool, 1)}
 	round := NewRound()
 	room.CurrentRound = round
 	rooms[roomId] = &room
@@ -183,7 +186,23 @@ func (room *Room) readMessage(client *user.Connection) {
 			}
 			room.Vote(client.Username, action.StoryPoints)
 		case actions.RoundToReveal:
-			room.RevealCurrentRound()
+			event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
+			events.Broadcast(event, room.Connections()...)
+			reveal, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			go func() {
+				select {
+				case <-room.cancelReveal:
+					log.Println("Cancel reveal")
+					event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
+					events.Broadcast(event, room.Connections()...)
+					cancel()
+				case <-reveal.Done():
+					room.RevealCurrentRound()
+				}
+			}()
+		case actions.CancelReveal:
+			room.cancelReveal <- true
 		case actions.RoundToStart:
 			room.CurrentRound = NewRound()
 			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}

@@ -3,6 +3,7 @@ package actions
 const (
 	UserToVote    = "userToVote"
 	RoundToReveal = "roundToReveal"
+	CancelReveal  = "cancelReveal"
 	RoundToStart  = "roundToStart"
 	ChangeRole    = "changeRole"
 )
@@ -17,6 +18,9 @@ type UserToVoteAction struct {
 	StoryPoints int    `json:"storyPoints"`
 }
 type RoundToRevealAction struct {
+	Action
+}
+type CancelRevealAction struct {
 	Action
 }
 type ChangeRoleAction struct {

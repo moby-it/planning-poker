@@ -48,11 +48,27 @@ export function isRoundRevealAvailable(
   const { success } = RoundRevealAvailable.safeParse(data);
   return success;
 }
-
+const RoundToReveal = z.object({
+  type: z.literal("roundToReveal"),
+  after: z.number(),
+});
+export type RoundToReveal = z.infer<typeof RoundToReveal>;
+export function isRoundToReveal(data: unknown): data is RoundToReveal {
+  const { success } = RoundToReveal.safeParse(data);
+  return success;
+}
 const RoundStarted = z.object({
   type: z.literal("roundStarted"),
 });
 type RoundStarted = z.infer<typeof RoundStarted>;
+const CancelReveal = z.object({
+  type: z.literal("cancelReveal"),
+});
+type CancelReveal = z.infer<typeof CancelReveal>;
+export function isCancelReveal(data: unknown): data is CancelReveal {
+  const { success } = CancelReveal.safeParse(data);
+  return success;
+}
 export function isRoundStarted(data: unknown): data is RoundStarted {
   const { success } = RoundStarted.safeParse(data);
   return success;

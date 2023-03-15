@@ -18,10 +18,7 @@ import {
 } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { Button } from "../../components/button/button";
-import {
-  ProgressBar,
-  ProgressBarDefaultDuration,
-} from "../../components/progressBar/progressBar";
+import { ProgressBar } from "../../components/progressBar/progressBar";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import { Toggle } from "../../components/toggle/toggle";
 import {
@@ -32,12 +29,12 @@ import {
 import { wsv1Url } from "../../config";
 import "./room.css";
 import {
-  averageScore,
-  cancelTimeout,
   handleWsMessage,
   revealable,
   revealed,
   revealing,
+  revealingDuration,
+  roundScore,
   roundStatus,
   RoundStatuses,
   voters,
@@ -60,17 +57,14 @@ const Room: Component = () => {
       case RoundStatuses.Revealable:
         setRoomHeader(roomHeaders.Ready);
         break;
-      case RoundStatuses.Revealing:
-        setRoomHeader(roomHeaders.Revealing);
-        break;
       case RoundStatuses.Revealed:
-        setRoomHeader(roomHeaders.Revealed + " " + averageScore());
+        setRoomHeader(roomHeaders.Revealed + " " + roundScore());
         break;
     }
   });
   createEffect(() => {
     if (revealing()) {
-      let i = ProgressBarDefaultDuration / 1000;
+      let i = revealingDuration() / 1000;
       setRoomHeader(roomHeaders.Revealing + " " + i);
       interval = setInterval(() => {
         if (i === 0) {
@@ -80,7 +74,6 @@ const Room: Component = () => {
         setRoomHeader(roomHeaders.Revealing + " " + --i);
       }, 1000);
     } else {
-      setRoomHeader(roomHeaders.Voting);
       if (interval) clearInterval(interval);
     }
   });
@@ -133,7 +126,7 @@ const Room: Component = () => {
       })
     );
   }
-  function revealRound() {
+  function toRevealRound() {
     const ws = socket();
 
     if (socket.loading || socket.error || !ws) {
@@ -142,6 +135,18 @@ const Room: Component = () => {
     ws.send(
       JSON.stringify({
         type: "roundToReveal",
+      })
+    );
+  }
+  function cancelReveal() {
+    const ws = socket();
+
+    if (socket.loading || socket.error || !ws) {
+      throw new Error("No socket connection");
+    }
+    ws.send(
+      JSON.stringify({
+        type: "cancelReveal",
       })
     );
   }
@@ -167,7 +172,7 @@ const Room: Component = () => {
         <div class="room-header">
           <h2>{roomHeader()}</h2>
           <Show when={roundStatus() === RoundStatuses.Revealing}>
-            <ProgressBar />
+            <ProgressBar duration={revealingDuration()} />
           </Show>
         </div>
         <div class="room-subheader">
@@ -196,7 +201,7 @@ const Room: Component = () => {
             <Show when={!isSpectator()}>
               <Switch>
                 <Match when={revealable()}>
-                  <Button action={revealRound}>
+                  <Button action={toRevealRound}>
                     <span>Reveal Cards</span>
                   </Button>
                 </Match>
@@ -206,7 +211,7 @@ const Room: Component = () => {
                   </Button>
                 </Match>
                 <Match when={revealing()}>
-                  <Button color="default" action={() => cancelTimeout()}>
+                  <Button color="default" action={() => cancelReveal()}>
                     <span>Cancel Reveal</span>
                   </Button>
                 </Match>

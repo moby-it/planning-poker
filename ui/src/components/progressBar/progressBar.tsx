@@ -1,8 +1,6 @@
-import { Component, createSignal, mergeProps } from "solid-js";
+import { Component, createSignal } from "solid-js";
 import "./progressBar.css";
-export const ProgressBarDefaultDuration = 5000;
-export const ProgressBar: Component<{ duration?: number }> = (_props) => {
-  const props = mergeProps({ duration: ProgressBarDefaultDuration }, _props);
+export const ProgressBar: Component<{ duration: number }> = (props) => {
   const [width, setWidth] = createSignal(1);
   const intervalTime = 10;
   let i = 1;
