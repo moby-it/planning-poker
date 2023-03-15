@@ -94,7 +94,7 @@ const Room: Component = () => {
   }
   const [socket] = createResource(() => connectToRoom());
   createEffect(() => {
-    if (selectedCard()) userVotes();
+    if (typeof selectedCard() === "number") userVotes();
   });
   createEffect((prev) => {
     if (prev === isSpectator()) return;
