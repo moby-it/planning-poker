@@ -70,7 +70,7 @@ func (room *Room) IncludeUsername(username string) bool {
 }
 func New() *Room {
 	roomId := uuid.New().String()
-	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil, cancelReveal: make(chan bool, 1)}
+	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}
 	round := NewRound()
 	room.CurrentRound = round
 	rooms[roomId] = &room
@@ -164,6 +164,9 @@ func (room *Room) readMessage(client *user.Connection) {
 		_, message, err := client.ReadMessage()
 		if err != nil {
 			log.Printf("error: %v", err)
+			if client.IsVoter && room.cancelReveal != nil {
+				room.cancelReveal <- true
+			}
 			room.removeClient(client)
 			if room.IsEmpty() {
 				room.Close()
@@ -189,7 +192,7 @@ func (room *Room) readMessage(client *user.Connection) {
 			event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
 			events.Broadcast(event, room.Connections()...)
 			reveal, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
+			room.cancelReveal = make(chan bool, 1)
 			go func() {
 				select {
 				case <-room.cancelReveal:
@@ -200,6 +203,7 @@ func (room *Room) readMessage(client *user.Connection) {
 				case <-reveal.Done():
 					room.RevealCurrentRound()
 				}
+				room.cancelReveal = nil
 			}()
 		case actions.CancelReveal:
 			room.cancelReveal <- true

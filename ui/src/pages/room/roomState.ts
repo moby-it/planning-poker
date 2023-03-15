@@ -49,23 +49,25 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
     console.error(e);
   }
   if (isUsersUpdated(data)) {
-    const voters = data.users
+    const v = data.users
       .filter((u) => u.isVoter)
       .map((u) => ({
         username: u.username,
         voted: u.hasVoted,
+        points: voters.find((v) => v.username === u.username)?.points,
       }));
-    const spectators = data.users
+    const s: User[] = data.users
       .filter((u) => !u.isVoter)
       .map((u) => ({
         username: u.username,
         voted: false,
       }));
-    setVoters(voters);
-    setSpectators(spectators);
+    setVoters(v);
+    setSpectators(s);
   } else if (isRoundRevealAvailable(data)) {
     if (data.revealAvailable)
       setRoundStatus(RoundStatuses.Revealable);
+    else setRoundStatus(RoundStatuses.Started);
   } else if (isUserVoted(data)) {
     setVoters(
       (voter) => voter.username === data.username,

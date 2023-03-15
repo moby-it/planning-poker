@@ -77,6 +77,7 @@ const Room: Component = () => {
       if (interval) clearInterval(interval);
     }
   });
+
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
@@ -87,10 +88,18 @@ const Room: Component = () => {
   }
   const [socket] = createResource(() => connectToRoom());
   createEffect(() => {
+    const ws = socket();
+    if (ws?.readyState === WebSocket.CLOSED) {
+      console.error(socket());
+      toast.error("Connection Closed");
+      navigate("/");
+    }
+  });
+  createEffect(() => {
     if (typeof selectedCard() === "number") userVotes();
   });
   createEffect((prev) => {
-    if (prev === isSpectator()) return;
+    if (prev === isSpectator() || revealing()) return;
     if (isSpectator()) {
       changeRole("spectator");
       setSelectedCard(null);
@@ -191,6 +200,7 @@ const Room: Component = () => {
           <Toggle
             name="isSpectator"
             label="Join as Spectator"
+            disabled={revealing() || revealed()}
             action={() => setIsSpectator((v) => !v)}
             checked={isSpectator()}
           />
@@ -240,7 +250,6 @@ async function connectToRoom(): Promise<WebSocket> {
     });
     socket.addEventListener("message", handleWsMessage);
     socket.addEventListener("error", (event) => {
-      console.error("Error from ws connection ", event);
       navigate("/");
       reject(event);
     });
