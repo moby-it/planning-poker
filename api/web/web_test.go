@@ -223,7 +223,7 @@ func TestUserChangesRole(t *testing.T) {
 		{
 			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
 			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
-			connection.WriteJSON(actions.ChangeRoleAction{Username: usename, Role: "spectator"})
+			connection.WriteJSON(actions.ChangeRoleAction{Username: usename, Role: "spectator", Action: actions.Action{Type: actions.ChangeRole}})
 			t.Log("\t\tUsers should receive users list")
 			{
 				ConnectionReceivedEvent(t, connection, events.UsersUpdated)
@@ -231,6 +231,61 @@ func TestUserChangesRole(t *testing.T) {
 			}
 		}
 
+	}
+}
+func TestToRevealRound(t *testing.T) {
+	done := make(chan bool)
+	t.Log("Given a room is created and users have already joined")
+	{
+		roomId := CreateRoomAndGetId(t)
+		s := CreateTestServer(t)
+		usename := "fasolakis"
+		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
+		username2 := "george"
+		ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
+		t.Log("\tAfter users have voted")
+		{
+			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
+			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
+			UserVotesOnRoom(t, connection, string(roomId), usename, 3)
+			UserVotesOnRoom(t, connection2, string(roomId), username2, 3)
+			room, _ := room.Get(string(roomId))
+			if !room.CurrentRound.IsRevealable(len(room.Voters)) {
+				t.Errorf("\tRound should be revealable")
+			}
+			t.Log("\t\t When a user tries to reveal a round")
+			{
+				connection.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
+				t.Log("\t\t\tUsers should receive a round to reveal event")
+				{
+					ConnectionReceivedEvent(t, connection, events.RoundToReveal)
+				}
+			}
+			t.Log("\t\t When a user cancels a round reveal")
+			{
+				connection.WriteJSON(actions.CancelRevealAction{Action: actions.Action{Type: actions.CancelReveal}})
+				t.Log("\t\t\tUsers should receive a cancel reveal event")
+				{
+					ConnectionReceivedEvent(t, connection, events.CancelReveal)
+				}
+			}
+			t.Log("\t\t When a user tries to reveal a round")
+			{
+				connection.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
+				t.Log("\t\t\tUsers should receive the round votes after the 5 seconds")
+				{
+					time.AfterFunc(5*time.Second, func() {
+						ConnectionReceivedEvent(t, connection, events.RoundRevealed)
+						done <- true
+					})
+				}
+			}
+			select {
+			case <-done:
+			case <-time.After(6 * time.Second):
+				t.Errorf("\t\t\tShould have received a round revealed event")
+			}
+		}
 	}
 }
 func TestRoundReveal(t *testing.T) {
