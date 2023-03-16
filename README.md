@@ -1,12 +1,16 @@
 # Poker Planning
 
+https://poker-planning.net/
+
 Poker planning is a method of estimating effort complexity within Agile teams. It focuses on removing biases with a goal of describing team velocity through a small statistical analysis rather than human intuition.
 
 You can read more about this methodology on [Wikipedia](https://en.wikipedia.org/wiki/Planning_poker):
 
 # So why another app for Poker Planning?
 
-As a team we were searching for an app to do some poker planning and were always stopped by paywalls. This is why we decided to solve the problem ourselves, host it and open-source it. 
+As a team we were searching for an app to do some poker planning and were always stopped by paywalls. This is why we decided to solve the problem ourselves, [host it](https://poker-planning.net/) and open-source it.
+
+ 
 
 ## Quick Start
 
