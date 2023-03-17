@@ -10,6 +10,6 @@ func NewRound() *Round {
 	return &Round{Votes: make(map[string]int)}
 }
 
-func (r Round) IsRevealable(currentVotes int) bool {
-	return currentVotes > 0 && currentVotes == len(r.Votes)
+func (r Round) IsRevealable(voters int) bool {
+	return voters > 0 && voters == len(r.Votes)
 }

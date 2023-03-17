@@ -155,6 +155,9 @@ func (room *Room) emitUsersAndRevealableRound() {
 	event := events.UsersUpdatedEvent{Users: users, Event: events.Event{Type: events.UsersUpdated}}
 	events.Broadcast(event, room.Connections()...)
 	revealableEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+	if room.cancelReveal != nil {
+		room.cancelReveal <- true
+	}
 	events.Broadcast(revealableEvent, room.Connections()...)
 }
 

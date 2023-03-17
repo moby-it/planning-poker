@@ -84,7 +84,8 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
       });
     })(data);
   } else if (isCancelReveal(data)) {
-    setRoundStatus(RoundStatuses.Revealable);
+    if (revealing())
+      setRoundStatus(RoundStatuses.Revealable);
   }
   else if (isRoundRevealed(data)) {
     const averageScore =
