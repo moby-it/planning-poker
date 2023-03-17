@@ -5,7 +5,14 @@ const User = z.object({
   isVoter: z.boolean(),
   hasVoted: z.boolean(),
 });
-
+const Pong = z.object({
+  type: z.literal("pong"),
+});
+type Pong = z.infer<typeof Pong>;
+export function isPong(data: unknown): data is Pong {
+  const { success } = Pong.safeParse(data);
+  return success;
+}
 const UsersUpdated = z.object({
   type: z.literal("usersUpdated"),
   users: z.array(User),

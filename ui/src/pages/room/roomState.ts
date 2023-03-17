@@ -4,6 +4,7 @@ import { username } from "../../common/state";
 import { User } from "../../common/user";
 import {
   isCancelReveal,
+  isPong,
   isRoundRevealAvailable,
   isRoundRevealed,
   isRoundStarted,
@@ -108,6 +109,8 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
       setVoters(voters.map((v) => ({ ...v, voted: false, points: undefined })));
       setAverageScore(null);
     });
+  } else if (isPong(data)) {
+    // ignore
   } else {
     console.error("Unhandled message", data);
   }
