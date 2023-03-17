@@ -6,6 +6,7 @@ const (
 	CancelReveal  = "cancelReveal"
 	RoundToStart  = "roundToStart"
 	ChangeRole    = "changeRole"
+	Ping          = "ping"
 )
 
 type Action struct {

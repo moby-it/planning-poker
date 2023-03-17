@@ -81,19 +81,28 @@ const Room: Component = () => {
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
+  const pingMSInterval = 5000;
+  let pingInterval: NodeJS.Timer | undefined;
   setRoomId(roomId);
   if (!username()) {
     navigate("/prejoin");
     return;
   }
   const [socket] = createResource(() => connectToRoom());
-  createEffect(() => {
+  createEffect((prevWs) => {
     const ws = socket();
     if (ws?.readyState === WebSocket.CLOSED) {
       console.error(socket());
       toast.error("Connection Closed");
       navigate("/");
     }
+    if (!prevWs && ws) {
+      pingInterval = setInterval(() => {
+        ws.send(JSON.stringify({ type: "ping" }));
+      }, pingMSInterval);
+    }
+    if (prevWs && !ws) clearInterval(pingInterval);
+    return ws;
   });
   createEffect(() => {
     if (typeof selectedCard() === "number") userVotes();

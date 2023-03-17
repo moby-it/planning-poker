@@ -14,6 +14,7 @@ const (
 	RoundRevealed        = "roundRevealed"
 	RoundRevealAvailable = "roundRevealAvailable"
 	RoundStarted         = "roundStarted"
+	Pong                 = "pong"
 )
 
 type Broadcastable interface {
@@ -22,7 +23,9 @@ type Broadcastable interface {
 type Event struct {
 	Type string `json:"type"`
 }
-
+type PongEvent struct {
+	Event
+}
 type UsersUpdatedEvent struct {
 	Event
 	Users []user.User `json:"users"`

@@ -181,6 +181,8 @@ func (room *Room) readMessage(client *user.Connection) {
 			continue
 		}
 		switch a.Type {
+		case actions.Ping:
+			client.WriteJSON(events.PongEvent{Event: events.Event{Type: events.Pong}})
 		case actions.UserToVote:
 			var action actions.UserToVoteAction
 			err = json.Unmarshal(message, &action)
