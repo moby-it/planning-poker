@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  ui:
+    build:
+      context: ./ui
+      dockerfile: dev.Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./ui/src:/app/src
+  api:
+    ports:
+      - 8080:8080
+    build:
+      context: api
+    command: go run main.go

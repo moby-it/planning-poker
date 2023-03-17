@@ -2,7 +2,7 @@ version: "3.9"
 services:
   ui:
     ports:
-      - 4200:80
+      - 3000:80
     build:
       context: ui
   api:

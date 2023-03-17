@@ -10,14 +10,16 @@ You can read more about this methodology on [Wikipedia](https://en.wikipedia.org
 
 As a team we were searching for an app to do some poker planning and were always stopped by paywalls. This is why we decided to solve the problem ourselves, [host it](https://poker-planning.net/) and open-source it.
 
- 
-
 ## Quick Start
 
 1. Make sure you have [docker installed](https://docs.docker.com/get-docker/)
 2. Navigate inside this repo and run `docker compose up`. If you want to detach your terminal window from the `docker compose up` you can run `docker compose up -d`
-3. Navigate to `localhost:4200` to see the front end app locally.
-
+3. Navigate to `localhost:3000` to see the front end app locally.
+## Work with the front end Locally
+1. Open a bash terminal inside this folder.
+2. Execute `run.dev.sh` script.
+3. You can find the app in `localhost:3000`.
+4. Any change inside the ui folder should be **automatically** reflected on the site.
 ## Tech stack
 
 The application consists of a simple [Go](https://go.dev/) web api and a Front End UI created with [SolidJS](https://www.solidjs.com/). While our experience lies heavily in the JavaScript (NodeJS, Angular, Typescript) ecosystem, we always like to try new technologies.

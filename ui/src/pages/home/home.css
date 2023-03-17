@@ -1,7 +1,7 @@
 .home {
   margin-top: 72px;
   margin-left: 36px;
-  gap: 48px;
+  gap: 16px;
 }
 .subtitle {
   display: flex;
@@ -17,7 +17,7 @@
 .welcome-box {
   display: flex;
   flex-direction: column;
-  gap: 55px;
+  gap: 32px;
   width: 670px;
   font-family: "IBM Plex Mono", monospace;
   font-size: 1.25rem;
