@@ -117,6 +117,7 @@ func (room *Room) AddClient(client *user.Connection, role string) error {
 	room.emitUsersAndRevealableRound()
 
 	go room.readMessage(client)
+	log.Printf("%v joined room %v", client.Username, room.Id)
 	return nil
 }
 
@@ -133,10 +134,11 @@ func (room *Room) removeClient(client *user.Connection) {
 		}
 	}
 	room.emitUsersAndRevealableRound()
+	log.Printf("%v left room %v", client.Username, room.Id)
 }
 func (room *Room) RevealCurrentRound() {
 	if !room.CurrentRound.IsRevealable(len(room.Voters)) {
-		log.Println("Cannot reveal round. Not enough votes")
+		log.Println("Cannot reveal round. Not enough votes. RoundId: ", room.Id)
 		return
 	}
 	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
@@ -157,9 +159,7 @@ func (room *Room) emitUsersAndRevealableRound() {
 }
 
 func (room *Room) readMessage(client *user.Connection) {
-	defer func() {
-		client.Close()
-	}()
+	defer client.Close()
 	for {
 		_, message, err := client.ReadMessage()
 		if err != nil {
@@ -168,10 +168,10 @@ func (room *Room) readMessage(client *user.Connection) {
 				room.cancelReveal <- true
 			}
 			room.removeClient(client)
-			// if room.IsEmpty() {
-			// 	log.Printf("Room %s is empty. Closing room", room.Id)
-			// 	room.Close()
-			// }
+			if room.IsEmpty() {
+				log.Printf("Room %s is empty. Closing room", room.Id)
+				room.Close()
+			}
 			break
 		}
 		var a actions.Action
