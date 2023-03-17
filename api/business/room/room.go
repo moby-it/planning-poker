@@ -163,14 +163,15 @@ func (room *Room) readMessage(client *user.Connection) {
 	for {
 		_, message, err := client.ReadMessage()
 		if err != nil {
-			log.Printf("error: %v", err)
+			log.Printf("error: %v \nclient: %v", err, client.Username)
 			if client.IsVoter && room.cancelReveal != nil {
 				room.cancelReveal <- true
 			}
 			room.removeClient(client)
-			if room.IsEmpty() {
-				room.Close()
-			}
+			// if room.IsEmpty() {
+			// 	log.Printf("Room %s is empty. Closing room", room.Id)
+			// 	room.Close()
+			// }
 			break
 		}
 		var a actions.Action
