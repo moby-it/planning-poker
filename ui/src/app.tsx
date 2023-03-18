@@ -14,7 +14,6 @@ export const App = () => {
         <Route path="/" component={Home} />
         <Route path="/prejoin" component={PrejoinForm} />
         <Route path="/room/:roomId" component={Room} />
-        <Route path="*" component={Home} />
       </Routes>
       <Toaster position="top-right" gutter={8} />
     </>

@@ -250,6 +250,7 @@ const Room: Component = () => {
 async function connectToRoom(): Promise<WebSocket> {
   const navigate = useNavigate();
   return new Promise((resolve, reject) => {
+    if (!roomId()) reject("No room id");
     const socket = new WebSocket(
       `${wsv1Url}/joinRoom/${roomId()}/${username()}/${
         isSpectator() ? "spectator" : "voter"
