@@ -4,10 +4,14 @@ export const Toggle: Component<{
   action: () => void;
   checked?: boolean;
   disabled?: boolean;
+  testId?: string;
   label?: string;
   name: string;
 }> = (_props) => {
-  const props = mergeProps({ checked: false, disabled: false }, _props);
+  const props = mergeProps(
+    { checked: false, disabled: false, testId: "" },
+    _props
+  );
   return (
     <div class="toggle-container">
       <label for={props.name}>{props.label}</label>
@@ -16,6 +20,7 @@ export const Toggle: Component<{
           disabled={props.disabled}
           name={props.name}
           type="checkbox"
+          data-testid={props.testId}
           checked={props.checked}
           onChange={props.action}
         />

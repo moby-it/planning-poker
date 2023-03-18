@@ -1,0 +1,17 @@
+{
+  "name": "tests",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "root": "./src",
+  "scripts": {
+    "test": "node src/index.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@babel/eslint-parser": "^7.21.3",
+    "eslint": "^8.36.0",
+    "pptr-testing-library": "^0.7.0",
+    "puppeteer": "^19.7.5"
+  }
+}

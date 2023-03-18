@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.CONTAINER_PASSWORD }}
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.sha }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:latest,

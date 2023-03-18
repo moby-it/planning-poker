@@ -72,7 +72,7 @@ const PrejoinForm: Component = () => {
         <span id="change-later">You can change this later</span>
       </div>
       <Button
-        data-testid="createRoomBtn"
+        testId="create-room"
         disabled={!!usernameError()}
         action={async () =>
           isCreatingRoom ? await createRoom() : navigate(`/room/${roomId()}`)

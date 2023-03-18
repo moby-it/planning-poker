@@ -6,15 +6,23 @@ on:
       - "v*"
 
 jobs:
-  test:
+  test-api:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Test api
         working-directory: api
         run: make test
+  test-ui:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test ui
+        run: |
+          docker compose -f docker-compose.test.yml build
+          docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from e2e
   build-api:
-    needs: test
+    needs: test-api
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +38,7 @@ jobs:
           context: ./api
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
   build-ui:
-    needs: test
+    needs: test-ui
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +51,7 @@ jobs:
         run: |
           echo "${{ secrets.UI_ENV }}" > ui/.env
       - name: Build and Push image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
           context: ./ui

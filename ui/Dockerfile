@@ -1,5 +1,8 @@
 
 FROM node:18.12.0-alpine as build
+
+ARG MODE=production
+
 WORKDIR /app
 
 RUN npm i -g pnpm
@@ -10,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . ./
 
-RUN npm run build:prod
+RUN npm run build -- --mode $MODE
 
 FROM nginx:1.23-alpine
 
