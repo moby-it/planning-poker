@@ -6,15 +6,22 @@ on:
       - "v*"
 
 jobs:
-  test:
+  test-api:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Test api
         working-directory: api
         run: make test
+  test-ui:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test ui
+        working-directory: ui
+        run: test.sh
   build-api:
-    needs: test
+    needs: test-api
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +37,7 @@ jobs:
           context: ./api
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
   build-ui:
-    needs: test
+    needs: test-ui
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3

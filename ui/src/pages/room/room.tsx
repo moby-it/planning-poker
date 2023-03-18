@@ -209,6 +209,7 @@ const Room: Component = () => {
           <Toggle
             name="isSpectator"
             label="Join as Spectator"
+            testId="spectator-toggle"
             disabled={revealing() || revealed()}
             action={() => setIsSpectator((v) => !v)}
             checked={isSpectator()}

@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ESNext"
+  },
+  "include": ["src/**/*.js", ]
+}

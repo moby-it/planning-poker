@@ -9,7 +9,7 @@ const Home: Component = () => {
     <div class="col home">
       <div class="row align-center title">
         <img src="/icon-lg.svg" width="105" height="98" alt="" srcset="" />
-        <h1>Poker Planning</h1>
+        <h1 data-testid="title">Poker Planning</h1>
       </div>
       <div class="welcome-box col">
         <div class="subtitle">
@@ -36,7 +36,7 @@ const Home: Component = () => {
           </strong>
           , so we decided to solve the issue ourselves and open-source it.
         </span>
-        <div style="align-self:center;">
+        <div style="align-self:center;" data-testid="start-here">
           <Button action={() => navigate("prejoin?create=true")}>
             <span>Start Here</span>
           </Button>

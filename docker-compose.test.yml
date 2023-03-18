@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  ui:
+    ports:
+      - 3000:80
+    build:
+      context: ui
+
+  api:
+    ports:
+      - 8080:8080
+    build:
+      context: api
+  e2e:
+    build: 
+      context: e2e
+      dockerfile: Dockerfile
+    depends_on:
+    - ui
+    - api
+
