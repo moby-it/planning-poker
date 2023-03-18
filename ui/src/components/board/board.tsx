@@ -12,6 +12,7 @@ export const Board: Component<{ users: User[] }> = (props) => {
             <Card
               points={user.points}
               voted={user.voted}
+              data-testid={`board-card-${user.username}`}
               revealed={revealed()}
             />
             <span class="username">{user.username}</span>

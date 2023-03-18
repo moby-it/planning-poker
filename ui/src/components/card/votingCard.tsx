@@ -9,6 +9,7 @@ export const VotingCard: Component<{
   return (
     <div
       classList={{ "voting-card": true, selected: props.selected }}
+      data-testid={`voting-card-${props.points}`}
       onClick={props.action}
     >
       <Switch fallback={<span>{props.points}</span>}>
