@@ -86,12 +86,12 @@ func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expected
 		}
 		_, data, err := connection.ReadMessage()
 		if err != nil {
-			t.Fatalf("User should receive an event %v", err)
+			t.Fatalf("Read: User should receive an event %v", err)
 		}
 		var event events.Event
 		err = json.Unmarshal(data, &event)
 		if err != nil {
-			t.Fatalf("User should receive an event %v", err)
+			t.Fatalf("Unmarshal:User should receive an event %v", err)
 		}
 		if event.Type == expectedEvent {
 			t.Logf("\tUser %v got expected event %v", connection.Username, expectedEvent)
@@ -143,6 +143,7 @@ func TestConnectVoter(t *testing.T) {
 		{
 
 			room, _ := room.Get(roomId)
+			room.Mu.Lock()
 			if len(room.Voters) != 1 {
 				t.Fatal("\t\tRoom should have one voter. Expected length of 1. Got: ", len(room.Voters))
 			}
@@ -152,6 +153,7 @@ func TestConnectVoter(t *testing.T) {
 				t.Fatal("\t\tUser should be added to the room. Expected username: ", username, "Got: ", room.Voters[0].Username)
 			}
 			t.Logf("\t\tUser named %v should be added to the room", username)
+			room.Mu.Unlock()
 		}
 	}
 
