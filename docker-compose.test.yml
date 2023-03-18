@@ -5,6 +5,8 @@ services:
       - 3000:80
     build:
       context: ui
+      args:
+        - MODE=test
 
   api:
     ports:
