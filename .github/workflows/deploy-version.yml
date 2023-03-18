@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Test ui
-        run: test.sh
+        run: ./test.sh
   build-api:
     needs: test-api
     runs-on: ubuntu-22.04
