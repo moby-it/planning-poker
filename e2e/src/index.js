@@ -5,10 +5,10 @@ import { TestVoting } from "./tests/vote.js";
 import { voterJoinsRoom } from "./tests/voterJoinsRoom.js";
 
 try {
+  // setup
   let browsers = [];
   let documents = [];
   await runTest("smoke test", () => smokeTest());
-  // room setup
   const [roomId, chromeData] = await runTest(
     "User should be able to create room",
     () => createRoom("fasolakis")
@@ -28,8 +28,13 @@ try {
   );
   browsers.push(chromeData3.browser);
   documents.push(chromeData3.$document);
+  //
+
+  // Test Suits
   await TestVoting(documents);
-  // close browsers
+  //
+  
+  // Teardown
   browsers.forEach(async (browser) => await browser.close());
   process.exit(0);
 } catch (error) {
