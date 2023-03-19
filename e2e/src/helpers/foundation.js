@@ -19,17 +19,19 @@ function failTest(testName, e) {
  *
  * @param {(browser:import('puppeteer').Browser)=>Promise<void>} test
  */
-export async function runTest(test, name = test.name) {
-  const browser = await launch({
-    args: ["--incognito", "--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath:'google-chrome-stable'
-  });
+export async function runTest(name, test) {
   let res;
   try {
-    res = await test(browser);
+    res = await test();
     passTest(name);
   } catch (e) {
     failTest(name, e);
   }
-  return [res, browser];
+  return res;
+}
+export async function createBrowser() {
+  return await launch({
+    args: ["--incognito", "--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "google-chrome-stable",
+  });
 }

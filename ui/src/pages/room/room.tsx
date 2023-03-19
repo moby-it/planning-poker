@@ -221,17 +221,17 @@ const Room: Component = () => {
             <Show when={!isSpectator()}>
               <Switch>
                 <Match when={revealable()}>
-                  <Button action={toRevealRound} data-testid="reveal-round">
+                  <Button action={toRevealRound} testId="reveal-round">
                     <span>Reveal Cards</span>
                   </Button>
                 </Match>
-                <Match when={revealed()} data-testid="start-new-round">
-                  <Button action={startNewRound}>
+                <Match when={revealed()} >
+                  <Button action={startNewRound} testId="start-new-round">
                     <span>Start New Round</span>
                   </Button>
                 </Match>
-                <Match when={revealing()} data-testid="cancel-reveal">
-                  <Button color="default" action={() => cancelReveal()}>
+                <Match when={revealing()}  >
+                  <Button color="default" action={() => cancelReveal()} testId="cancel-reveal">
                     <span>Cancel Reveal</span>
                   </Button>
                 </Match>

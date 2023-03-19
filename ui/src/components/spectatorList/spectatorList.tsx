@@ -7,7 +7,11 @@ export const SpectatorList: Component = () => {
       <ul class="spectators">
         <li>Spectators</li>
         <Index each={spectators}>
-          {(spectator) => <li>{spectator().username}</li>}
+          {(spectator) => (
+            <li data-testid={"spectator-" + spectator().username}>
+              {spectator().username}
+            </li>
+          )}
         </Index>
       </ul>
     </Show>

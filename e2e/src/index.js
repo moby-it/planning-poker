@@ -1,19 +1,36 @@
 import { runTest } from "./helpers/foundation.js";
 import { createRoom } from "./tests/createRoom.js";
 import { smokeTest } from "./tests/smoke.js";
+import { TestVoting } from "./tests/vote.js";
 import { voterJoinsRoom } from "./tests/voterJoinsRoom.js";
+
 try {
-  await runTest(smokeTest);
-  const [roomId, browser] = await runTest(
-    createRoom("fasolakis"),
-    createRoom.name
+  let browsers = [];
+  let documents = [];
+  await runTest("smoke test", () => smokeTest());
+  // room setup
+  const [roomId, chromeData] = await runTest(
+    "User should be able to create room",
+    () => createRoom("fasolakis")
   );
-  const [browser2] = await runTest(
-    voterJoinsRoom(roomId, "fasolis"),
-    voterJoinsRoom.name
+  browsers.push(chromeData.browser);
+  documents.push(chromeData.$document);
+  console.log("When a voter joins a room");
+  const chromeData2 = await runTest(
+    "\tA voter should be able to join the room",
+    () => voterJoinsRoom(roomId, "fasolis")
   );
-  await browser.close();
-  await browser2.close();
+  browsers.push(chromeData2.browser);
+  documents.push(chromeData2.$document);
+  const chromeData3 = await runTest(
+    "\tAnother voter should be able to join the room",
+    () => voterJoinsRoom(roomId, "manolakis")
+  );
+  browsers.push(chromeData3.browser);
+  documents.push(chromeData3.$document);
+  await TestVoting(documents);
+  // close browsers
+  browsers.forEach(async (browser) => await browser.close());
   process.exit(0);
 } catch (error) {
   console.error(error);
