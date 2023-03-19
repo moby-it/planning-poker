@@ -5,6 +5,7 @@ on:
       - "main"
     paths:
       - "ui/**"
+      - "e2e/**"
   workflow_dispatch:
 
 jobs:
