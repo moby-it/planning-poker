@@ -23,7 +23,6 @@ export const Toggle: Component<{
           data-testid={props.testId}
           checked={props.checked}
           onChange={props.action}
-          onClick={props.action}
         />
         <span class="slider round"></span>
       </label>
