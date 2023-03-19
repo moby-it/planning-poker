@@ -1,4 +1,5 @@
 import { runTest } from "./helpers/foundation.js";
+import { TestChangeRole } from "./tests/changeRole.js";
 import { createRoom } from "./tests/createRoom.js";
 import { TestRevealRound } from "./tests/revealRound.js";
 import { smokeTest } from "./tests/smoke.js";
@@ -8,10 +9,11 @@ try {
   // setup
   let browsers = [];
   let documents = [];
+  const username = "fasolakis";
   await runTest("smoke test", () => smokeTest());
   const [roomId, chromeData] = await runTest(
     "User should be able to create room",
-    () => createRoom("fasolakis")
+    () => createRoom(username)
   );
 
   browsers.push(chromeData.browser);
@@ -32,6 +34,8 @@ try {
   //
 
   // Test Suits
+  // order matters
+  await TestChangeRole(documents, username);
   await TestVoting(documents);
   await TestRevealRound(documents, roomId);
   //

@@ -37,18 +37,48 @@ export async function ShouldHaveNVoters($document, n) {
   const $votes = await $document.$$(".card");
   return $votes.length === n;
 }
+
+/**
+ *
+ * @param {import('puppeteer').ElementHandle<Element>} $document
+ * @param {*} role
+ */
 export async function ChangeRole($document, role) {
   const $roleInput = await getByTestId($document, "spectator-toggle");
-  const checked = $roleInput.toElement().checked;
+
+  const checked = await $roleInput.evaluate((el) => el.checked);
   if (role === "voter" && checked) {
-    await $roleInput.click();
+    await $document.$eval("input[data-testid='spectator-toggle']", (el) =>
+      el.click()
+    );
   } else if (role === "spectator" && !checked) {
-    await $roleInput.click();
+    await $document.$eval("input[data-testid='spectator-toggle']", (el) =>
+      el.click()
+    );
   }
+}
+export async function TryChangeRole($document, role, expectedResult) {
+  const $roleInput = await getByTestId($document, "spectator-toggle");
+  const beforeChecked = await $roleInput.evaluate((el) => el.checked);
+  await ChangeRole($document, role);
+  const afterChecked = await $roleInput.evaluate((el) => el.checked);
+  if (
+    (expectedResult && beforeChecked === afterChecked) ||
+    (!expectedResult && beforeChecked !== afterChecked)
+  )
+    throw new Error("Unexpected result when chaging role");
 }
 export async function UserIsSpectator($document, username) {
   try {
     await getByTestId($document, `spectator-${username}`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+export async function UserIsVoter($document, username) {
+  try {
+    await getByTestId($document, `board-card-${username}`);
     return true;
   } catch (e) {
     return false;
@@ -102,7 +132,7 @@ export async function RevealingRound($document) {
   });
 }
 export async function StartNewRound($document) {
-  const $startNewRoundButton = getByTestId($document, "start-new-round");
+  const $startNewRoundButton = await getByTestId($document, "start-new-round");
   await $startNewRoundButton.click();
 }
 export async function CancelRoundReveal($document) {
