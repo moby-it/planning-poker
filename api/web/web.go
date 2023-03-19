@@ -26,8 +26,8 @@ func StartApp() error {
 		Handler: h.CORS(originsOk)(r),
 		Addr:    "0.0.0.0:8080",
 		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  30 * time.Second,
 	}
 	log.Println("Listening on port 8080")
 	return srv.ListenAndServe()
