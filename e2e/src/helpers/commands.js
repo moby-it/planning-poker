@@ -64,7 +64,7 @@ export async function UserVoted($document, username) {
   }
 }
 export async function RevealRound($document) {
-  const $revealButton = getByTestId($document, "reveal-button");
+  const $revealButton = await getByTestId($document, "reveal-round");
   await $revealButton.click();
 }
 export async function RoundRevealed($document) {
@@ -77,7 +77,7 @@ export async function RoundRevealed($document) {
     return false;
   }
 }
-async function IsReadyToReveal($document) {
+async function isReadyToReveal($document) {
   try {
     await waitFor(() => getByTestId($document, "reveal-round"), {
       timeout: 500,
@@ -89,18 +89,23 @@ async function IsReadyToReveal($document) {
   }
 }
 export async function ReadyToReveal($document) {
-  const isReady = await IsReadyToReveal($document);
+  const isReady = await isReadyToReveal($document);
   if (!isReady) throw new Error("Not ready to reveal");
 }
 export async function NotReadToReaveal($document) {
-  const isReady = await IsReadyToReveal($document);
+  const isReady = await isReadyToReveal($document);
   if (isReady) throw new Error("Ready to reveal");
+}
+export async function RevealingRound($document) {
+  await waitFor(() => getByTestId($document, "cancel-reveal"), {
+    timeout: 2000,
+  });
 }
 export async function StartNewRound($document) {
   const $startNewRoundButton = getByTestId($document, "start-new-round");
   await $startNewRoundButton.click();
 }
 export async function CancelRoundReveal($document) {
-  const $cancelButton = getByTestId($document, "cancel-reveal");
+  const $cancelButton = await getByTestId($document, "cancel-reveal");
   await $cancelButton.click();
 }

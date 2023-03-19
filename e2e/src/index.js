@@ -1,5 +1,6 @@
 import { runTest } from "./helpers/foundation.js";
 import { createRoom } from "./tests/createRoom.js";
+import { TestRevealRound } from "./tests/revealRound.js";
 import { smokeTest } from "./tests/smoke.js";
 import { TestVoting } from "./tests/vote.js";
 import { voterJoinsRoom } from "./tests/voterJoinsRoom.js";
@@ -32,8 +33,9 @@ try {
 
   // Test Suits
   await TestVoting(documents);
+  await TestRevealRound(documents);
   //
-  
+
   // Teardown
   browsers.forEach(async (browser) => await browser.close());
   process.exit(0);
