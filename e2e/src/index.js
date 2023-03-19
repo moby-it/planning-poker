@@ -4,7 +4,6 @@ import { TestRevealRound } from "./tests/revealRound.js";
 import { smokeTest } from "./tests/smoke.js";
 import { TestVoting } from "./tests/vote.js";
 import { voterJoinsRoom } from "./tests/voterJoinsRoom.js";
-
 try {
   // setup
   let browsers = [];
@@ -14,6 +13,7 @@ try {
     "User should be able to create room",
     () => createRoom("fasolakis")
   );
+
   browsers.push(chromeData.browser);
   documents.push(chromeData.$document);
   console.log("When a voter joins a room");
@@ -33,7 +33,7 @@ try {
 
   // Test Suits
   await TestVoting(documents);
-  await TestRevealRound(documents);
+  await TestRevealRound(documents, roomId);
   //
 
   // Teardown

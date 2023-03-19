@@ -1,15 +1,18 @@
 import {
   CancelRoundReveal,
+  NotReadToReaveal,
   ReadyToReveal,
   RevealingRound,
   RevealRound,
   RoundRevealed,
 } from "../helpers/commands.js";
 import { runTest } from "../helpers/foundation.js";
+import { voterJoinsRoom } from "./voterJoinsRoom.js";
 
-export async function TestRevealRound(documents) {
+export async function TestRevealRound(documents, roomId) {
   console.log("Test Reveal Round");
   if (documents.length < 2) throw new Error("Not enough documents");
+  if(!roomId) throw new Error("No roomId provided");
   for (const document of documents) {
     await runTest("\tround should be revealable", () =>
       ReadyToReveal(document)
@@ -29,6 +32,23 @@ export async function TestRevealRound(documents) {
   console.log("\tAfter a user cancels the reveal");
   for (const document of documents) {
     await runTest("\t\tRound reveals should be available", async () =>
+      ReadyToReveal(document)
+    );
+  }
+  await runTest("\t\tA user should be able start the round reveal again", () =>
+    RevealRound(documents[0])
+  );
+  console.log("\t After a new user joins the room");
+  const { browser } = await voterJoinsRoom(roomId, "george");
+  for (const document of documents) {
+    await runTest("\tRound reveal should get canceled", () =>
+      NotReadToReaveal(document)
+    );
+  }
+  await browser.close();
+  console.log("\t After the new user leaves the room");
+  for (const document of documents) {
+    await runTest("\tRound reveal should be available", () =>
       ReadyToReveal(document)
     );
   }

@@ -17,7 +17,7 @@ import (
 const (
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 10 * time.Second
+	pongWait = 15 * time.Second
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
@@ -103,6 +103,8 @@ func (room *Room) IsEmpty() bool {
 }
 
 func (r *Room) Close() {
+	r.Mu.Lock()
+	defer r.Mu.Unlock()
 	delete(rooms, r.Id)
 }
 func (room *Room) Vote(username string, storyPoints int) {
@@ -133,6 +135,7 @@ func (room *Room) AddClient(client *user.Connection, role string) error {
 }
 
 func (room *Room) removeClient(client *user.Connection) {
+	room.Mu.Lock()
 	for i, c := range room.Voters {
 		if c == client {
 			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
@@ -144,6 +147,7 @@ func (room *Room) removeClient(client *user.Connection) {
 			room.Spectators = append(room.Spectators[:i], room.Spectators[i+1:]...)
 		}
 	}
+	room.Mu.Unlock()
 	room.emitUsersAndRevealableRound()
 	log.Printf("%v left room %v", client.Username, room.Id)
 }
@@ -178,11 +182,9 @@ func (room *Room) readMessage(client *user.Connection) {
 	defer client.Close()
 	client.SetReadLimit(maxMessageSize)
 	client.SetReadDeadline(time.Now().Add(pongWait))
-	client.SetPongHandler(func(string) error { client.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		_, message, err := client.ReadMessage()
 		if err != nil {
-			room.Mu.Lock()
 			log.Printf("error: %v \nclient: %v", err, client.Username)
 			if client.IsVoter && room.cancelReveal != nil {
 				room.cancelReveal <- true
@@ -192,7 +194,6 @@ func (room *Room) readMessage(client *user.Connection) {
 				log.Printf("Room %s is empty. Closing room", room.Id)
 				room.Close()
 			}
-			room.Mu.Unlock()
 			break
 		}
 		var a actions.Action
@@ -203,6 +204,7 @@ func (room *Room) readMessage(client *user.Connection) {
 		}
 		switch a.Type {
 		case actions.Ping:
+			client.SetReadDeadline(time.Now().Add(pongWait))
 			client.WriteJSON(events.PongEvent{Event: events.Event{Type: events.Pong}})
 		case actions.UserToVote:
 			var action actions.UserToVoteAction
