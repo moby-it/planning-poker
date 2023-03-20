@@ -12,22 +12,56 @@ As a team we were searching for an app to do some poker planning and were always
 
 ## Quick Start
 
+As mentioned [we are hosting this app](https://poker-planning.net/) **for free** for as long as we can sustain it.
+
+However, if you want to run the app locally follow these 3 steps:
+
 1. Make sure you have [docker installed](https://docs.docker.com/get-docker/)
-2. Navigate inside this repo and run `docker compose up`. If you want to detach your terminal window from the `docker compose up` you can run `docker compose up -d`
-3. Navigate to `localhost:3000` to see the front end app locally.
-## Work with the front end Locally
-1. Open a bash terminal inside this folder.
-2. Execute `run.dev.sh` script.
-3. You can find the app in `localhost:3000`.
-4. Any change inside the ui folder should be **automatically** reflected on the site.
+2. Open a terminal in the project root and run `./scripts/run.sh`.
+3. App should be available at `localhost:3000`.
+
+# Licence
+
+We create this simple poker planning app as a first step of providing something of value to the community. Anyone you are free to take it and modify to your needs since it's licenced under **Apache 2.0**.
+# How to Contribute
+
+We are glad that you are reached this section. Before providing some guidelines on how to contribute, let's go briefly over the tech stack.
+
 ## Tech stack
 
 The application consists of a simple [Go](https://go.dev/) web api and a Front End UI created with [SolidJS](https://www.solidjs.com/). While our experience lies heavily in the JavaScript (NodeJS, Angular, Typescript) ecosystem, we always like to try new technologies.
 
-### Application Structure
+*Any PR that suggests improvements in code quality and stability of the product is always appreciated.*
 
-The application is fairly simple. There is no database layer, every piece of information is saved in web api's memory. There is no persistent logging outsite of the container logs.
+## Contribution guidelines
 
-## Privary and Open Source
+### Requirements
 
-We undestand that when planning information might include sensitive data from a company perspective. This is why we decided to open source our app under **Apache Licence** so that you have the option for you to self-host it so that you have **complete control of your data**.
+In case you are working with windows, we suggest working inside a Windows Subsystem Linux environment (WSL). On how to install wsl read more [here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+To spin up the stack you need:
+
+1. [Go](https://go.dev/) installed on your machine. Minimun version v1.20.2
+2. Install [make](https://www.gnu.org/software/make/) if not already included in your system.
+3. Install [Node.js](https://nodejs.org/en). Minimum version LTS
+
+Inside the scripts folder there is a bunch of conveniece scripts, to help you test your changes before you create your Pull Request. The main one is `test-all.sh` We highly suggest you do so.
+
+## Privacy and Open Source
+
+We undestand that when planning information might include sensitive data from a company perspective.
+For this reason we decided:
+1. To create an stateless app with no database. Everything is persisted in memory and lost when a room closes.
+2. We don't ask you of any names, either room names or task names. We trust that you do this work yourself.
+3. We also decided to open source our app under **Apache Licence** so that you have the option for you to self-host it and extend it/modify it to fit your needs.
+
+So if you are a privacy freak like us, you can host this yourself. If not, **we guarantee that we use exactly as much data as the app need to provide its features.**
+
+---
+
+<h3 align="center" style="display:flex; align-items:center; gap:1rem; justify-content:center;">
+<img src="https://moby-it.com/favicon.ico" width="50"/>
+Build by Moby IT
+<img src="https://moby-it.com/favicon.ico" width="50"/>
+
+</h3>

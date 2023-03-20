@@ -1,1 +1,1 @@
-cd ../api && make test
+cd api && make test

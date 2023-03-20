@@ -1,1 +1,1 @@
-./test-api.sh && ./test-ui.sh
+scripts/test-api.sh && scripts/test-ui.sh

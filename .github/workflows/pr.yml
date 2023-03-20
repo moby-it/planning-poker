@@ -1,0 +1,22 @@
+name: Pull Request Test
+
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  test-api:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test api
+        working-directory: api
+        run: make test
+  test-ui:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test ui
+        run: |
+          docker compose -f docker-compose.test.yml build
+          docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from e2e
