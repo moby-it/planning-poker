@@ -32,10 +32,12 @@ jobs:
           username: ${{ secrets.CONTAINER_USERNAME }}
           password: ${{ secrets.CONTAINER_PASSWORD }}
       - name: Build and Push image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
           context: ./api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
   build-ui:
     needs: test-ui
@@ -55,6 +57,8 @@ jobs:
         with:
           push: true
           context: ./ui
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:stable
   deploy:
     needs: [build-ui, build-api]
