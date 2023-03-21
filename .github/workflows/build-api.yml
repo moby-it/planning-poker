@@ -34,6 +34,4 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.sha }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:latest,
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           context: ./api
