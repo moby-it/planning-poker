@@ -1,7 +1,12 @@
-import "./room.css";
 import { useNavigate, useParams } from "@solidjs/router";
-import { Component, createEffect, createResource, Show } from "solid-js";
-import toast from "solid-toast";
+import {
+  Component,
+  createEffect,
+  createResource,
+  onCleanup,
+  Show,
+  Suspense,
+} from "solid-js";
 import { isSpectator, setRoomId, username } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
@@ -10,8 +15,9 @@ import {
   setSelectedCard,
   VotingCardList,
 } from "../../components/votingCardList/votingCardList";
-import { sendMessageIfOpen, connectToRoom } from "./common";
+import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
+import "./room.css";
 import { revealing, voters } from "./roomState";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
@@ -28,21 +34,21 @@ const Room: Component = () => {
     return;
   }
   const [socket] = createResource(() => connectToRoom());
-  createEffect((prevWs) => {
+  onCleanup(() => {
+    if (!socket.error) socket()?.close();
+    clearInterval(pingInterval);
+    setSelectedCard(null);
+  });
+  createEffect(() => {
+    if (socket.loading) return;
+    if (socket.error) return navigate("/");
     const ws = socket();
-    if (ws?.readyState === WebSocket.CLOSED) {
-      console.error(socket());
-      toast.error("Connection Closed");
-      navigate("/");
-    }
-    if (!prevWs && ws) {
-      pingInterval = setInterval(async () => {
-        if (ws.readyState === WebSocket.OPEN)
-          ws.send(JSON.stringify({ type: "ping" }));
-        else clearInterval(pingInterval);
-      }, pingMSInterval);
-    }
-    return ws;
+    if (!ws) return;
+    pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: "ping" }));
+      else clearInterval(pingInterval);
+    }, pingMSInterval);
   });
   createEffect(() => {
     if (typeof selectedCard() === "number") userVotes();
@@ -72,10 +78,7 @@ const Room: Component = () => {
     });
 
   return (
-    <Show
-      when={!socket.loading}
-      fallback={<p data-testid="loading">Connecting...</p>}
-    >
+    <Suspense fallback={<p data-testid="loading">Connecting...</p>}>
       <div class="room" data-testid="room">
         <RoomHeader />
         <RoomSubheader />
@@ -90,7 +93,7 @@ const Room: Component = () => {
           <SpectatorList />
         </div>
       </div>
-    </Show>
+    </Suspense>
   );
 };
 

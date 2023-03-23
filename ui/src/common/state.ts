@@ -11,6 +11,7 @@ export const [roomId, setRoomId] = createSignal("");
 export const [isSpectator, setIsSpectator] = createSignal(
   Boolean(Number(localStorage.getItem(BrowserStorageKeys.isSpectator)))
 );
+export const role = () => (isSpectator() ? "spectator" : "voter");
 export const [username, setUsername] = createSignal(
   localStorage.getItem(BrowserStorageKeys.username) ?? ""
 );

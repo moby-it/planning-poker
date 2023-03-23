@@ -1,23 +1,19 @@
-import { useNavigate } from "@solidjs/router";
-import { roomId, username, isSpectator } from "../../common/state";
+import { role, roomId, username } from "../../common/state";
 import { wsv1Url } from "../../config";
 import { handleWsMessage } from "./roomState";
 
 export async function connectToRoom(): Promise<WebSocket> {
-  const navigate = useNavigate();
   return new Promise((resolve, reject) => {
     if (!roomId()) reject("No room id");
     const socket = new WebSocket(
-      `${wsv1Url}/joinRoom/${roomId()}/${username()}/${isSpectator() ? "spectator" : "voter"
-      }`
+      `${wsv1Url}/joinRoom/${roomId()}/${username()}/${role()}`
     );
-    socket.addEventListener("open", function (event) {
+    socket.addEventListener("open", function () {
       resolve(socket);
     });
     socket.addEventListener("message", handleWsMessage);
-    socket.addEventListener("error", (event) => {
-      navigate("/");
-      reject(event);
+    socket.addEventListener("error", () => {
+      reject('error from ws connection');
     });
   });
 }
