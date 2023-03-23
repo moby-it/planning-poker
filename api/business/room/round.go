@@ -3,11 +3,12 @@ package room
 
 // A round always belongs to a room and has a certain number of votes
 type Round struct {
-	Votes map[string]int
+	Votes    map[string]int
+	revealed bool
 }
 
 func NewRound() *Round {
-	return &Round{Votes: make(map[string]int)}
+	return &Round{Votes: make(map[string]int), revealed: false}
 }
 
 func (r Round) IsRevealable(voters int) bool {
