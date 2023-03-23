@@ -209,6 +209,16 @@ func TestUserVotes(t *testing.T) {
 			ConnectionReceivedEvent(t, connection3, events.UserVoted)
 			t.Log("\t\tUsers should reveive a vote update event")
 		}
+		t.Log("\t After all users have voted")
+		{
+			room, _ := room.Get(string(roomId))
+			room.Mu.RLock()
+			if room.CurrentRound.Revealed {
+				t.Fatal("\t\tCurrent round should not be revealed. Expected: ", false, "Got: ", room.CurrentRound.Revealed)
+			}
+			room.Mu.RUnlock()
+			t.Log("\t\tCurrent round should not be revealed")
+		}
 	}
 }
 
@@ -282,10 +292,24 @@ func TestToRevealRound(t *testing.T) {
 					})
 				}
 			}
+			t.Log("\t\t Before a round is revealed")
+			{
+				if room.CurrentRound.Revealed {
+					t.Error("\t\t\tRound should not be revealed")
+				}
+				t.Log("\t\t\tRound should not be revealed")
+			}
 			select {
 			case <-done:
 			case <-time.After(6 * time.Second):
 				t.Errorf("\t\t\tShould have received a round revealed event")
+			}
+			t.Log("\t\t After a round is revealed")
+			{
+				if !room.CurrentRound.Revealed {
+					t.Error("\t\t\tRound should be revealed")
+				}
+				t.Log("\t\t\tRound should be revealed")
 			}
 		}
 	}

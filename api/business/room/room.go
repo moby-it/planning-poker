@@ -157,7 +157,7 @@ func (room *Room) RevealCurrentRound() {
 		return
 	}
 	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
-	room.CurrentRound.revealed = true
+	room.CurrentRound.Revealed = true
 	events.Broadcast(event, room.Connections()...)
 }
 func (room *Room) emitUsersAndRevealableRound() {
@@ -171,7 +171,7 @@ func (room *Room) emitUsersAndRevealableRound() {
 	event := events.UsersUpdatedEvent{Users: users, Event: events.Event{Type: events.UsersUpdated}}
 	events.Broadcast(event, room.Connections()...)
 	room.Mu.RLock()
-	if !room.CurrentRound.revealed {
+	if !room.CurrentRound.Revealed {
 		revealableEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
 		room.Mu.RUnlock()
 		if room.cancelReveal != nil {

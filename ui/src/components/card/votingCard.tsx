@@ -17,7 +17,7 @@ export const VotingCard: Component<{
           <span>?</span>
         </Match>
         <Match when={props.points === 1000}>
-          <img src="/cup-small.svg" />
+          <img src={`/cup-small-${props.selected ? "white" : "black"}.svg`} />
         </Match>
       </Switch>
     </div>

@@ -71,6 +71,14 @@ export async function TestRevealRound(documents, roomId) {
         }, 5000)
       )
   );
+  console.log("\tAfter the round is revealed");
+
+  const { $document } = await voterJoinsRoom(roomId, "maria");
+  for (const document of [...documents, $document]) {
+    await runTest("\tRound reveal should still be revealed", () => {
+      RoundRevealed(document);
+    });
+  }
   await runTest("\tShould be able to start new Round", () =>
     StartNewRound(documents[0])
   );
