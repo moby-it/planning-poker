@@ -10,7 +10,7 @@ export const [selectedCard, setSelectedCard] = createSignal<number | null>(
 export const VotingCardList: Component = () => {
   createEffect((prev) => {
     if (prev && !revealed()) {
-      // setSelectedCard(null);
+      setSelectedCard(null);
     }
     return revealed();
   }, false);

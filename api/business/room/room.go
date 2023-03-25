@@ -188,7 +188,7 @@ func (room *Room) readMessage(client *user.Connection) {
 	for {
 		_, message, err := client.ReadMessage()
 		if err != nil {
-			log.Printf("error: %v \nclient: %v", err, client.Username)
+			log.Printf("Client %v: error: %v", client.Username, err)
 			if client.IsVoter && room.cancelReveal != nil {
 				room.cancelReveal <- true
 			}
