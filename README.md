@@ -56,6 +56,11 @@ For this reason we decided:
 3. We also decided to open source our app under **Apache Licence** so that you have the option for you to self-host it and extend it/modify it to fit your needs.
 
 So if you are a privacy freak like us, you can host this yourself. If not, **we guarantee that we use exactly as much data as the app need to provide its features.**
+## Licence
+
+Moby IT does not claim any ownership on the idea of Agile Planning Poker. As mentioned in the [planningpoker.com](https://www.planningpoker.com/), the idea was popularized by Mike Cohn, Founding Member and Owner of [Mountain Goat Software](https://www.mountaingoatsoftware.com/).
+
+Moby IT only aims to provide an open source and free solution to teams that want to use this method to do planning. The software is licenced under [Apache Licence, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 ---
 
