@@ -11,14 +11,23 @@ export const Header: Component = () => {
   return (
     <div
       class="header row align-center"
-      style={{ cursor: "pointer" }}
-      onClick={() => navigate("/")}
       classList={{ "justify-between": showLogo(), "justify-end": !showLogo() }}
     >
       <Show when={showLogo()}>
-        <img src="/logo.png" width="198" height="42" />
+        <img
+          src="/logo.png"
+          width="198"
+          height="42"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        />
       </Show>
-      <span>Made By Moby IT</span>
+      <span>
+        Made By{" "}
+        <a href="https://moby-it.com" target="_black">
+          Moby IT
+        </a>
+      </span>
     </div>
   );
 };
