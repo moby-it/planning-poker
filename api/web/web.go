@@ -23,9 +23,8 @@ func StartApp() error {
 	originsOk := h.AllowedOrigins([]string{"*"})
 
 	srv := &http.Server{
-		Handler: h.CORS(originsOk)(r),
-		Addr:    "0.0.0.0:8080",
-		// Good practice: enforce timeouts for servers you create!
+		Handler:      h.CORS(originsOk)(r),
+		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}
