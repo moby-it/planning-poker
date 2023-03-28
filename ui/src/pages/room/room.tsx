@@ -7,6 +7,7 @@ import {
   Show,
   Suspense,
 } from "solid-js";
+import { log } from "../../common/analytics";
 import { isSpectator, setRoomId, username } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
@@ -33,6 +34,7 @@ const Room: Component = () => {
     navigate("/prejoin");
     return;
   }
+  log("new_room");
   const [socket] = createResource(() => connectToRoom());
   onCleanup(() => {
     if (!socket.error) socket()?.close();
