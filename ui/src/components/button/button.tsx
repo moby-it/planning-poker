@@ -12,7 +12,6 @@ export const Button: Component<{
     { color: "primary", disabled: false, testId: "" },
     _props
   );
-  const c = children(() => props.children);
   return (
     <button
       type="button"
@@ -26,7 +25,7 @@ export const Button: Component<{
       }}
       onClick={props.action}
     >
-      {c()}
+      {props.children}
     </button>
   );
 };
