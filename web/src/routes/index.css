@@ -1,0 +1,48 @@
+.home {
+  margin-top: 72px;
+  margin-left: 36px;
+  gap: 16px;
+}
+.subtitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.subtitle a,
+.subtitle span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.welcome-box {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 670px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.25rem;
+  line-height: 30px;
+}
+
+.home-illustration {
+  width: 594px;
+}
+@media screen and (min-width: 1500px) {
+  .home-illustration {
+    width: 720px;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .home-illustration {
+    position: absolute;
+    right: 26px;
+    bottom: 46px;
+  }
+}
+@media screen and (max-width: 1280px) {
+  .home {
+    align-items: center;
+    gap: 24px;
+  }
+}
