@@ -11,7 +11,7 @@ import "./prejoin.css";
 import { Header } from "~/components/header/header";
 const PrejoinForm: Component = () => {
   const navigate = useNavigate();
-  const [{ isSpectator, roomId, username }, { setIsSpectator, setRoomId }] = UseRootContext();
+  const [{ isSpectator, roomId, username }, { setIsSpectator, setRoomId, setUsername }] = UseRootContext();
   const [params] = useSearchParams<{ create: string; }>();
   const isCreatingRoom = Boolean(params.create);
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
@@ -26,6 +26,7 @@ const PrejoinForm: Component = () => {
         return;
       }
       setUsernameError(null);
+      setUsername(username);
     } catch (e) {
       console.error(e);
     }

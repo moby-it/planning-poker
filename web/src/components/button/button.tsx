@@ -1,4 +1,4 @@
-import { Component, JSXElement, mergeProps } from "solid-js";
+import { Component, JSXElement, children, mergeProps } from "solid-js";
 import "./button.css";
 export const Button: Component<{
   color?: string;
@@ -12,7 +12,7 @@ export const Button: Component<{
     { color: "primary", disabled: false, testId: "" },
     _props
   );
-  
+  const c = children(() => props.children);
   return (
     <button
       type="button"
@@ -26,7 +26,7 @@ export const Button: Component<{
       }}
       onClick={props.action}
     >
-      {props.children}
-    </button>
+      {c()}
+    </button >
   );
 };
