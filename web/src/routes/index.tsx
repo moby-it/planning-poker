@@ -16,7 +16,9 @@ const Home: Component = () => {
         <div class="welcome-box col">
           <div class="subtitle">
             <img src="/check.svg" alt="check" srcset="" />
-            user-friendly
+            <span>
+              user-friendly
+            </span>
             <a href="https://github.com/moby-it/planning-poker" target="_blank">
               <img src="/github.svg" alt="github" srcset="" />
               <u>open-sourced</u>
@@ -28,7 +30,7 @@ const Home: Component = () => {
                 alt="check"
                 srcset=""
               />
-              free forerer
+              free forever
             </span>
           </div>
           <div>
