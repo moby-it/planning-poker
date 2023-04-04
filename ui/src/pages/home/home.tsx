@@ -26,7 +26,7 @@ const Home: Component = () => {
               alt="check"
               srcset=""
             />
-            free forerer
+            free forever
           </span>
         </div>
         <span>
