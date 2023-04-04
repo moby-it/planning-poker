@@ -12,6 +12,7 @@ import {
 } from "solid-start";
 import { Link } from "@solidjs/meta";
 import { ErrorBoundary } from "solid-start/error-boundary";
+import { Header } from "./components/header/header";
 
 export default function Root() {
   return (
@@ -30,6 +31,7 @@ export default function Root() {
       <Body id="root">
         <Suspense>
           <ErrorBoundary>
+
             <Routes>
               <FileRoutes />
             </Routes>
