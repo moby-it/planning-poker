@@ -27,7 +27,7 @@ export default function Root() {
         <Link rel="stylesheet" href="/css/layout.css"></Link>
         <Link rel="stylesheet" href="css/input.css"></Link>
       </Head>
-      <Body>
+      <Body id="root">
         <Suspense>
           <ErrorBoundary>
             <Routes>

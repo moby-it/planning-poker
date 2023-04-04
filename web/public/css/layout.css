@@ -1,11 +1,11 @@
 :root {
   --max--width: 1440px;
 }
-body {
+#root {
   padding: 24px 46px;
 }
 @media screen and (min-width: 1439px) {
-  body {
+  #root {
     padding: 24px 138px;
   }
 }
