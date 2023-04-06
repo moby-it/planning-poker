@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { User } from "./user";
+import { createContext, useContext, useState } from "react";
 import { log } from "./analytics";
-import { isUsersUpdated, isRoundRevealAvailable, isUserVoted, isRoundToReveal, RoundToReveal, isCancelReveal, isRoundRevealed, isRoundStarted, isPong } from "./ws-events";
+import { User } from "./user";
+import {
+  RoundToReveal, isCancelReveal, isPong, isRoundRevealAvailable,
+  isRoundRevealed, isRoundStarted, isRoundToReveal, isUserVoted, isUsersUpdated
+} from "./ws-events";
 
 export const RoundStatuses = {
   NotStarted: "NotStarted",
@@ -10,35 +13,61 @@ export const RoundStatuses = {
   Revealing: "Revealing",
   Revealed: "Revealed",
 } as const;
-export function UseRoomState() {
-  const [voters, setVoters] = useState<User[]>([]);
-  const [spectators, setSpectators] = useState<User[]>([]);
-  const [roundStatus, setRoundStatus] = useState<string>(RoundStatuses.Started);
-  const [revealingDuration, setRevealingDuration] = useState<number>(0);
-  const [averageScore, setAverageScore] = useState<number | null>(null);
-  const roundScore = averageScore?.toFixed(1);
-  const revealed = roundStatus === RoundStatuses.Revealed;
-  const revealing = roundStatus === RoundStatuses.Revealing;
-  const revealable = roundStatus === RoundStatuses.Revealable;
-  return [{
-    voters,
-    spectators,
-    roundStatus,
-    revealingDuration,
-    roundScore,
-    revealed,
-    revealing,
-    revealable,
-  }, {
-    setVoters,
-    setSpectators,
-    setRoundStatus,
-    setRevealingDuration,
-    setAverageScore,
-  }];
+interface RoomState {
+  voters: User[];
+  spectators: User[];
+  roundStatus: string;
+  revealingDuration: number;
+  roundScore: string | null;
+}
+export type RoomAction = {
+  type: "setVoters";
+  payload: User[];
+} | {
+  type: "setSpectators";
+  payload: User[];
+} | {
+  type: "setRoundStatus";
+  payload: string;
+} | {
+  type: "setRevealingDuration";
+  payload: number;
+} | {
+  type: "setAverageScore";
+  payload: number | null;
+};
+export function RoomReducer(state: RoomState, action: RoomAction) {
+  switch (action.type) {
+    case "setVoters":
+      return { ...state, voters: action.payload };
+    case "setSpectators":
+      return { ...state, spectators: action.payload };
+    case "setRoundStatus":
+      return { ...state, roundStatus: action.payload };
+    case "setRevealingDuration":
+      return { ...state, revealingDuration: action.payload };
+    case "setAverageScore":
+      return { ...state, roundScore: action.payload?.toFixed(1) };
+    default:
+      return state;
+  }
+}
+export const roomInitialState = {
+  voters: [],
+  spectators: [],
+  roundStatus: RoundStatuses.NotStarted,
+  revealingDuration: 0,
+  roundScore: null,
+};
+export const RoomContext = createContext<RoomState>(roomInitialState);
+export const RoomDispatchContext = createContext<React.Dispatch<RoomAction>>(() => { });
+export function useRoomContext() {
+  return useContext(RoomContext);
+}
+export function useRoomDispatch() {
+  return useContext(RoomDispatchContext);
 }
 export function handleWsMessage(event: MessageEvent<unknown>): void {
-  const [{ voters }, { setVoters, setSpectators }] = UseRoomState();
   let data: any = event.data;
   try {
     data = JSON.parse(data as string);

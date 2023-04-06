@@ -5,7 +5,7 @@ export const BrowserStorageKeys = {
   username: "username",
   isSpectator: "isSpectator",
 };
-interface RootState {
+export interface RootState {
   roomId: string;
   username: string;
   isSpectator: boolean;

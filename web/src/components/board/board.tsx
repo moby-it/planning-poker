@@ -6,6 +6,7 @@ interface BoardProps {
   users: User[];
 }
 export const Board = (props: BoardProps) => {
+  const {}
   return (
     <div className={styles.board}>
       {props.users.map(user => (
