@@ -164,7 +164,6 @@ export const handleWsMessage = (ctx: { state: RoomState, dispatch: Dispatch<Room
   } else if (isRoundRevealAvailable(data)) {
     if (data.revealAvailable)
       dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
-    else dispatch({ type: "setRoundStatus", payload: RoundStatuses.Started });
   } else if (isUserVoted(data)) {
     dispatch({ type: "setUserVoted", payload: { username: data.username, voted: true } });
   } else if (isRoundToReveal(data)) {

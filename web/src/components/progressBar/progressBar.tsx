@@ -20,7 +20,7 @@ export const ProgressBar = (props: ProgressBarProps) => {
       }, intervalTime);
     }
 
-  });
+  }, []);
 
   return (
     <div className={styles.progressBar} >

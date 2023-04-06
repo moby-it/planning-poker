@@ -1,6 +1,6 @@
 import { RootContext, RootDispatchContext } from "@/common/root.context";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
 import { apiV1Url } from "../../config";
@@ -34,7 +34,7 @@ const PrejoinForm = () => {
       method: "POST",
     });
     const data = await response.text();
-    console.log(data)
+    console.log(data);
     dispatch({ type: 'setRoomId', payload: data });
     router.replace(`/room/${data}`);
   }

@@ -7,37 +7,35 @@ import { SubmitBtn } from "@/components/room/submitBtn";
 import { VotingCardList } from "@/components/votingCardList/votingCardList";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { log } from "../../common/analytics";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import styles from "./room.module.css";
 let init = false;
-let intervalStart = false;
 const Room = () => {
   const [socket, setSocket] = useState<WebSocket>();
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const { roomId } = router.query;
-  if (typeof roomId !== "string") throw new Error("RoomId is not a string");
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const pingMSInterval = 5000;
   const pingInterval = useRef<NodeJS.Timer | undefined>();
   const roomDispatch = useRoomDispatch();
   const rootContext = useRootContext();
+  const roomContext = useRoomContext();
   const revealing = useRevealing();
   const { isSpectator } = rootContext;
-  const roomContext = useRoomContext();
   const username = rootContext.username;
   const voters = roomContext.voters;
-  if (!username) {
-    router.push("/prejoin");
-    throw new Error("no username");
-  }
-  log("new_room");
   useEffect(() => {
     if (init) return;
     init = true;
-    console.log('init effect ran');
+    if (typeof roomId !== "string") {
+      router.push("/");
+    }
+    if (!username) {
+      router.push("/prejoin");
+      throw new Error("no username");
+    }
     setLoading(true);
     connectToRoom({ state: { ...roomContext, ...rootContext }, dispatch: roomDispatch }).then((socket) => {
       setSocket(socket);

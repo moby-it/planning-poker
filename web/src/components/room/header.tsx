@@ -14,22 +14,35 @@ export const RoomHeader = () => {
   const { roundStatus, revealingDuration, roundScore } = useRoomContext();
   const revealing = useRevealing();
   const [roomHeader, setRoomHeader] = useState<string>(roomHeaders.Voting);
-
   useEffect(() => {
-    if (revealing) {
-      let i = revealingDuration / 1000;
-      setRoomHeader(roomHeaders.Revealing + " " + i);
-      interval.current = setInterval(() => {
-        if (i === 0) {
-          clearInterval(interval.current);
-          return;
-        }
-        setRoomHeader(roomHeaders.Revealing + " " + --i);
-      }, 1000);
-    } else {
-      if (interval) clearInterval(interval.current);
+    switch (roundStatus) {
+      case RoundStatuses.Started:
+        setRoomHeader(roomHeaders.Voting);
+        if (interval.current) clearInterval(interval.current);
+
+      case RoundStatuses.Revealable:
+        setRoomHeader(roomHeaders.Ready);
+        if (interval.current) clearInterval(interval.current);
+
+        break;
+      case RoundStatuses.Revealed:
+        setRoomHeader(roomHeaders.Revealed + " " + roundScore);
+        if (interval.current) clearInterval(interval.current);
+        break;
+      case RoundStatuses.Revealing:
+        let i = revealingDuration / 1000;
+        setRoomHeader(roomHeaders.Revealing + " " + i);
+        interval.current = setInterval(() => {
+          if (i === 0) {
+            clearInterval(interval.current);
+            return;
+          }
+          setRoomHeader(roomHeaders.Revealing + " " + --i);
+        }, 1000);
+        break;
     }
-  }, [revealing, revealingDuration]);
+  }, [roundStatus, roundScore]);
+
   useEffect(() => {
     switch (roundStatus) {
       case RoundStatuses.Started:
@@ -43,7 +56,7 @@ export const RoomHeader = () => {
     }
   }, [roundStatus, roundScore]);
   return (
-    <div className={styles.roomHeader}>
+    <div className={styles["room-header"]}>
       <h2>{roomHeader}</h2>
       {revealing && <ProgressBar duration={revealingDuration} />}
     </div>
