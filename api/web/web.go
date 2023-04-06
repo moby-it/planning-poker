@@ -1,6 +1,7 @@
 package web
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"time"
@@ -15,10 +16,28 @@ func StartApp() error {
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("app healthy"))
 	}).Methods("GET")
-	// attachProfiler(r)
+	fs := http.FileServer(http.Dir("web/static"))
+	http.Handle("/static", fs)
 
+	// serve templates folder as static
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		data := map[string]interface{}{
+			"Title": "Poker Planning",
+		}
+		tmpl, err := template.ParseFiles("web/templates/index.html", "web/templates/head.html")
+		if err != nil {
+			log.Println(err)
+		}
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			log.Println(err)
+		}
+	})
+
+	// attachProfiler(r)
+	apiRouter := r.PathPrefix("/api").Subrouter()
 	// v1 Handlers
-	v1Router := r.PathPrefix("/v1").Subrouter()
+	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
 	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
 	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 
