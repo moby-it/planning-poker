@@ -6,6 +6,7 @@ run:
 build:
 	rm -rf bin
 	go build -race -o  bin/
+	mkdir bin/web && cp -r web/static web/templates bin/web
 
 test:
 	go clean -testcache
