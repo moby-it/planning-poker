@@ -18,6 +18,8 @@ func StartApp() error {
 	}).Methods("GET")
 	fs := http.FileServer(http.Dir("web/static"))
 	http.Handle("/static", fs)
+	r.PathPrefix("/scripts/").Handler(http.StripPrefix("/scripts/", http.FileServer(http.Dir("web/static"))))
+	r.PathPrefix("/styles/").Handler(http.StripPrefix("/styles/", http.FileServer(http.Dir("web/static"))))
 
 	// serve templates folder as static
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
