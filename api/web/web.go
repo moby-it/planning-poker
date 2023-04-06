@@ -21,12 +21,29 @@ func StartApp() error {
 	r.PathPrefix("/scripts/").Handler(http.StripPrefix("/scripts/", http.FileServer(http.Dir("web/static"))))
 	r.PathPrefix("/styles/").Handler(http.StripPrefix("/styles/", http.FileServer(http.Dir("web/static"))))
 
-	// serve templates folder as static
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data := map[string]interface{}{
-			"Title": "Poker Planning",
+	// register static files
+	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("web/static")))
+	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("web/static")))
+	r.PathPrefix("/assets/").Handler(http.FileServer(http.Dir("web/static")))
+
+	r.Handle("/favicon.ico", http.FileServer(http.Dir("web/static")))
+
+	// register templates
+	r.HandleFunc("/prejoin", func(w http.ResponseWriter, r *http.Request) {
+		data := struct {
+			Title string
+			Text  string
+		}{
+			Title: "Create a New Room",
+			Text:  "create room",
 		}
-		tmpl, err := template.ParseFiles("web/templates/index.html", "web/templates/head.html")
+		create := r.URL.Query().Get("create")
+
+		if create != "true" {
+			data.Title = "Join a Room"
+			data.Text = "join room"
+		}
+		tmpl, err := template.ParseFiles("web/templates/prejoin.html", "web/templates/head.html", "web/templates/header.html")
 		if err != nil {
 			log.Println(err)
 		}
@@ -35,10 +52,21 @@ func StartApp() error {
 			log.Println(err)
 		}
 	})
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
+		tmpl, err := template.ParseFiles("web/templates/index.html", "web/templates/head.html", "web/templates/header.html")
+		if err != nil {
+			log.Println(err)
+		}
+		err = tmpl.Execute(w, nil)
+		if err != nil {
+			log.Println(err)
+		}
+	})
 	// attachProfiler(r)
+
+	// register api v1 Handlers
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	// v1 Handlers
 	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
 	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
 	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
