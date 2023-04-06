@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { Dispatch, createContext, useContext } from "react";
 import { log } from "./analytics";
 import { User } from "./user";
 import {
@@ -13,33 +13,74 @@ export const RoundStatuses = {
   Revealing: "Revealing",
   Revealed: "Revealed",
 } as const;
-interface RoomState {
+export interface RoomState {
   voters: User[];
   spectators: User[];
   roundStatus: string;
   revealingDuration: number;
-  roundScore: string | null;
+  roundScore: string | null | undefined;
 }
-export type RoomAction = {
-  type: "setVoters";
-  payload: User[];
-} | {
-  type: "setSpectators";
-  payload: User[];
-} | {
-  type: "setRoundStatus";
-  payload: string;
-} | {
-  type: "setRevealingDuration";
-  payload: number;
-} | {
-  type: "setAverageScore";
-  payload: number | null;
-};
-export function RoomReducer(state: RoomState, action: RoomAction) {
+export type RoomAction =
+  {
+    type: "setSelectedCard",
+    payload: number | null;
+  }
+  | {
+    type: "setVoters";
+    payload: User[];
+  } | {
+    type: "setSpectators";
+    payload: User[];
+  } | {
+    type: "setRoundStatus";
+    payload: string;
+  } | {
+    type: "setRevealingDuration";
+    payload: number;
+  } | {
+    type: "setAverageScore";
+    payload: number | null;
+  } | {
+    type: "setUserVoted";
+    payload: User;
+  } | {
+    type: "setUserVotes";
+    payload: Record<string, number>;
+  } | {
+    type: "resetVotes";
+
+  };
+export function roomReducer(state: RoomState, action: RoomAction): RoomState {
   switch (action.type) {
     case "setVoters":
       return { ...state, voters: action.payload };
+    case "setUserVoted":
+      return {
+        ...state,
+        voters: state.voters.map((voter) => {
+          if (voter.username === action.payload.username) {
+            return action.payload;
+          }
+          return voter;
+        }),
+      };
+    case "setUserVotes":
+      return {
+        ...state,
+        voters: state.voters.map((voter) => {
+          voter.points = action.payload[voter.username];
+          return voter;
+        }),
+      };
+    case "resetVotes":
+      return {
+        ...state,
+        voters: state.voters.map((voter) => {
+          voter.points = undefined;
+          voter.voted = false;
+          return voter;
+        }),
+      };
     case "setSpectators":
       return { ...state, spectators: action.payload };
     case "setRoundStatus":
@@ -52,13 +93,33 @@ export function RoomReducer(state: RoomState, action: RoomAction) {
       return state;
   }
 }
-export const roomInitialState = {
+export const roomInitialState: RoomState = {
   voters: [],
   spectators: [],
   roundStatus: RoundStatuses.NotStarted,
   revealingDuration: 0,
   roundScore: null,
 };
+export function useRevealed() {
+  const { roundStatus } = useRoomContext();
+  return roundStatus === RoundStatuses.Revealed;
+}
+export function useRevealing() {
+  const { roundStatus } = useRoomContext();
+  return roundStatus === RoundStatuses.Revealing;
+}
+export function useRevealable() {
+  const { roundStatus } = useRoomContext();
+  return roundStatus === RoundStatuses.Revealable;
+}
+export function useSpectators() {
+  const { spectators } = useRoomContext();
+  return spectators;
+}
+export function useRevealignDuration() {
+  const { revealingDuration } = useRoomContext();
+  return revealingDuration;
+}
 export const RoomContext = createContext<RoomState>(roomInitialState);
 export const RoomDispatchContext = createContext<React.Dispatch<RoomAction>>(() => { });
 export function useRoomContext() {
@@ -67,7 +128,9 @@ export function useRoomContext() {
 export function useRoomDispatch() {
   return useContext(RoomDispatchContext);
 }
-export function handleWsMessage(event: MessageEvent<unknown>): void {
+export const handleWsMessage = (ctx: { state: RoomState, dispatch: Dispatch<RoomAction>; }) => (event: MessageEvent<unknown>) => {
+  const state = ctx.state;
+  const dispatch = ctx.dispatch;
   let data: any = event.data;
   try {
     data = JSON.parse(data as string);
@@ -80,7 +143,7 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
       .map((u) => ({
         username: u.username,
         voted: u.hasVoted,
-        points: voters.find((v) => v.username === u.username)?.points,
+        points: state.voters.find((v) => v.username === u.username)?.points,
       }));
     const s: User[] = data.users
       .filter((u) => !u.isVoter)
@@ -88,57 +151,39 @@ export function handleWsMessage(event: MessageEvent<unknown>): void {
         username: u.username,
         voted: false,
       }));
-    setVoters(v);
-    setSpectators(s);
+    dispatch({ type: "setVoters", payload: v });
+    dispatch({ type: "setSpectators", payload: s });
   } else if (isRoundRevealAvailable(data)) {
     if (data.revealAvailable)
-      setRoundStatus(RoundStatuses.Revealable);
-    else setRoundStatus(RoundStatuses.Started);
+      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
+    else dispatch({ type: "setRoundStatus", payload: RoundStatuses.Started });
   } else if (isUserVoted(data)) {
-    setVoters(
-      (voter) => voter.username === data.username,
-      produce((voter) => {
-        voter.voted = true;
-      })
-    );
+    dispatch({ type: "setUserVoted", payload: { username: data.username, voted: true } });
   } else if (isRoundToReveal(data)) {
     ((data: RoundToReveal) => {
-      batch(() => {
-        setRevealingDuration(data.after);
-        setRoundStatus(RoundStatuses.Revealing);
-      });
+      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealing });
+      dispatch({ type: "setRevealingDuration", payload: data.after });
     })(data);
   } else if (isCancelReveal(data)) {
-    if (revealing())
-      setRoundStatus(RoundStatuses.Revealable);
+    if (state.roundStatus === RoundStatuses.Revealing)
+      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
   }
   else if (isRoundRevealed(data)) {
     log("round_revealed");
     const averageScore =
       Object.values(data.votes).reduce((a, b) => a + b, 0) /
       Object.values(data.votes).length;
-    batch(() => {
-      setAverageScore(averageScore);
-      setRoundStatus(RoundStatuses.Revealed);
-      setVoters(
-        produce((voters) =>
-          voters.map((voter) => {
-            voter.points = data.votes[voter.username];
-            return voter;
-          })
-        )
-      );
-    });
+    dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealed });
+    dispatch({ type: "setAverageScore", payload: averageScore });
+    dispatch({ type: "setUserVotes", payload: data.votes });
   }
   else if (isRoundStarted(data)) {
-    batch(() => {
-      setRoundStatus(RoundStatuses.Started);
-      setVoters(voters.map((v) => ({ ...v, voted: false, points: undefined })));
-      setAverageScore(null);
-    });
+    dispatch({ type: "setRoundStatus", payload: RoundStatuses.Started });
+    dispatch({ type: "setAverageScore", payload: null });
+    dispatch({ type: "resetVotes" });
   } else if (isPong(data)) {
     // ignore
   } else {
     console.error("Unhandled message", data);
   }
-}
+};

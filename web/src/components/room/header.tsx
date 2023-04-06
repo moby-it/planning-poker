@@ -1,14 +1,7 @@
-import { Component, createEffect, createSignal, Show } from "solid-js";
+import { useEffect, useRef, useState } from "react";
 import { ProgressBar } from "../../components/progressBar/progressBar";
-import {
-  roundStatus,
-  RoundStatuses,
-  revealingDuration,
-  roundScore,
-  revealing,
-} from "./roomState";
-import { Hydration } from "solid-js/web";
-
+import { RoundStatuses, useRevealing, useRoomContext } from "@/common/room.context";
+import styles from './room.module.css';
 const roomHeaders = {
   Voting: "Voting is in session!",
   Ready: "Everyone's Ready",
@@ -16,43 +9,43 @@ const roomHeaders = {
   Revealed: "Average Score",
 } as const;
 
-export const RoomHeader: Component = () => {
-  let interval: NodeJS.Timer | undefined;
-  const [roomHeader, setRoomHeader] = createSignal<string>(roomHeaders.Voting);
+export const RoomHeader = () => {
+  let interval = useRef<NodeJS.Timer | number>();
+  const { roundStatus, revealingDuration, roundScore } = useRoomContext();
+  const revealing = useRevealing();
+  const [roomHeader, setRoomHeader] = useState<string>(roomHeaders.Voting);
 
-  createEffect(() => {
-    if (revealing()) {
-      let i = revealingDuration() / 1000;
+  useEffect(() => {
+    if (revealing) {
+      let i = revealingDuration / 1000;
       setRoomHeader(roomHeaders.Revealing + " " + i);
-      interval = setInterval(() => {
+      interval.current = setInterval(() => {
         if (i === 0) {
-          clearInterval(interval);
+          clearInterval(interval.current);
           return;
         }
         setRoomHeader(roomHeaders.Revealing + " " + --i);
       }, 1000);
     } else {
-      if (interval) clearInterval(interval);
+      if (interval) clearInterval(interval.current);
     }
-  });
-  createEffect(() => {
-    switch (roundStatus()) {
+  }, [revealing, revealingDuration]);
+  useEffect(() => {
+    switch (roundStatus) {
       case RoundStatuses.Started:
         setRoomHeader(roomHeaders.Voting);
       case RoundStatuses.Revealable:
         setRoomHeader(roomHeaders.Ready);
         break;
       case RoundStatuses.Revealed:
-        setRoomHeader(roomHeaders.Revealed + " " + roundScore());
+        setRoomHeader(roomHeaders.Revealed + " " + roundScore);
         break;
     }
-  });
+  }, [roundStatus, roundScore]);
   return (
-    <div class="room-header">
-      <h2>{roomHeader()}</h2>
-      <Show when={roundStatus() === RoundStatuses.Revealing}>
-        <ProgressBar duration={revealingDuration()} />
-      </Show>
+    <div className={styles.roomHeader}>
+      <h2>{roomHeader}</h2>
+      {revealing && <ProgressBar duration={revealingDuration} />}
     </div>
   );
 };

@@ -1,11 +1,15 @@
-import { Component, createSignal } from "solid-js";
-import "./progressBar.css";
-export const ProgressBar: Component<{ duration: number }> = (props) => {
-  const [width, setWidth] = createSignal(1);
+import { useState } from "react";
+import styles from "./progressBar.module.css";
+
+interface ProgressBarProps {
+  duration: number;
+}
+export const ProgressBar = (props: ProgressBarProps) => {
+  const [width, setWidth] = useState(1);
   const intervalTime = 10;
   let i = 1;
   const interval = setInterval(() => {
-    if (width() >= 100) {
+    if (width >= 100) {
       clearInterval(interval);
       return;
     }
@@ -13,8 +17,8 @@ export const ProgressBar: Component<{ duration: number }> = (props) => {
     i++;
   }, intervalTime);
   return (
-    <div id="progress-bar">
-      <div id="bar" style={{ width: width() + "%" }}></div>
+    <div className={styles.progressBar} >
+      <div className={styles.bar} style={{ width: width + "%" }}></div>
     </div>
   );
 };

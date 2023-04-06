@@ -1,11 +1,17 @@
-import { Component, Match, Switch } from "solid-js";
+import { useRevealable, useRevealed, useRevealing } from "@/common/room.context";
 import { Button } from "../../components/button/button";
 import { sendMessageIfOpen } from "./common";
-import { revealable, revealed, revealing } from "./roomState";
 
-export const SubmitBtn: Component<{ socket: WebSocket | undefined }> = (
-  props
+interface SubmitBtnProps {
+  socket: WebSocket | undefined;
+}
+
+export const SubmitBtn = (
+  props: SubmitBtnProps
 ) => {
+  const revealable = useRevealable();
+  const revealed = useRevealed();
+  const revealing = useRevealing();
   const toRevealRound = () =>
     sendMessageIfOpen(props.socket, {
       type: "roundToReveal",
@@ -20,19 +26,21 @@ export const SubmitBtn: Component<{ socket: WebSocket | undefined }> = (
     sendMessageIfOpen(props.socket, {
       type: "roundToStart",
     });
-  return (
-    <Switch>
-      <Match when={revealable()}>
+  function renderButton() {
+    if (revealable) {
+      return (
         <Button action={toRevealRound} testId="reveal-round">
           <span>Reveal Cards</span>
         </Button>
-      </Match>
-      <Match when={revealed()}>
+      );
+    } else if (revealed) {
+      return (
         <Button action={startNewRound} testId="start-new-round">
           <span>Start New Round</span>
         </Button>
-      </Match>
-      <Match when={revealing()}>
+      );
+    } else if (revealing) {
+      return (
         <Button
           color="default"
           action={() => cancelReveal()}
@@ -40,7 +48,13 @@ export const SubmitBtn: Component<{ socket: WebSocket | undefined }> = (
         >
           <span>Cancel Reveal</span>
         </Button>
-      </Match>
-    </Switch>
+      );
+
+    } else {
+      throw new Error("Invalid state");
+    }
+  }
+  return (
+    renderButton()
   );
 };

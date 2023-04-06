@@ -1,29 +1,32 @@
-import { Component, Match, mergeProps, Show, Switch } from "solid-js";
-import "./card.css";
-
-export const Card: Component<{
+import "./card.module.css";
+import Image from "next/image";
+interface CardProps {
   voted?: boolean;
   points?: number;
   revealed?: boolean;
-}> = (_props) => {
-  const props = mergeProps({ voted: false, revealed: false }, _props);
+}
+
+export const Card = (props: CardProps) => {
+  const points = props.points;
+  const revealed = Boolean(props.revealed);
+  const voted = Boolean(props.voted);
+  const cssClasses = "card" + (voted ? " voted" : "") + (revealed ? " revealed" : "");
+  function renderPoints(points: unknown) {
+    if (typeof points === "number") {
+      if (points === 100) {
+        return <span>?</span>;
+      }
+      if (points === 1000) {
+        return <Image src="/cup-medium.svg" alt="cup-medium" />;
+      }
+      return <span>{points}</span>;
+    }
+    return null;
+  }
   return (
     <div
-      classList={{ card: true, voted: props.voted, revealed: props.revealed }}
-    >
-      <Show when={isNumber(props.points)}>
-        <Switch fallback={<span>{props.points}</span>}>
-          <Match when={props.points === 100}>
-            <span>?</span>
-          </Match>
-          <Match when={props.points === 1000}>
-            <img src="/cup-medium.svg" />
-          </Match>
-        </Switch>
-      </Show>
+      className={cssClasses}    >
+      {renderPoints(points)}
     </div>
   );
 };
-function isNumber(v: unknown): v is Number {
-  return typeof v === "number";
-}

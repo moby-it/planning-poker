@@ -1,4 +1,4 @@
-import { Dispatch, createContext } from "react";
+import { Dispatch, createContext, useContext } from "react";
 
 
 export const BrowserStorageKeys = {
@@ -32,6 +32,10 @@ export function rootReducer(state: RootState, action: RootAction) {
       return state;
   }
 }
+export function useIsSpectator() {
+  const { isSpectator } = useRootContext();
+  return isSpectator;
+}
 export const rootInitialState = {
   roomId: "",
   username: localStorage.getItem("username") ?? "",
@@ -39,3 +43,10 @@ export const rootInitialState = {
 };
 export const RootContext = createContext<RootState>(rootInitialState);
 export const RootDispatchContext = createContext<Dispatch<RootAction>>(() => { });
+
+export function useRootContext() {
+  return useContext(RootContext);
+}
+export function useRootDispatch() {
+  return useContext(RootDispatchContext);
+}

@@ -1,25 +1,29 @@
-import { Component, Match, mergeProps, Switch } from "solid-js";
+import Image from "next/image";
 import "./card.css";
-export const VotingCard: Component<{
+interface VotingCardProps {
   selected?: boolean;
   points: number;
   action: () => void;
-}> = (_props) => {
-  const props = mergeProps({ selected: false }, _props);
+}
+export const VotingCard = (props: VotingCardProps) => {
+  const selected = Boolean(props.selected);
+  const cssClasses = "votingCard" + (selected ? " selected" : "");
+  function renderPoints(points: number) {
+    if (points === 100) {
+      return <span>?</span>;
+    }
+    if (points === 1000) {
+      return <Image src="/cup-small.svg" alt="cup-small" />;
+    }
+    return <span>{points}</span>;
+  }
   return (
     <div
-      classList={{ "voting-card": true, selected: props.selected }}
-      data-testid={`voting-card-${props.points}`}
+      className={cssClasses}
+      data-testid={`votingCard-${props.points}`}
       onClick={props.action}
     >
-      <Switch fallback={<span>{props.points}</span>}>
-        <Match when={props.points === 100}>
-          <span>?</span>
-        </Match>
-        <Match when={props.points === 1000}>
-          <img src={`/cup-small-${props.selected ? "white" : "black"}.svg`} />
-        </Match>
-      </Switch>
+      {renderPoints(props.points)}
     </div>
   );
 };

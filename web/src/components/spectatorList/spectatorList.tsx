@@ -1,21 +1,23 @@
-import { Component, Index, Show } from "solid-js";
-import { spectators } from "../../pages/room/roomState";
-import "./spectatorList.css";
-export const SpectatorList: Component = () => {
+import { useSpectators } from "@/common/room.context";
+import styles from "./spectatorList.module.css";
+
+export const SpectatorList = () => {
+  const spectators = useSpectators();
   return (
-    <div class="spectators">
-      <Show when={spectators.length}>
-        <ul class="spectators">
+    <div className={styles.spectators}>
+      {spectators.length !== 0 && (
+        <ul className={styles.spectators}>
           <li>Spectators</li>
-          <Index each={spectators}>
-            {(spectator) => (
-              <li data-testid={"spectator-" + spectator().username}>
-                {spectator().username}
-              </li>
-            )}
-          </Index>
+          {spectators.map((spectator) => (
+            <li
+              key={spectator.username}
+              data-testid={"spectator-" + spectator.username}
+            >
+              {spectator.username}
+            </li>
+          ))}
         </ul>
-      </Show>
+      )}
     </div>
   );
 };

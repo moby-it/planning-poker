@@ -1,101 +1,97 @@
-import { useNavigate, useParams } from "@solidjs/router";
-import {
-  Component,
-  createEffect,
-  createResource,
-  onCleanup,
-  Show,
-  Suspense,
-} from "solid-js";
+import { useRevealing, useRoomContext, useRoomDispatch } from "@/common/room.context";
+import { useRootContext, useRootDispatch } from "@/common/root.context";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import { log } from "../../common/analytics";
-import { isSpectator, setRoomId, username } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
-import {
-  selectedCard,
-  setSelectedCard,
-  VotingCardList,
-} from "../../components/votingCardList/votingCardList";
 import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
-import "./room.css";
-import { revealing, voters } from "./roomState";
+import styles from "./room.module.css";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
+import { VotingCardList } from "../votingCardList/votingCardList";
 
-const Room: Component = () => {
-  const navigate = useNavigate();
-  const params = useParams();
-  const roomId = params["roomId"];
+const Room = async () => {
+  const router = useRouter();
+  const { roomId } = router.query;
+  if (typeof roomId !== "string") throw new Error("RoomId is not a string");
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const pingMSInterval = 5000;
-  let pingInterval: NodeJS.Timer | undefined;
-  setRoomId(roomId);
-  if (!username()) {
-    navigate("/prejoin");
-    return;
+  const pingInterval = useRef<NodeJS.Timer | undefined>();
+  const rootDispatch = useRootDispatch();
+  const roomDispatch = useRoomDispatch();
+  const rootContext = useRootContext();
+  const revealing = useRevealing();
+  const { isSpectator } = rootContext;
+  const roomContext = useRoomContext();
+  const username = rootContext.username;
+  const voters = roomContext.voters;
+  rootDispatch({ type: "setRoomId", payload: roomId });
+  if (!username) {
+    router.push("/prejoin");
+    throw new Error("no username");
   }
   log("new_room");
-  const [socket] = createResource(() => connectToRoom());
-  onCleanup(() => {
-    if (!socket.error) socket()?.close();
-    clearInterval(pingInterval);
-    setSelectedCard(null);
+  const socket = await connectToRoom({ state: { ...roomContext, ...rootContext }, dispatch: roomDispatch });
+  useEffect(() => {
+    return () => {
+      if (socket) socket.close();
+      clearInterval(pingInterval.current);
+      setSelectedCard(null);
+    };
   });
-  createEffect(() => {
-    if (socket.loading) return;
-    if (socket.error) return navigate("/");
-    const ws = socket();
-    if (!ws) return;
-    pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN)
-        ws.send(JSON.stringify({ type: "ping" }));
-      else clearInterval(pingInterval);
+  useEffect(() => {
+    pingInterval.current = setInterval(() => {
+      if (socket.readyState === WebSocket.OPEN)
+        socket.send(JSON.stringify({ type: "ping" }));
+      else clearInterval(pingInterval.current);
     }, pingMSInterval);
   });
-  createEffect(() => {
-    if (typeof selectedCard() === "number") userVotes();
+  useEffect(() => {
+    if (typeof selectedCard === "number") userVotes();
   });
-  createEffect((prev) => {
-    if (prev === isSpectator() || revealing()) return;
-    if (isSpectator()) {
+
+
+  const lastRoleIsSpectator = useRef<boolean>(isSpectator);
+  useEffect(() => {
+    if (lastRoleIsSpectator.current === isSpectator || revealing) return;
+    if (isSpectator) {
       changeRole("spectator");
       setSelectedCard(null);
     } else {
       changeRole("voter");
     }
-    return isSpectator();
-  });
-  const userVotes = () =>
-    sendMessageIfOpen(socket(), {
-      type: "userToVote",
-      username: username(),
-      storyPoints: selectedCard(),
-      roomId,
-    });
-  const changeRole = (role: string) =>
-    sendMessageIfOpen(socket(), {
+  }, [isSpectator, revealing]);
+
+  function changeRole(role: string) {
+    sendMessageIfOpen(socket, {
       type: "changeRole",
-      username: username(),
+      username: username,
       role,
+    });
+  }
+  const userVotes = () =>
+    sendMessageIfOpen(socket, {
+      type: "userToVote",
+      username: username,
+      storyPoints: selectedCard,
+      roomId,
     });
 
   return (
-    <Suspense fallback={<p data-testid="loading">Connecting...</p>}>
-      <div class="room" data-testid="room">
-        <RoomHeader />
-        <RoomSubheader />
-        <div class="voting-area-wrapper">
-          <div class="voting-area">
-            <Board users={voters} />
-            <Show when={!isSpectator()}>
-              <SubmitBtn socket={socket()} />
-            </Show>
-            <VotingCardList />
-          </div>
-          <SpectatorList />
+    <div className={styles.room} data-testid="room">
+      <RoomHeader />
+      <RoomSubheader />
+      <div className={styles["voting-area-wrapper"]}>
+        <div className={styles["voting-area"]}>
+          <Board users={voters} />
+          {!isSpectator && <SubmitBtn socket={socket} />}
+          <VotingCardList selectedCard={selectedCard} setSelectedCard={setSelectedCard} />
         </div>
+        <SpectatorList />
       </div>
-    </Suspense>
+    </div>
   );
 };
 

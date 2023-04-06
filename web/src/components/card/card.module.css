@@ -1,5 +1,5 @@
 .card,
-.voting-card {
+.votingCard {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,7 +11,7 @@
   width: 64px;
   height: 88px;
 }
-.voting-card {
+.votingCard {
   width: 44px;
   height: 60px;
 }
@@ -27,15 +27,15 @@
   line-height: 35px;
 }
 
-.voting-card span {
+.votinCard span {
   font-size: 1.375rem;
   line-height: 28px;
 }
-.voting-card.selected {
+.votinCard.selected {
   color: var(--white);
   background-color: var(--primary);
 }
-.voting-card:hover {
+.votingCard:hover {
   cursor: pointer;
   box-sizing: border-box;
   border: 2px solid var(--primary);

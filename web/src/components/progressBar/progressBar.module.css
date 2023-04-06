@@ -1,11 +1,11 @@
-#progress-bar {
+.progressBar {
   width: 480px;
   background-color: var(--primary--hover);
   border-radius: 8px;
   align-self: center;
 }
 
-#bar {
+.bar {
   width: 1%;
   height: 8px;
   border-radius: 8px;

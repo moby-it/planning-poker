@@ -1,30 +1,31 @@
-import { Component, mergeProps } from "solid-js";
-import "./toggle.css";
-export const Toggle: Component<{
+import styles from "./toggle.module.css";
+
+interface ToggleProps {
   action: () => void;
   checked?: boolean;
   disabled?: boolean;
   testId?: string;
   label?: string;
   name: string;
-}> = (_props) => {
-  const props = mergeProps(
-    { checked: false, disabled: false, testId: "" },
-    _props
-  );
+}
+
+export const Toggle = (props: ToggleProps) => {
+  const checked = Boolean(props.checked);
+  const disabled = Boolean(props.disabled);
+
   return (
-    <div class="toggle-container">
-      <label for={props.name}>{props.label}</label>
-      <label class="switch">
+    <div className={styles.toggleContainer}>
+      <label htmlFor={props.name}>{props.label}</label>
+      <label className={styles.switch}>
         <input
-          disabled={props.disabled}
+          disabled={disabled}
           name={props.name}
           type="checkbox"
           data-testid={props.testId}
-          checked={props.checked}
+          checked={checked}
           onChange={props.action}
         />
-        <span class="slider round"></span>
+        <span className={`${styles.slider} ${styles.round}`}></span>
       </label>
     </div>
   );
