@@ -34,7 +34,7 @@ const Room = () => {
     const { roomId } = router.query;
     rootDispatch({ type: "setRoomId", payload: roomId as string });
     setRoomIsReady(true);
-  }, [router.isReady]);
+  }, [router.isReady, router.query]);
   useEffect(() => {
     if (init || !roomIsReady) return;
     init = true;
@@ -44,6 +44,7 @@ const Room = () => {
     }
     if (!username) {
       router.push("/prejoin");
+      return
     }
     setLoading(true);
     connectToRoom({ state: { ...roomContext, ...rootContext }, dispatch: roomDispatch }).then((socket) => {
@@ -54,14 +55,22 @@ const Room = () => {
           socket.send(JSON.stringify({ type: "ping" }));
         else clearInterval(pingInterval.current);
       }, pingMSInterval);
+    }).catch((e) => {
+      console.log(e);
+      router.push("/");
     });
   }, [roomIsReady]);
 
   useEffect(() => () => {
-    console.log(socket);
-    socket?.close();
-    clearInterval(pingInterval.current);
-    setSelectedCard(null);
+    if (socket) {
+      socket.close();
+      setSocket(undefined);
+      roomDispatch({ type: "reset" });
+      clearInterval(pingInterval.current);
+      setSelectedCard(null);
+    }
+    init = false;
+    roomInit = false;
   }, [socket]);
 
   useEffect(() => {

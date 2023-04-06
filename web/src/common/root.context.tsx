@@ -1,7 +1,8 @@
 import { Dispatch, createContext, useContext, useEffect, useReducer } from "react";
+import { boolean } from "zod";
 
-let init = true;
-
+let userInit = true;
+let isSpectatorInit = true;
 export const BrowserStorageKeys = {
   username: "username",
   isSpectator: "isSpectator",
@@ -19,6 +20,7 @@ type RootAction = {
   payload: string;
 } | {
   type: "setIsSpectator";
+  payload?: boolean;
 };
 
 function rootReducer(state: RootState, action: RootAction) {
@@ -28,21 +30,31 @@ function rootReducer(state: RootState, action: RootAction) {
     case "setUsername":
       return { ...state, username: action.payload };
     case "setIsSpectator":
-      return { ...state, isSpectator: !state.isSpectator };
+      return { ...state, isSpectator: typeof action.payload === 'boolean' ? action.payload : !state.isSpectator };
     default:
       return state;
   }
 }
 export function useIsSpectator() {
   const { isSpectator } = useRootContext();
+  const dispatch = useRootDispatch();
+  useEffect(() => {
+    if (!isSpectatorInit) return;
+    isSpectatorInit = false;
+    const isSpectator = localStorage.getItem(BrowserStorageKeys.isSpectator) ? Boolean(Number(localStorage.getItem(BrowserStorageKeys.isSpectator))) : false;
+    dispatch({ type: "setIsSpectator", payload: isSpectator });
+  }, [isSpectator]);
+  useEffect(() => {
+    localStorage.setItem(BrowserStorageKeys.isSpectator, isSpectator ? "1" : "0");
+  }, [isSpectator]);
   return isSpectator;
 }
 export function useUsername() {
   const { username } = useRootContext();
   const dispatch = useRootDispatch();
   useEffect(() => {
-    if (!init) return;
-    init = false;
+    if (!userInit) return;
+    userInit = false;
     const username = localStorage.getItem(BrowserStorageKeys.username);
     if (username) {
       dispatch({ type: "setUsername", payload: username });
@@ -52,6 +64,10 @@ export function useUsername() {
     localStorage.setItem(BrowserStorageKeys.username, username);
   }, [username]);
   return username;
+}
+export function useRoomId() {
+  const { roomId } = useRootContext();
+  return roomId;
 }
 export const rootInitialState = {
   roomId: "",

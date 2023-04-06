@@ -1,4 +1,4 @@
-import { RootContext, RootDispatchContext, useUsername } from "@/common/root.context";
+import { RootDispatchContext, useIsSpectator, useRoomId, useUsername } from "@/common/root.context";
 import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { Button } from "../../components/button/button";
@@ -7,7 +7,8 @@ import { apiV1Url } from "../../config";
 import styles from "./index.module.css";
 const PrejoinForm = () => {
   const router = useRouter();
-  const { isSpectator, roomId } = useContext(RootContext);
+  const roomId = useRoomId();
+  const isSpectator = useIsSpectator();
   const username = useUsername();
   const dispatch = useContext(RootDispatchContext);
   const { create } = router.query;

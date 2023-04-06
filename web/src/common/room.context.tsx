@@ -48,7 +48,9 @@ export type RoomAction =
     payload: Record<string, number>;
   } | {
     type: "resetVotes";
-
+  }
+  | {
+    type: "reset";
   };
 function roomReducer(state: RoomState, action: RoomAction): RoomState {
   switch (action.type) {
@@ -89,6 +91,8 @@ function roomReducer(state: RoomState, action: RoomAction): RoomState {
       return { ...state, revealingDuration: action.payload };
     case "setAverageScore":
       return { ...state, roundScore: action.payload?.toFixed(1) };
+    case "reset":
+      return roomInitialState;
     default:
       return state;
   }

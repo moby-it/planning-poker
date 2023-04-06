@@ -2,11 +2,9 @@ version: "3.9"
 services:
   ui:
     ports:
-      - 3000:80
+      - 3000:3000
     build:
-      context: ui
-      args:
-        - MODE=test
+      context: web
 
   api:
     ports:
