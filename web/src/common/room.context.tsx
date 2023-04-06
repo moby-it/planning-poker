@@ -164,15 +164,15 @@ export const handleWsMessage = (ctx: { state: RoomState, dispatch: Dispatch<Room
   } else if (isRoundRevealAvailable(data)) {
     if (data.revealAvailable)
       dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
+    else
+      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Started });
   } else if (isUserVoted(data)) {
     dispatch({ type: "setUserVoted", payload: { username: data.username, voted: true } });
   } else if (isRoundToReveal(data)) {
     dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealing });
     dispatch({ type: "setRevealingDuration", payload: data.after });
   } else if (isCancelReveal(data)) {
-    console.log(state);
-    if (state.roundStatus === RoundStatuses.Revealing)
-      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
+    dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
   }
   else if (isRoundRevealed(data)) {
     log("round_revealed");

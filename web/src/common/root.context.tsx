@@ -1,5 +1,6 @@
-import { Dispatch, createContext, useContext, useReducer } from "react";
+import { Dispatch, createContext, useContext, useEffect, useReducer } from "react";
 
+let init = true;
 
 export const BrowserStorageKeys = {
   username: "username",
@@ -35,6 +36,22 @@ function rootReducer(state: RootState, action: RootAction) {
 export function useIsSpectator() {
   const { isSpectator } = useRootContext();
   return isSpectator;
+}
+export function useUsername() {
+  const { username } = useRootContext();
+  const dispatch = useRootDispatch();
+  useEffect(() => {
+    if (!init) return;
+    init = false;
+    const username = localStorage.getItem(BrowserStorageKeys.username);
+    if (username) {
+      dispatch({ type: "setUsername", payload: username });
+    }
+  }, [username]);
+  useEffect(() => {
+    localStorage.setItem(BrowserStorageKeys.username, username);
+  }, [username]);
+  return username;
 }
 export const rootInitialState = {
   roomId: "",

@@ -4,6 +4,8 @@
   justify-content: flex-end;
   align-items: flex-end;
   gap: 12px;
+  width: 180px;
+
 }
 @media screen and (max-width: 768px) {
   .spectators {

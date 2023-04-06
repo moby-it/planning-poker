@@ -1,5 +1,5 @@
-import { useRevealing, useRoomContext, useRoomDispatch } from "@/common/room.context";
-import { useRootContext } from "@/common/root.context";
+import { useRoomContext, useRoomDispatch } from "@/common/room.context";
+import { useRootContext, useRootDispatch, useUsername } from "@/common/root.context";
 import { connectToRoom, sendMessageIfOpen } from "@/components/room/common";
 import { RoomHeader } from "@/components/room/header";
 import { RoomSubheader } from "@/components/room/subheader";
@@ -11,30 +11,39 @@ import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import styles from "./room.module.css";
 let init = false;
+let roomInit = false;
 const Room = () => {
   const [socket, setSocket] = useState<WebSocket>();
+  const [roomIsReady, setRoomIsReady] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-  const { roomId } = router.query;
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const pingMSInterval = 5000;
   const pingInterval = useRef<NodeJS.Timer | undefined>();
   const roomDispatch = useRoomDispatch();
+  const rootDispatch = useRootDispatch();
   const rootContext = useRootContext();
   const roomContext = useRoomContext();
-  const revealing = useRevealing();
+  const { roomId } = rootContext;
   const { isSpectator } = rootContext;
-  const username = rootContext.username;
+  const username = useUsername();
   const voters = roomContext.voters;
   useEffect(() => {
-    if (init) return;
+    if (!router.isReady || roomInit) return;
+    roomInit = true;
+    const { roomId } = router.query;
+    rootDispatch({ type: "setRoomId", payload: roomId as string });
+    setRoomIsReady(true);
+  }, [router.isReady]);
+  useEffect(() => {
+    if (init || !roomIsReady) return;
     init = true;
     if (typeof roomId !== "string") {
       router.push("/");
+      throw new Error("no roomId");
     }
     if (!username) {
       router.push("/prejoin");
-      throw new Error("no username");
     }
     setLoading(true);
     connectToRoom({ state: { ...roomContext, ...rootContext }, dispatch: roomDispatch }).then((socket) => {
@@ -46,27 +55,28 @@ const Room = () => {
         else clearInterval(pingInterval.current);
       }, pingMSInterval);
     });
-    return () => {
-      if (socket) socket.close();
-      clearInterval(pingInterval.current);
-      setSelectedCard(null);
-    };
-  }, []);
+  }, [roomIsReady]);
+
+  useEffect(() => () => {
+    console.log(socket);
+    socket?.close();
+    clearInterval(pingInterval.current);
+    setSelectedCard(null);
+  }, [socket]);
+
   useEffect(() => {
     if (typeof selectedCard === "number") userVotes();
   }, [selectedCard]);
 
 
-  const lastRoleIsSpectator = useRef<boolean>(isSpectator);
   useEffect(() => {
-    if (lastRoleIsSpectator.current === isSpectator || revealing) return;
     if (isSpectator) {
       changeRole("spectator");
       setSelectedCard(null);
     } else {
       changeRole("voter");
     }
-  }, [isSpectator, revealing]);
+  }, [isSpectator]);
 
   function changeRole(role: string) {
     sendMessageIfOpen(socket, {

@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 26px;
 }
+
 .room-header {
   width: 100%;
   height: 87px;
@@ -12,10 +13,12 @@
   justify-content: center;
   gap: 24px;
 }
+
 .room-subheader {
   display: flex;
   justify-content: space-between;
 }
+
 .voting-area {
   margin-left: 180px;
   flex: 1;
@@ -26,27 +29,27 @@
   align-items: center;
   padding: 42px 0 0;
 }
+
 .voting-area-wrapper {
   display: flex;
 }
+
 @media screen and (max-width: 768px) {
   .voting-area-wrapper {
     flex-direction: column;
     gap: 10px;
     align-items: center;
   }
+
   .voting-area {
     margin: 0;
 
     gap: 10px;
   }
+
   .room-subheader {
     flex-direction: column;
     gap: 10px;
     align-items: center;
   }
-}
-
-.spectators {
-  width: 180px;
 }

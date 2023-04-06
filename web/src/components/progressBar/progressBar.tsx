@@ -10,6 +10,7 @@ export const ProgressBar = (props: ProgressBarProps) => {
   let i = 1;
   useEffect(() => {
     if (!init) {
+      init = true;
       const interval = setInterval(() => {
         if (width >= 100) {
           clearInterval(interval);
@@ -23,8 +24,8 @@ export const ProgressBar = (props: ProgressBarProps) => {
   }, []);
 
   return (
-    <div className={styles.progressBar} >
-      <div className={styles.bar} style={{ width: width + "%" }}></div>
+    <div id={styles.progressBar} >
+      <div id={styles.bar} style={{ width: width + "%" }}></div>
     </div>
   );
 };
