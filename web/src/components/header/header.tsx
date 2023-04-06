@@ -1,27 +1,32 @@
-import { useLocation, useNavigate } from "@solidjs/router";
-import { Component, createEffect, createSignal, Show } from "solid-js";
-import "./header.css";
-export const Header: Component = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [showLogo, setShowLogo] = createSignal(location.pathname !== "/");
-  createEffect(() => {
-    setShowLogo(location.pathname !== "/");
-  });
+
+import Image from "next/image";
+import { useRouter } from 'next/router';
+import { useEffect, useState } from "react";
+import "./header.module.css";
+export const Header = () => {
+  const router = useRouter();
+  const [showLogo, setShowLogo] = useState(router.pathname !== "/");
+  useEffect(() => {
+    setShowLogo(router.pathname !== "/");
+  }, [router.pathname]);
+  let headerClasses = 'header row align-center';
+  if (showLogo) {
+    headerClasses += ' justify-between';
+  } else {
+    headerClasses += ' justify-end';
+  }
   return (
     <div
-      class="header row align-center"
-      classList={{ "justify-between": showLogo(), "justify-end": !showLogo() }}
+      className={headerClasses}
     >
-      <Show when={showLogo()}>
-        <img
-          src="/logo.png"
-          width="198"
-          height="42"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        />
-      </Show>
+      {showLogo && <Image
+        src="/logo.png"
+        width="198"
+        height="42"
+        alt="Moby IT"
+        style={{ cursor: "pointer" }}
+        onClick={() => router.replace("/")}
+      />}
       <span>
         Made By{" "}
         <a href="https://moby-it.com" target="_black">

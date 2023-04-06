@@ -1,5 +1,5 @@
 export function isProduction() {
-  return import.meta.env.PROD;
+  return process.env.PROD;
 }
 export function gtagIsAvailable(): boolean {
   return 'gtag' in window && typeof window.gtag === "function";

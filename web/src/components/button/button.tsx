@@ -1,28 +1,27 @@
-import { children, Component, JSXElement, mergeProps } from "solid-js";
-import "./button.css";
-export const Button: Component<{
+import styles from "./button.module.css";
+
+interface ButtonProps {
   color?: string;
   text?: string;
   testId?: string;
   action?: () => void;
   disabled?: boolean;
-  children?: JSXElement;
-}> = (_props) => {
-  const props = mergeProps(
-    { color: "primary", disabled: false, testId: "" },
-    _props
-  );
+  children?: React.ReactNode;
+}
+export const Button = (props: ButtonProps) => {
+  const color = props.color || "primary";
+  const disabled = props.disabled || false;
+  const testId = props.testId || "";
+  let classes = styles.btn;
+  if (color === "primary") classes += ` ${styles.primary}`;
+  if (color === "default") classes += ` ${styles.default}`;
+  if (disabled) classes += ` ${styles.disabled}`;
   return (
     <button
       type="button"
-      data-testid={props.testId}
-      disabled={props.disabled}
-      classList={{
-        btn: true,
-        primary: props.color === "primary",
-        default: props.color === "default",
-        disabled: props.disabled,
-      }}
+      data-testid={testId}
+      disabled={disabled}
+      className={classes}
       onClick={props.action}
     >
       {props.children}
