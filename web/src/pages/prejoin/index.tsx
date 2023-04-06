@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
 import { apiV1Url } from "../../config";
-import styles from "./prejoinForm.module.css";
+import styles from "./index.module.css";
 const PrejoinForm = () => {
   const router = useRouter();
   const { username, isSpectator, roomId } = useContext(RootContext);
@@ -34,8 +34,9 @@ const PrejoinForm = () => {
       method: "POST",
     });
     const data = await response.text();
+    console.log(data)
     dispatch({ type: 'setRoomId', payload: data });
-    router.push(`/room/${roomId}`);
+    router.replace(`/room/${data}`);
   }
   return (
     <div className={styles.prejoinForm}>
@@ -47,6 +48,7 @@ const PrejoinForm = () => {
           type="text"
           name="username"
           onKeyUp={handleInputChanged}
+          onChange={handleInputChanged}
           value={username}
         />
         {usernameError && (
@@ -59,10 +61,10 @@ const PrejoinForm = () => {
             name="isSpectator"
             checked={isSpectator}
             label="Join as Spectator"
-            action={dispatch({ type: 'setIsSpectator' })}
+            action={() => dispatch({ type: 'setIsSpectator' })}
           ></Toggle>
         </div>
-        <span id="change-later">You can change this later</span>
+        <span id={styles["change-later"]}>You can change this later</span>
       </div>
       <Button
         testId="create-room"

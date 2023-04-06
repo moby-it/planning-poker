@@ -51,7 +51,7 @@ export const SubmitBtn = (
       );
 
     } else {
-      throw new Error("Invalid state");
+     return <></>
     }
   }
   return (

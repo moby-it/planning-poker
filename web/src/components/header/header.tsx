@@ -2,14 +2,14 @@
 import Image from "next/image";
 import { useRouter } from 'next/router';
 import { useEffect, useState } from "react";
-import "./header.module.css";
+import styles from "./header.module.css";
 export const Header = () => {
   const router = useRouter();
   const [showLogo, setShowLogo] = useState(router.pathname !== "/");
   useEffect(() => {
     setShowLogo(router.pathname !== "/");
   }, [router.pathname]);
-  let headerClasses = 'header row align-center';
+  let headerClasses = `${styles.header} row align-center`;
   if (showLogo) {
     headerClasses += ' justify-between';
   } else {

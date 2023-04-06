@@ -1,4 +1,4 @@
-import "./card.module.css";
+import styles from "./card.module.css";
 import Image from "next/image";
 interface CardProps {
   voted?: boolean;
@@ -10,7 +10,7 @@ export const Card = (props: CardProps) => {
   const points = props.points;
   const revealed = Boolean(props.revealed);
   const voted = Boolean(props.voted);
-  const cssClasses = "card" + (voted ? " voted" : "") + (revealed ? " revealed" : "");
+  const cssClasses = styles.card + (voted ? ` ${styles.voted}` : "") + (revealed ? ` ${styles.revealed}` : "");
   function renderPoints(points: unknown) {
     if (typeof points === "number") {
       if (points === 100) {

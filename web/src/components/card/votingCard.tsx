@@ -1,5 +1,7 @@
 import Image from "next/image";
-import "./card.css";
+import styles from "./card.module.css";
+import cupSmallWhite from "/public/cup-small-white.svg";
+import cupSmallBlack from "/public/cup-small-black.svg";
 interface VotingCardProps {
   selected?: boolean;
   points: number;
@@ -7,13 +9,13 @@ interface VotingCardProps {
 }
 export const VotingCard = (props: VotingCardProps) => {
   const selected = Boolean(props.selected);
-  const cssClasses = "votingCard" + (selected ? " selected" : "");
+  const cssClasses = styles.votingCard + (selected ? ` ${styles.selected}` : "");
   function renderPoints(points: number) {
     if (points === 100) {
       return <span>?</span>;
     }
     if (points === 1000) {
-      return <Image src="/cup-small.svg" alt="cup-small" />;
+      return <Image src={selected ? cupSmallWhite :cupSmallBlack } alt="cup-small" />;
     }
     return <span>{points}</span>;
   }

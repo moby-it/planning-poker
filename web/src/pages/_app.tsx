@@ -1,21 +1,21 @@
-import { RoomContext, RoomDispatchContext, roomInitialState, roomReducer } from '@/common/room.context';
-import { RootContext, RootDispatchContext, rootInitialState, rootReducer } from '@/common/root.context';
+import { RoomProvider } from '@/common/room.context';
+import { RootProvider } from '@/common/root.context';
+import { Header } from '@/components/header/header';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
-import { useReducer } from 'react';
+import Head from 'next/head';
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [state, dispatch] = useReducer(rootReducer, rootInitialState);
-  const [roomState, roomDispatch] = useReducer(roomReducer, roomInitialState);
-  return <main id="root">
-    <RootContext.Provider value={state}>
-      <RootDispatchContext.Provider value={dispatch}>
-        <RoomContext.Provider value={roomState}>
-          <RoomDispatchContext.Provider value={roomDispatch}>
-            <Component {...pageProps} />
-          </RoomDispatchContext.Provider>
-        </RoomContext.Provider>
-      </RootDispatchContext.Provider>
-    </RootContext.Provider>
-  </main >;
+  return <>
+    <Head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />    </Head>
+    <main id="root">
+      <RootProvider>
+        <RoomProvider>
+          <Header />
+          <Component {...pageProps} />
+        </RoomProvider>
+      </RootProvider>
+    </main >;
+  </>;
 }

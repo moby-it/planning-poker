@@ -1,8 +1,8 @@
-import { Dispatch, createContext, useContext } from "react";
+import React, { Dispatch, createContext, useContext } from "react";
 import { log } from "./analytics";
 import { User } from "./user";
 import {
-  RoundToReveal, isCancelReveal, isPong, isRoundRevealAvailable,
+  isCancelReveal, isPong, isRoundRevealAvailable,
   isRoundRevealed, isRoundStarted, isRoundToReveal, isUserVoted, isUsersUpdated
 } from "./ws-events";
 
@@ -50,7 +50,7 @@ export type RoomAction =
     type: "resetVotes";
 
   };
-export function roomReducer(state: RoomState, action: RoomAction): RoomState {
+function roomReducer(state: RoomState, action: RoomAction): RoomState {
   switch (action.type) {
     case "setVoters":
       return { ...state, voters: action.payload };
@@ -96,7 +96,7 @@ export function roomReducer(state: RoomState, action: RoomAction): RoomState {
 export const roomInitialState: RoomState = {
   voters: [],
   spectators: [],
-  roundStatus: RoundStatuses.NotStarted,
+  roundStatus: RoundStatuses.Started,
   revealingDuration: 0,
   roundScore: null,
 };
@@ -127,6 +127,14 @@ export function useRoomContext() {
 }
 export function useRoomDispatch() {
   return useContext(RoomDispatchContext);
+}
+export function RoomProvider({ children }: { children: React.ReactNode; }) {
+  const [state, dispatch] = React.useReducer(roomReducer, roomInitialState);
+  return <RoomContext.Provider value={state}>
+    <RoomDispatchContext.Provider value={dispatch}>
+      {children}
+    </RoomDispatchContext.Provider>
+  </RoomContext.Provider>;
 }
 export const handleWsMessage = (ctx: { state: RoomState, dispatch: Dispatch<RoomAction>; }) => (event: MessageEvent<unknown>) => {
   const state = ctx.state;
@@ -160,11 +168,10 @@ export const handleWsMessage = (ctx: { state: RoomState, dispatch: Dispatch<Room
   } else if (isUserVoted(data)) {
     dispatch({ type: "setUserVoted", payload: { username: data.username, voted: true } });
   } else if (isRoundToReveal(data)) {
-    ((data: RoundToReveal) => {
-      dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealing });
-      dispatch({ type: "setRevealingDuration", payload: data.after });
-    })(data);
+    dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealing });
+    dispatch({ type: "setRevealingDuration", payload: data.after });
   } else if (isCancelReveal(data)) {
+    console.log(state);
     if (state.roundStatus === RoundStatuses.Revealing)
       dispatch({ type: "setRoundStatus", payload: RoundStatuses.Revealable });
   }

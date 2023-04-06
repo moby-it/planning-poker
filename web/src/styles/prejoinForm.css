@@ -1,4 +1,4 @@
-.prejoinForm {
+.prejoin-form {
   margin: auto;
   display: flex;
   flex-direction: column;
@@ -8,36 +8,36 @@
   width: 360px;
   height: 603px;
 }
-.prejoinForm label {
+.prejoin-form label {
   color: var(--primary--dark);
   font-size: 1.25rem;
   line-height: 25px;
 }
-.prejoinForm input {
+.prejoin-form input {
   border-bottom: 3px solid var(--primary);
   width: 360px;
 }
-.prejoinForm .inputWrapper {
+.input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-height: 120px;
 }
-.prejoinForm .error {
+.prejoin-form .error {
   color: var(--error);
   font-size: 0.75rem;
 }
-.prejoinForm .isSpectatorSwitch {
+.is-spectator-switch {
   display: flex;
   align-items: center;
   gap: 37px;
 }
-.prejoinForm .isSpectator {
+.is-spectator {
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
-.isSpectator label:first-child {
+.is-spectator label:first-child {
   width: 270px;
 }
 #change-later {

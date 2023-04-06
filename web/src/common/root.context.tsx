@@ -1,4 +1,4 @@
-import { Dispatch, createContext, useContext } from "react";
+import { Dispatch, createContext, useContext, useReducer } from "react";
 
 
 export const BrowserStorageKeys = {
@@ -20,7 +20,7 @@ type RootAction = {
   type: "setIsSpectator";
 };
 
-export function rootReducer(state: RootState, action: RootAction) {
+function rootReducer(state: RootState, action: RootAction) {
   switch (action.type) {
     case "setRoomId":
       return { ...state, roomId: action.payload };
@@ -38,8 +38,8 @@ export function useIsSpectator() {
 }
 export const rootInitialState = {
   roomId: "",
-  username: localStorage.getItem("username") ?? "",
-  isSpectator: Boolean(Number(localStorage.getItem(BrowserStorageKeys.isSpectator))),
+  username: "",
+  isSpectator: false,
 };
 export const RootContext = createContext<RootState>(rootInitialState);
 export const RootDispatchContext = createContext<Dispatch<RootAction>>(() => { });
@@ -50,3 +50,13 @@ export function useRootContext() {
 export function useRootDispatch() {
   return useContext(RootDispatchContext);
 }
+export function RootProvider({ children }: { children: React.ReactNode; }) {
+  const [state, dispatch] = useReducer(rootReducer, rootInitialState);
+  return (
+    <RootContext.Provider value={state}>
+      <RootDispatchContext.Provider value={dispatch}>
+        {children}
+      </RootDispatchContext.Provider>
+    </RootContext.Provider>
+  );
+};
