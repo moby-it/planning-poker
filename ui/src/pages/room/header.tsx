@@ -7,6 +7,7 @@ import {
   roundScore,
   revealing,
 } from "./roomState";
+import { Hydration } from "solid-js/web";
 
 const roomHeaders = {
   Voting: "Voting is in session!",
