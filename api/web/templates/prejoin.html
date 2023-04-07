@@ -6,7 +6,7 @@
 
 <body id="root">
   {{template "header"}}
-  <div class="prejoin-form">
+  <form class="prejoin-form" method="post">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>
@@ -24,10 +24,10 @@
       </div>
       <span id="change-later">You can change this later</span>
     </div>
-    <button class="btn primary" testId="create-room">
+    <button type="submit" class="btn primary" testId="create-room">
       <span>{{.Text}}</span>
     </button>
-  </div>
+  </form>
 </body>
 
 </html>
