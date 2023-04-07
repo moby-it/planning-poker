@@ -33,7 +33,7 @@
   background-color: var(--primary);
 }
 .btn:disabled {
-  background-color: var(--primary--gray);
+  background-color: var(--primary--gray) !important;
 }
 .btn.default {
   color: var(--primary);
