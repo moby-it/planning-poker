@@ -17,7 +17,7 @@ import (
 const (
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 30 * time.Second
+	pongWait = 10 * time.Second
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512

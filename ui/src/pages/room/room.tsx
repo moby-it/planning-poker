@@ -35,7 +35,7 @@ const Room: Component = () => {
     return;
   }
   log("new_room");
-  const [socket] = createResource(() => connectToRoom());
+  const [socket, { refetch }] = createResource(() => connectToRoom());
   onCleanup(() => {
     if (!socket.error) socket()?.close();
     clearInterval(pingInterval);
@@ -49,7 +49,10 @@ const Room: Component = () => {
     pingInterval = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN)
         ws.send(JSON.stringify({ type: "ping" }));
-      else clearInterval(pingInterval);
+      else {
+        clearInterval(pingInterval);
+        refetch();
+      }
     }, pingMSInterval);
   });
   createEffect(() => {
