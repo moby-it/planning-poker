@@ -17,7 +17,7 @@ import (
 const (
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 10 * time.Second
+	pongWait = 5 * time.Minute
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
@@ -208,6 +208,7 @@ func (room *Room) readMessage(client *user.Connection) {
 		switch a.Type {
 		case actions.Ping:
 			client.SetReadDeadline(time.Now().Add(pongWait))
+			log.Printf("%v refreshed connection deadline", client.Username)
 			client.WriteJSON(events.PongEvent{Event: events.Event{Type: events.Pong}})
 		case actions.UserToVote:
 			var action actions.UserToVoteAction

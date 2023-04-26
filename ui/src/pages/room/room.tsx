@@ -27,7 +27,7 @@ const Room: Component = () => {
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
-  const pingMSInterval = 5000;
+  const pingMSInterval = 15 * 1000; // 15 seconds
   let pingInterval: NodeJS.Timer | undefined;
   setRoomId(roomId);
   if (!username()) {
