@@ -21,7 +21,7 @@ export const App = () => {
     </RoomProvider>
   );
 };
-const NoComponent: Component = () => {
+const NoComponent: () => JSX.Element = () => {
   const navigate = useNavigate();
   navigate("/");
   return <></>;
