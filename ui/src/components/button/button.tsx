@@ -1,6 +1,13 @@
-import {children, Component, JSX, JSXElement, mergeProps} from "solid-js";
+import { children, Component, JSX, JSXElement, mergeProps } from "solid-js";
 import "./button.css";
-export const Button: (_props) => JSX.Element = (_props) => {
+export const Button: Component<{
+  color?: string;
+  text?: string;
+  testId?: string;
+  action?: () => void;
+  disabled?: boolean;
+  children?: JSXElement;
+}> = (_props) => {
   const props = mergeProps(
     { color: "primary", disabled: false, testId: "" },
     _props
