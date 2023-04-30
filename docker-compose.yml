@@ -1,11 +1,6 @@
 version: "3.9"
 services:
-  ui:
-    ports:
-      - 3000:80
-    build:
-      context: ui
-  api:
+  web:
     ports:
       - 8080:8080
     build:

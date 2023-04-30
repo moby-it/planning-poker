@@ -7,7 +7,7 @@ const localStorageKeys = {
 // validate user input changes and save to local storage
 if (usernameInput) {
   usernameInput.addEventListener('input', (e) => {
-    const submit = document.querySelector('button[type="submit"]');
+    const submit = document.querySelector('#submit');
     const username = e.target.value;
     const errorNode = document.querySelector('.error');
     if (username.length > 12) {
