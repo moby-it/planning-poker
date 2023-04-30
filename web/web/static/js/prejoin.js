@@ -1,13 +1,14 @@
 const usernameInput = document.querySelector('input[name="username"]');
 const isSpectatorInput = document.querySelector('input[name="isSpectator"]');
+const submit = document.querySelector('#submit');
+const apiUrl = window.location.origin + "/api/v1";
 const localStorageKeys = {
   username: 'username',
   isSpectator: 'isSpectator',
-}
+};
 // validate user input changes and save to local storage
 if (usernameInput) {
   usernameInput.addEventListener('input', (e) => {
-    const submit = document.querySelector('#submit');
     const username = e.target.value;
     const errorNode = document.querySelector('.error');
     if (username.length > 12) {
@@ -34,5 +35,22 @@ if (isSpectatorInput) {
   isSpectatorInput.addEventListener('change', (e) => {
     const isSpectator = e.target.checked;
     localStorage.setItem(localStorageKeys.isSpectator, isSpectator);
+  });
+}
+// register submit handler
+if (submit) {
+  submit.addEventListener('click', () => {
+    const username = usernameInput.value;
+    const role = isSpectatorInput.checked ? 'spectator' : 'voter';
+    const url = new URLSearchParams(window.location.search);
+    const shouldCreate = Boolean(+url.get("create"));
+    if (username.length) {
+      if (shouldCreate) {
+        fetch(apiUrl + "/createRoom", { method: "POST" }).then(r => r.text()).then(roomId => {
+          window.location.href = `${window.origin}/room/${roomId}`;
+        });
+      }
+    }
+    console.log(username, role, shouldCreate);
   });
 }
