@@ -6,14 +6,14 @@ on:
       - "v*"
 
 jobs:
-  test-api:
+  test-web:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Test api
         working-directory: api
         run: make test
-  test-ui:
+  test-e2e:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -22,7 +22,7 @@ jobs:
           docker compose -f docker-compose.test.yml build
           docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from e2e
   build-api:
-    needs: test-api
+    needs: [test-web,test-e2e]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -35,29 +35,10 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          context: ./api
-          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
-  build-ui:
-    needs: test-ui
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Log in to registry
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.CONTAINER_USERNAME }}
-          password: ${{ secrets.CONTAINER_PASSWORD }}
-      - name: 'Create env file'
-        run: |
-          echo "${{ secrets.UI_ENV }}" > ui/.env
-      - name: Build and Push image
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          context: ./ui
-          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:stable
+          context: ./web
+          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-web:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-web:stable
   deploy:
-    needs: [build-ui, build-api]
+    needs: build-web
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3

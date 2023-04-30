@@ -29,12 +29,23 @@ func StartApp() error {
 	r.Handle("/favicon.ico", http.FileServer(http.Dir("web/static")))
 
 	// register templates
+	r.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		tmpl, err := template.ParseFiles("web/templates/room.html", "web/templates/head.html", "web/templates/header.html")
+		if err != nil {
+			http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
+		}
+		tmpl.Execute(w, nil)
+	})
 	r.HandleFunc("/prejoin", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			username := r.FormValue("username")
 			log.Println(string(username))
 			isSpectator := r.FormValue("isSpectator")
 			log.Println(string(isSpectator))
+			http.Redirect(w, r, "/room", http.StatusTemporaryRedirect)
 		} else if r.Method == "GET" {
 			data := struct {
 				Title string
