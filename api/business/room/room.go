@@ -133,13 +133,14 @@ func (room *Room) AddClient(client *user.Connection, role string) error {
 	log.Printf("%v joined room %v", client.Username, room.Id)
 	return nil
 }
-
 func (room *Room) removeClient(client *user.Connection) {
 	room.Mu.RLock()
 	for i, c := range room.Voters {
 		if c == client {
 			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
-			delete(room.CurrentRound.Votes, c.Username)
+			if !room.CurrentRound.Revealed {
+				delete(room.CurrentRound.Votes, c.Username)
+			}
 		}
 	}
 	for i, c := range room.Spectators {
@@ -178,6 +179,8 @@ func (room *Room) emitUsersAndRevealableRound() {
 			room.cancelReveal <- true
 		}
 		events.Broadcast(revealableEvent, room.Connections()...)
+	} else {
+		room.RevealCurrentRound()
 	}
 }
 
