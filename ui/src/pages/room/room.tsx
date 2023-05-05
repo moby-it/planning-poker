@@ -19,7 +19,7 @@ import {
 import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
 import "./room.css";
-import { revealing, voters } from "./roomState";
+import { revealed, revealing, setSpectators, setVoters, voters } from "./roomState";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
 
@@ -40,6 +40,8 @@ const Room: Component = () => {
     if (!socket.error) socket()?.close();
     clearInterval(pingInterval);
     setSelectedCard(null);
+    setVoters([]);
+    setSpectators([]);
   });
   createEffect(() => {
     if (socket.loading) return;
@@ -69,14 +71,14 @@ const Room: Component = () => {
     return isSpectator();
   });
   const userVotes = () =>
-    sendMessageIfOpen(socket(), {
+    sendMessageIfOpen(socket.latest, {
       type: "userToVote",
       username: username(),
       storyPoints: selectedCard(),
       roomId,
     });
   const changeRole = (role: string) =>
-    sendMessageIfOpen(socket(), {
+    sendMessageIfOpen(socket.latest, {
       type: "changeRole",
       username: username(),
       role,
