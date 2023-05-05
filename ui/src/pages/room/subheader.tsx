@@ -1,8 +1,8 @@
 import { Component } from "solid-js";
 import toast from "solid-toast";
-import { setIsSpectator, isSpectator } from "../../common/state";
+import { isSpectator, setIsSpectator } from "../../common/state";
 import { Toggle } from "../../components/toggle/toggle";
-import { revealing, revealed } from "./roomState";
+import { revealed, revealing } from "./roomState";
 
 export const RoomSubheader: Component = () => {
   return (
@@ -19,14 +19,16 @@ export const RoomSubheader: Component = () => {
       >
         Copy Invite Link
       </span>
-      <Toggle
-        name="isSpectator"
-        label="Join as Spectator"
-        testId="spectator-toggle"
-        disabled={revealing() || revealed()}
-        action={() => setIsSpectator((v) => !v)}
-        checked={isSpectator()}
-      />
+      <div onClick={() => (revealed() || revealing()) && toast.error('Can only change role after a new Round has Started')}>
+        <Toggle
+          name="isSpectator"
+          label="Join as Spectator"
+          testId="spectator-toggle"
+          disabled={revealed() || revealing()}
+          action={() => setIsSpectator((v) => !v)}
+          checked={isSpectator()}
+        />
+      </div>
     </div>
   );
 };

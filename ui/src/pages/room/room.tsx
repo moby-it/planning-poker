@@ -1,25 +1,25 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import {
   Component,
+  Show,
+  Suspense,
   createEffect,
   createResource,
   onCleanup,
-  Show,
-  Suspense,
 } from "solid-js";
 import { log } from "../../common/analytics";
 import { isSpectator, setRoomId, username } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
 import {
+  VotingCardList,
   selectedCard,
   setSelectedCard,
-  VotingCardList,
 } from "../../components/votingCardList/votingCardList";
 import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
 import "./room.css";
-import { revealed, revealing, setSpectators, setVoters, voters } from "./roomState";
+import { revealing, setSpectators, setVoters, voters } from "./roomState";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
 
@@ -27,7 +27,7 @@ const Room: Component = () => {
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
-  const pingMSInterval = 15 * 1000; // 15 seconds
+  const pingMSInterval = 5 * 1000; // 15 seconds
   let pingInterval: NodeJS.Timer | undefined;
   setRoomId(roomId);
   if (!username()) {
@@ -57,8 +57,9 @@ const Room: Component = () => {
       }
     }, pingMSInterval);
   });
-  createEffect(() => {
-    if (typeof selectedCard() === "number") userVotes();
+  createEffect((prevCard) => {
+    if (typeof selectedCard() === "number" && prevCard !== selectedCard()) userVotes();
+    return selectedCard();
   });
   createEffect((prev) => {
     if (prev === isSpectator() || revealing()) return;

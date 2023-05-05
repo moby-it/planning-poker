@@ -1,8 +1,5 @@
 ## Components
 
-- feedback on failed to connect ws
-
-
 - Enhance e2e suits
   - Voting
     1. User creates room

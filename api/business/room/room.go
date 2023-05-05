@@ -108,13 +108,15 @@ func (r *Room) Close() {
 	delete(rooms, r.Id)
 }
 func (room *Room) Vote(username string, storyPoints int) {
-	room.Mu.RLock()
-	room.CurrentRound.Votes[username] = storyPoints
-	room.Mu.RUnlock()
-	event := events.UserVotedEvent{Username: username, Event: events.Event{Type: events.UserVoted}}
-	events.Broadcast(event, room.Connections()...)
-	revealEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
-	events.Broadcast(revealEvent, room.Connections()...)
+	if !room.CurrentRound.Revealed {
+		room.Mu.RLock()
+		room.CurrentRound.Votes[username] = storyPoints
+		room.Mu.RUnlock()
+		event := events.UserVotedEvent{Username: username, Event: events.Event{Type: events.UserVoted}}
+		events.Broadcast(event, room.Connections()...)
+		revealEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: room.CurrentRound.IsRevealable(len(room.Voters))}
+		events.Broadcast(revealEvent, room.Connections()...)
+	}
 }
 
 // a client can either connect as a "voter" or a "spectator". Any other role will result in panic
@@ -149,7 +151,9 @@ func (room *Room) removeClient(client *user.Connection) {
 		}
 	}
 	room.Mu.RUnlock()
-	room.emitUsersAndRevealableRound()
+	if !room.CurrentRound.Revealed {
+		room.emitUsersAndRevealableRound()
+	}
 	log.Printf("%v left room %v", client.Username, room.Id)
 }
 func (room *Room) RevealCurrentRound() {
@@ -248,6 +252,7 @@ func (room *Room) readMessage(client *user.Connection) {
 			room.CurrentRound = NewRound()
 			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
 			events.Broadcast(event, room.Connections()...)
+			room.emitUsersAndRevealableRound()
 		case actions.ChangeRole:
 			var action actions.ChangeRoleAction
 			err = json.Unmarshal(message, &action)
