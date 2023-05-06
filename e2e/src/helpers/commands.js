@@ -85,13 +85,8 @@ export async function UserIsVoter($document, username) {
   }
 }
 export async function UserVoted($document, username) {
-  try {
-    const $card = await getByTestId($document, `board-card-${username}`);
-    await $card.$$(".voted");
-    return true;
-  } catch (e) {
-    return false;
-  }
+  const $card = await getByTestId($document, `board-card-${username}`);
+  await $card.$$(".voted");
 }
 export async function RevealRound($document) {
   const $revealButton = await getByTestId($document, "reveal-round");
@@ -138,4 +133,20 @@ export async function StartNewRound($document) {
 export async function CancelRoundReveal($document) {
   const $cancelButton = await getByTestId($document, "cancel-reveal");
   await $cancelButton.click();
+}
+export async function ShouldHaveSelectedVoted() {
+
+}
+export async function VotingCardListVisible($document, expectedResult) {
+  try {
+    await waitFor(() => getByTestId($document, "voting-card-list"), {
+      timeout: 2000,
+    });
+    if (expectedResult) return true;
+    throw new Error("Expected voting card list to be present");
+  } catch (e) {
+    if (!expectedResult) return true;
+    throw new Error("Expected voting card list NOT to be present");
+
+  }
 }
