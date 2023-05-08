@@ -24,7 +24,7 @@ export const Header: Component = () => {
       </Show>
       <span>
         Made By{" "}
-        <a href="https://moby-it.com" target="_black">
+        <a class="moby-link" href="https://moby-it.com" target="_black">
           Moby IT
         </a>
       </span>
