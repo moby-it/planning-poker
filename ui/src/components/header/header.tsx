@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { Component, createEffect, createSignal, Show } from "solid-js";
+import { Component, Show, createEffect, createSignal } from "solid-js";
+import { Logo } from "../logo/Logo";
 import "./header.css";
 export const Header: Component = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [showLogo, setShowLogo] = createSignal(location.pathname !== "/");
   createEffect(() => {
@@ -14,13 +14,7 @@ export const Header: Component = () => {
       classList={{ "justify-between": showLogo(), "justify-end": !showLogo() }}
     >
       <Show when={showLogo()}>
-        <img
-          src="/logo.png"
-          width="198"
-          height="42"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        />
+        <Logo />
       </Show>
       <span>
         Made By{" "}
