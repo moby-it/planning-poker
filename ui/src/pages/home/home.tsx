@@ -21,7 +21,7 @@ const Home: Component = () => {
           </a>
           <span>
             <img
-              src="/check-primary.svg"
+              src="/check.svg"
               class="primary"
               alt="check"
               srcset=""
@@ -32,7 +32,7 @@ const Home: Component = () => {
         <span>
           We got tired of searching for free solution for doing{" "}
           <strong>
-            <u>Scrum Poker Planning</u>
+            Scrum Poker Planning
           </strong>
           , so we decided to solve the issue ourselves and open-source it.
         </span>

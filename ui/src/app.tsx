@@ -1,6 +1,6 @@
 import { Route, Routes, useNavigate } from "@solidjs/router";
 import { Component, lazy } from "solid-js";
-import toast, { Toaster } from "solid-toast";
+import { Toaster } from "solid-toast";
 import { Header } from "./components/header/header";
 
 const Home = lazy(() => import("./pages/home/home"));

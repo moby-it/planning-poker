@@ -5,7 +5,7 @@ ARG MODE=production
 
 WORKDIR /app
 
-RUN npm i -g pnpm@8.0.0
+RUN npm i -g pnpm@8.6.0
 
 COPY package.json pnpm-lock.yaml ./
 
