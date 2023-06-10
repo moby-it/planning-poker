@@ -1,11 +1,7 @@
 import { Component, createEffect, createSignal, Show } from "solid-js";
 import { ProgressBar } from "../../components/progressBar/progressBar";
 import {
-  roundStatus,
-  RoundStatuses,
-  revealingDuration,
-  roundScore,
-  revealing,
+  RoundStatuses, useRoomContext,
 } from "./roomState";
 
 const roomHeaders = {
@@ -16,6 +12,7 @@ const roomHeaders = {
 } as const;
 
 export const RoomHeader: Component = () => {
+  const { revealing, revealingDuration, roundStatus, roundScore } = useRoomContext();
   let interval: NodeJS.Timer | undefined;
   const [roomHeader, setRoomHeader] = createSignal<string>(roomHeaders.Voting);
 

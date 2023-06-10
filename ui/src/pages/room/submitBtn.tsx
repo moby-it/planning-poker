@@ -1,11 +1,12 @@
 import { Component, Match, Switch } from "solid-js";
 import { Button } from "../../components/button/button";
 import { sendMessageIfOpen } from "./common";
-import { revealable, revealed, revealing } from "./roomState";
+import { useRoomContext } from "./roomState";
 
-export const SubmitBtn: Component<{ socket: WebSocket | undefined }> = (
+export const SubmitBtn: Component<{ socket: WebSocket | undefined; }> = (
   props
 ) => {
+  const { revealable, revealed, revealing } = useRoomContext();
   const toRevealRound = () =>
     sendMessageIfOpen(props.socket, {
       type: "roundToReveal",

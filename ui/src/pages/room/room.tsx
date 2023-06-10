@@ -19,11 +19,12 @@ import {
 import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
 import "./room.css";
-import { revealing, setSpectators, setVoters, voters } from "./roomState";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
+import { useRoomContext } from "./roomState";
 
 const Room: Component = () => {
+  const { setSpectators, setVoters, revealing, voters, handleWsMessage } = useRoomContext();
   const navigate = useNavigate();
   const params = useParams();
   const roomId = params["roomId"];
@@ -35,7 +36,7 @@ const Room: Component = () => {
     return;
   }
   log("new_room");
-  const [socket, { refetch }] = createResource(() => connectToRoom());
+  const [socket, { refetch }] = createResource(() => connectToRoom(handleWsMessage));
   onCleanup(() => {
     if (!socket.error) socket()?.close();
     clearInterval(pingInterval);

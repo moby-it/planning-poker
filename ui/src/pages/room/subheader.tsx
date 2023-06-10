@@ -2,9 +2,10 @@ import { Component } from "solid-js";
 import toast from "solid-toast";
 import { isSpectator, setIsSpectator } from "../../common/state";
 import { Toggle } from "../../components/toggle/toggle";
-import { revealed, revealing } from "./roomState";
+import { useRoomContext } from "./roomState";
 
 export const RoomSubheader: Component = () => {
+  const { revealed, revealing } = useRoomContext();
   return (
     <div class="room-subheader">
       <span

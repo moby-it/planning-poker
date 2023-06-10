@@ -1,8 +1,10 @@
 import { role, roomId, username } from "../../common/state";
 import { wsv1Url } from "../../config";
-import { handleWsMessage } from "./roomState";
+import { useRoomContext } from "./roomState";
 
-export async function connectToRoom(): Promise<WebSocket> {
+type WsEventHandler = (event: MessageEvent<unknown>) => void;
+
+export async function connectToRoom(hander: WsEventHandler): Promise<WebSocket> {
   return new Promise((resolve, reject) => {
     if (!roomId()) reject("No room id");
     const socket = new WebSocket(
@@ -11,7 +13,7 @@ export async function connectToRoom(): Promise<WebSocket> {
     socket.addEventListener("open", function () {
       resolve(socket);
     });
-    socket.addEventListener("message", handleWsMessage);
+    socket.addEventListener("message", hander);
     socket.addEventListener("error", () => {
       reject('error from ws connection');
     });

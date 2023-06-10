@@ -1,13 +1,15 @@
 import { Component, createEffect, createSignal } from "solid-js";
 import { isSpectator } from "../../common/state";
-import { revealed, revealing } from "../../pages/room/roomState";
 import { VotingCard } from "../card/votingCard";
 import "./votingCardList.css";
+import { useRoomContext } from "../../pages/room/roomState";
+
 export const [selectedCard, setSelectedCard] = createSignal<number | null>(
   null
 );
 
 export const VotingCardList: Component = () => {
+  const { revealed, revealing } = useRoomContext();
   createEffect((prev) => {
     if (prev && !revealed()) {
       setSelectedCard(null);

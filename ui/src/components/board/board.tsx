@@ -1,9 +1,10 @@
 import { Component, For } from "solid-js";
 import { User } from "../../common/user";
-import { revealed } from "../../pages/room/roomState";
 import { Card } from "../card/card";
 import "./board.css";
+import { useRoomContext } from "../../pages/room/roomState";
 export const Board: Component<{ users: User[]; }> = (props) => {
+  const { revealed } = useRoomContext();
   return (
     <div class="board">
       <For each={props.users}>

@@ -1,7 +1,8 @@
 import { Component, Index, Show } from "solid-js";
-import { spectators } from "../../pages/room/roomState";
 import "./spectatorList.css";
+import { useRoomContext } from "../../pages/room/roomState";
 export const SpectatorList: Component = () => {
+  const { spectators } = useRoomContext();
   return (
     <div class="spectators">
       <Show when={spectators.length}>
