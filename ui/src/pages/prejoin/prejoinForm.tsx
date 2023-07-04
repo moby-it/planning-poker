@@ -13,9 +13,10 @@ import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
 import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
+import { log } from "../../common/analytics";
 const PrejoinForm: Component = () => {
   const navigate = useNavigate();
-  const [params] = useSearchParams<{ create: string }>();
+  const [params] = useSearchParams<{ create: string; }>();
   const isCreatingRoom = Boolean(params.create);
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
@@ -42,6 +43,7 @@ const PrejoinForm: Component = () => {
     });
     const data = await response.text();
     setRoomId(data);
+    log("new_room");
     navigate(`/room/${roomId()}`);
   }
   return (

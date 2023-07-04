@@ -35,7 +35,6 @@ const Room: Component = () => {
     navigate("/prejoin");
     return;
   }
-  log("new_room");
   const [socket, { refetch }] = createResource(() => connectToRoom(handleWsMessage));
   onCleanup(() => {
     if (!socket.error) socket()?.close();
