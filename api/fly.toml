@@ -1,0 +1,15 @@
+# fly.toml app configuration file generated for planning-poker-api on 2023-07-10T16:01:11+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "planning-poker-api"
+primary_region = "cdg"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
