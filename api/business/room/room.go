@@ -126,8 +126,6 @@ func (room *Room) AddClient(client *user.Connection, role string) error {
 		room.Voters = append(room.Voters, client)
 	case "spectator":
 		room.Spectators = append(room.Spectators, client)
-	default:
-		panic("incorrect role flag. Please send 'spectator' or 'voter'")
 	}
 	room.emitUsersAndRevealableRound()
 
