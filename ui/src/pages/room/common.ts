@@ -1,6 +1,5 @@
 import { role, roomId, username } from "../../common/state";
 import { wsv1Url } from "../../config";
-import { useRoomContext } from "./roomState";
 
 type WsEventHandler = (event: MessageEvent<unknown>) => void;
 
