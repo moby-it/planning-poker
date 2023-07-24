@@ -230,20 +230,7 @@ func (room *Room) readMessage(client *user.Connection) {
 			room.Mu.RLock()
 			room.cancelReveal = make(chan bool, 1)
 			room.Mu.RUnlock()
-			go func() {
-				select {
-				case <-room.cancelReveal:
-					log.Println("Cancel reveal")
-					event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
-					events.Broadcast(event, room.Connections()...)
-					cancel()
-				case <-reveal.Done():
-					room.RevealCurrentRound()
-				}
-				room.Mu.RLock()
-				room.cancelReveal = nil
-				room.Mu.RUnlock()
-			}()
+			go waitForCancelReveal(room, reveal, cancel)
 		case actions.CancelReveal:
 			room.cancelReveal <- true
 		case actions.RoundToStart:
@@ -261,4 +248,18 @@ func (room *Room) readMessage(client *user.Connection) {
 			room.ConvertUserRole(client.Username, action.Role)
 		}
 	}
+}
+func waitForCancelReveal(room *Room, reveal context.Context, cancel context.CancelFunc) {
+	select {
+	case <-room.cancelReveal:
+		log.Println("Cancel reveal")
+		event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
+		events.Broadcast(event, room.Connections()...)
+		cancel()
+	case <-reveal.Done():
+		room.RevealCurrentRound()
+	}
+	room.Mu.RLock()
+	room.cancelReveal = nil
+	room.Mu.RUnlock()
 }
