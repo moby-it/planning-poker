@@ -1,0 +1,10 @@
+{{define "toggle"}}
+
+<div class="toggle-container">
+  <label for="{{ .Name }}">{{ .Label }}</label>
+  <label class="switch">
+    <input name="{{ .Name}}" type="checkbox" data-testid="{{ .TestId }}" checked="{{ .Checked }}" />
+    <span class="slider round"></span>
+  </label>
+</div>
+{{end}}

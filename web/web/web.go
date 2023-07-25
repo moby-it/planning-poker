@@ -29,6 +29,7 @@ func StartApp() error {
 	// register templates
 	r.HandleFunc("/room/{roomId}", handlers.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", handlers.ServePrejoin).Methods("GET")
+	r.HandleFunc("/room", handlers.ServePrejoin).Methods("GET")
 	r.HandleFunc("/", handlers.ServeHome).Methods("GET")
 
 	// attachProfiler(r)

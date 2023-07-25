@@ -22,8 +22,15 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	tmpl, err := template.ParseFiles("web/templates/room.html", "web/templates/head.html", "web/templates/header.html")
+	roomTemplates := []string{
+		"web/templates/room.html", "web/templates/head.html", "web/templates/header.html",
+		"web/templates/board.html", "web/templates/button.html", "web/templates/spectatorList.html",
+		"web/templates/subheader.html", "web/templates/toggle.html", "web/templates/votingCard.html",
+		"web/templates/votingCardList.html", "web/templates/card.html",
+	}
+	tmpl, err := template.ParseFiles(roomTemplates...)
 	if err != nil {
+		log.Fatalln(err)
 		http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
 	}
 	tmpl.Execute(w, nil)

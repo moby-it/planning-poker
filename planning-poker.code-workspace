@@ -25,7 +25,7 @@
         "type": "go",
         "request": "launch",
         "mode": "debug",
-        "program": "${workspaceFolder}/api/main.go"
+        "program": "${workspaceFolder}/web/main.go"
       }
     ]
   }

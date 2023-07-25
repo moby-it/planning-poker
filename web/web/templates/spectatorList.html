@@ -1,0 +1,10 @@
+{{define "spectatorList"}}
+<div class="spectators">
+  <ul class="spectators">
+    <li>Spectators</li>
+    {{range .}}
+    <li data-testid="spectator-{{.Name}}"> {{.Name}} </li>
+    {{end}}
+  </ul>
+</div>
+{{end}}
