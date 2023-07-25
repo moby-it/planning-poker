@@ -1,0 +1,12 @@
+{{define "card"}}
+<div class="{{ .Classes }}">
+  {{ if eq .Points 100 }}
+  <span>?</span>
+  {{end}}
+  {{ if eq .Points 1000 }}
+  <img src="/cup-medium.svg" />
+  {{ else }}
+  <span>{{ .Points }}</span>
+  {{end}}
+</div>
+{{end}}

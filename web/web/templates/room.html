@@ -6,17 +6,20 @@
 <body id="root">
   {{template "header"}}
   <div class="room" data-testid="room">
-    <RoomHeader />
-    <RoomSubheader />
+    <div class="room-header">
+      <h2>Room Header</h2>
+      <div id="progress-bar">
+        <div id="bar"></div>
+      </div>
+    </div>
+    {{template "subheader"}}
     <div class="voting-area-wrapper">
       <div class="voting-area">
-        <Board users={voters} />
-        <Show when={!isSpectator()}>
-          <SubmitBtn socket={socket()} />
-        </Show>
-        <VotingCardList />
+        {{template "board"}}
+        {{template "button"}}
+        {{template "votingCardList"}}
       </div>
-      <SpectatorList />
+      {{template "spectatorList"}}
     </div>
   </div>
   <script defer src="/js/room.js"></script>
