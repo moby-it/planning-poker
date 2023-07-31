@@ -12,7 +12,9 @@ import (
 
 func StartApp() error {
 	r := mux.NewRouter()
-
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("app healthy"))
+	}).Methods("GET")
 	// attachProfiler(r)
 
 	// v1 Handlers
