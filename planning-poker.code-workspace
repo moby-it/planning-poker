@@ -6,29 +6,9 @@
   ],
   "settings": {
     "makefile.makefilePath": "api/Makefile",
-    "workbench.colorCustomizations": {
-      "activityBar.activeBackground": "#91b3e0",
-      "activityBar.background": "#91b3e0",
-      "activityBar.foreground": "#15202b",
-      "activityBar.inactiveForeground": "#15202b99",
-      "activityBarBadge.background": "#c73876",
-      "activityBarBadge.foreground": "#e7e7e7",
-      "commandCenter.border": "#15202b99",
-      "sash.hoverBorder": "#91b3e0",
-      "statusBar.background": "#6997d5",
-      "statusBar.foreground": "#15202b",
-      "statusBarItem.hoverBackground": "#417bca",
-      "statusBarItem.remoteBackground": "#6997d5",
-      "statusBarItem.remoteForeground": "#15202b",
-      "titleBar.activeBackground": "#6997d5",
-      "titleBar.activeForeground": "#15202b",
-      "titleBar.inactiveBackground": "#6997d599",
-      "titleBar.inactiveForeground": "#15202b99"
-    },
-    "peacock.color": "#6997d5",
     "yaml.schemas": {
       "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "**/*/docker-stack.yml"
-    }
+    },
   },
   "extensions": {
     "recommendations": [
