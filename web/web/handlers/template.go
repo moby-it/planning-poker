@@ -47,7 +47,7 @@ func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 		}
 		create := r.URL.Query().Get("create")
 
-		if create != "true" {
+		if create != "1" {
 			data.Title = "Join a Room"
 			data.Text = "join room"
 		}
