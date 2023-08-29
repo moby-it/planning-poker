@@ -10,16 +10,19 @@ import (
 )
 
 type Card struct {
-	Classes string
-	Points  string
+	Classes  string
+	Points   int
+	Username string
 }
 type Spectator struct {
 	Name string
 }
 type Button struct {
-	Text    string
-	Show    bool
-	Classes string
+	Text     string
+	Show     bool
+	Classes  string
+	TestId   string
+	Disabled bool
 }
 type Toggle struct {
 	Label   string
@@ -33,9 +36,8 @@ type Subheader struct {
 type RoomData struct {
 	Subheader
 	Button
-	Spectators  []Spectator
-	VotingCards []Card
-	BoardCards  []Card
+	Spectators []Spectator
+	BoardCards []Card
 }
 
 func ServeRoom(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +48,7 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	_, found := room.Get(roomId)
+	room, found := room.Get(roomId)
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -64,7 +66,33 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	toggle := Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: true, Label: "Join as Spectator"}
-	roomData := RoomData{Subheader: Subheader{Toggle: toggle}}
+	spectators := make([]Spectator, len(room.Spectators))
+	for i := range room.Spectators {
+		spectators[i] = Spectator{Name: room.Spectators[i].Username}
+	}
+	button := Button{Show: false}
+	boardCards := createBoardCards(room)
+
+	roomData := RoomData{Subheader: Subheader{Toggle: toggle}, Spectators: spectators, Button: button, BoardCards: boardCards}
 	tmpl.Execute(w, roomData)
 
+}
+
+func createBoardCards(room *room.Room) []Card {
+	boardCards := make([]Card, len(room.Voters))
+
+	for i := range room.Voters {
+		username := room.Voters[i].Username
+		boardCards[i] = Card{Username: username}
+		if room.CurrentRound.Revealed {
+			boardCards[i].Classes += "revealed"
+			if vote, found := room.CurrentRound.Votes[username]; found {
+				boardCards[i].Points = vote
+			}
+		} else if room.UserHasVoted(username) {
+			boardCards[i].Classes += "voted"
+		}
+
+	}
+	return boardCards
 }

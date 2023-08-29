@@ -16,8 +16,10 @@
     <div class="voting-area-wrapper">
       <div class="voting-area">
         {{template "board" .BoardCards}}
+        {{if .Button.Show}}
         {{template "button" .Button}}
-        {{template "votingCardList" .VotingCards}}
+        {{end}}
+        {{template "votingCardList"}}
       </div>
       {{template "spectatorList" .Spectators}}
     </div>
