@@ -1,6 +1,6 @@
 {{define "votingCardList"}}
 <div class="voting-card-list" data-testid="voting-card-list">
-  {{range .VotingCards}}
+  {{range .}}
   {{template "votingCard" .}}
   {{end}}
 </div>

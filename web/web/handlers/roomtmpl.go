@@ -9,6 +9,35 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Card struct {
+	Classes string
+	Points  string
+}
+type Spectator struct {
+	Name string
+}
+type Button struct {
+	Text    string
+	Show    bool
+	Classes string
+}
+type Toggle struct {
+	Label   string
+	Name    string
+	TestId  string
+	Checked bool
+}
+type Subheader struct {
+	Toggle Toggle
+}
+type RoomData struct {
+	Subheader
+	Button
+	Spectators  []Spectator
+	VotingCards []Card
+	BoardCards  []Card
+}
+
 func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	roomId, ok := vars["roomId"]
@@ -33,43 +62,9 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 		http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
 	}
-	tmpl.Execute(w, nil)
 
-}
-func ServePrejoin(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		data := struct {
-			Title string
-			Text  string
-		}{
-			Title: "Create a New Room",
-			Text:  "create room",
-		}
-		create := r.URL.Query().Get("create")
+	toggle := Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: true, Label: "Join as Spectator"}
+	roomData := RoomData{Subheader: Subheader{Toggle: toggle}}
+	tmpl.Execute(w, roomData)
 
-		if create != "1" {
-			data.Title = "Join a Room"
-			data.Text = "join room"
-		}
-		tmpl, err := template.ParseFiles("web/templates/prejoin.html", "web/templates/head.html", "web/templates/header.html")
-		if err != nil {
-			log.Println(err)
-		}
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-func ServeHome(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("web/templates/index.html", "web/templates/head.html", "web/templates/header.html")
-	if err != nil {
-		log.Println(err)
-	}
-	err = tmpl.Execute(w, nil)
-	if err != nil {
-		log.Println(err)
-	}
 }

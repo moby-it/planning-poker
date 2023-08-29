@@ -66,6 +66,10 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ErrRoomNotFound.Error()))
 	}
 }
+
+// takes a map with the route params
+//
+// returns the roomId, username, role, error
 func validateRoomRequest(vars map[string]string) (string, string, string, error) {
 	var errs = make([]error, 0)
 	// not validating if vars exists since mux returns 404 if they don't

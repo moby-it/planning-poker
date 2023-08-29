@@ -12,14 +12,13 @@ import (
 
 func StartApp() error {
 	r := mux.NewRouter()
+
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("app healthy"))
 	}).Methods("GET")
+
 	fs := http.FileServer(http.Dir("web/static"))
 	http.Handle("/static", fs)
-	r.PathPrefix("/scripts/").Handler(http.StripPrefix("/scripts/", http.FileServer(http.Dir("web/static"))))
-	r.PathPrefix("/styles/").Handler(http.StripPrefix("/styles/", http.FileServer(http.Dir("web/static"))))
-
 	// register static files
 	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("web/static")))
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("web/static")))
@@ -29,7 +28,7 @@ func StartApp() error {
 	// register templates
 	r.HandleFunc("/room/{roomId}", handlers.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", handlers.ServePrejoin).Methods("GET")
-	r.HandleFunc("/room", handlers.ServePrejoin).Methods("GET")
+	r.HandleFunc("/room", handlers.ServeRoom).Methods("GET")
 	r.HandleFunc("/", handlers.ServeHome).Methods("GET")
 
 	// attachProfiler(r)

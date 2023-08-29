@@ -7,19 +7,19 @@
   {{template "header"}}
   <div class="room" data-testid="room">
     <div class="room-header">
-      <h2>Room Header</h2>
-      <div id="progress-bar">
+      <h2>Everyone's Ready</h2>
+      <!-- <div id="progress-bar">
         <div id="bar"></div>
-      </div>
+      </div> -->
     </div>
-    {{template "subheader"}}
+    {{template "subheader" .Subheader}}
     <div class="voting-area-wrapper">
       <div class="voting-area">
-        {{template "board"}}
-        {{template "button"}}
-        {{template "votingCardList"}}
+        {{template "board" .BoardCards}}
+        {{template "button" .Button}}
+        {{template "votingCardList" .VotingCards}}
       </div>
-      {{template "spectatorList"}}
+      {{template "spectatorList" .Spectators}}
     </div>
   </div>
   <script defer src="/js/room.js"></script>
