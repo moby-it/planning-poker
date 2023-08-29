@@ -2,7 +2,7 @@
 <div class="board">
   {{range .}}
   {{template "card" .}}
-  <span class="username">{user.username}</span>
+  <span class="username">{{.Username}}</span>
   {{end}}
 </div>
 {{end}}

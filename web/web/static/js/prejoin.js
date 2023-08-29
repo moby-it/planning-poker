@@ -32,16 +32,22 @@ if (usernameInput) {
 }
 // save spectator input changes to local storage
 if (isSpectatorInput) {
+  const isSpectator = parseInt(localStorage.getItem(localStorageKeys.isSpectator));
+  if (typeof isSpectator === 'number' && !isNaN(isSpectator)) {
+    isSpectatorInput.checked = !!isSpectator;
+  } else {
+    localStorage.setItem(localStorageKeys.isSpectator, 0);
+    isSpectator.checked = false;
+  }
   isSpectatorInput.addEventListener('change', (e) => {
     const isSpectator = e.target.checked;
-    localStorage.setItem(localStorageKeys.isSpectator, isSpectator);
+    localStorage.setItem(localStorageKeys.isSpectator, isSpectator ? 1 : 0);
   });
 }
 // register submit handler
 if (submit) {
   submit.addEventListener('click', () => {
     const username = usernameInput.value;
-    const role = isSpectatorInput.checked ? 'spectator' : 'voter';
     const url = new URLSearchParams(window.location.search);
     const shouldCreate = Boolean(+url.get("create"));
     if (username.length) {
@@ -49,8 +55,10 @@ if (submit) {
         fetch(apiUrl + "/createRoom", { method: "POST" }).then(r => r.text()).then(roomId => {
           window.location.href = `${window.origin}/room/${roomId}`;
         });
+      } else {
+        const roomId = sessionStorage.getItem('roomId');
+        window.location.href = `${window.origin}/room/${roomId}`;
       }
     }
-    console.log(username, role, shouldCreate);
   });
 }
