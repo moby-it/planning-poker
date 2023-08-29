@@ -1,6 +1,8 @@
 {{define "board"}}
 <div class="board">
-  {{template "card"}}
+  {{range .}}
+  {{template "card" .}}
   <span class="username">{user.username}</span>
+  {{end}}
 </div>
 {{end}}
