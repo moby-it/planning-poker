@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from "@solidjs/router";
-import { Component, lazy } from "solid-js";
+import { JSX, lazy } from "solid-js";
 import { Toaster } from "solid-toast";
 import { Header } from "./components/header/header";
 import { RoomProvider } from "./pages/room/roomState";
