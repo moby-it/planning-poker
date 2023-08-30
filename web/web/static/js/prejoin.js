@@ -59,6 +59,7 @@ if (submit) {
         const roomId = sessionStorage.getItem('roomId');
         window.location.href = `${window.origin}/room/${roomId}`;
       }
+      sessionStorage.removeItem('roomId')
     }
   });
 }
