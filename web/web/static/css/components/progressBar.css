@@ -3,6 +3,7 @@
   background-color: var(--primary--hover);
   border-radius: 8px;
   align-self: center;
+  display: none;
 }
 
 #bar {
