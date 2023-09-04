@@ -31,6 +31,7 @@ if (!username) {
 }
 
 registeVoteEventHandler();
+changeRoleEventListener();
 
 function registeVoteEventHandler() {
   const votingCards = document.querySelectorAll('.voting-card');
@@ -53,7 +54,19 @@ function registeVoteEventHandler() {
     });
   }
 }
-
+function changeRoleEventListener() {
+  const toggle = document.querySelector('input[name="isSpectator"]');
+  toggle.addEventListener('change', (e) => {
+    console.log(e.target.checked);
+    if (typeof e.target.checked === 'boolean') {
+      sendWsMessage({
+        type: 'changeRole',
+        username: localStorage.getItem('username'),
+        role: e.target.checked ? 'spectator' : 'voter'
+      });
+    }
+  });
+}
 function sendWsMessage(message) {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(message));
