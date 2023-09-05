@@ -1,6 +1,11 @@
 import { getDocument, queries, waitFor } from "pptr-testing-library";
-const url = process.env.URL || "http://localhost:3000";
+const url = process.env.URL || "http://localhost:8080";
 const { getByTestId } = queries;
+import { Page } from 'puppeteer';
+
+Page.prototype.waitForTestId = async function (testid) {
+  await this.waitForSelector(`[data-testid='${testid}']`);
+};
 /**
  * @param {import('puppeteer').Browser} browser
  * @returns {Promise<{$document: ElementHandle<Element>,page: import('puppeteer').Page}>}
@@ -11,6 +16,12 @@ export async function NavigateToHome(browser) {
   const $document = await getDocument(page);
   return { $document, page };
 }
+/**
+ * 
+ * @param {import('puppeteer').Browser} browser 
+ * @param {string} roomId 
+ * @returns {Promise<{$document: ElementHandle<Element>,page: import('puppeteer').Page}>}
+ */
 export async function NavigateToRoom(browser, roomId) {
   const page = await browser.newPage();
   await page.goto(`${url}/room/${roomId}`);

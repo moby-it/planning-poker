@@ -7,6 +7,9 @@ import { TestVoting } from "./tests/vote.js";
 import { voterJoinsRoom } from "./tests/voterJoinsRoom.js";
 try {
   // setup
+  /**
+   * @type {(import('puppeteer').Browser)[]}
+   */
   let browsers = [];
   let documents = [];
   const username = "fasolakis";
