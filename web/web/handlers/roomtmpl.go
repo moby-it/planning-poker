@@ -17,13 +17,6 @@ type Card struct {
 type Spectator struct {
 	Name string
 }
-type Button struct {
-	Text     string
-	Show     bool
-	Classes  string
-	TestId   string
-	Disabled bool
-}
 type Toggle struct {
 	Label   string
 	Name    string
@@ -35,7 +28,6 @@ type Subheader struct {
 }
 type RoomData struct {
 	Subheader
-	Button
 	Spectators []Spectator
 	BoardCards []Card
 }
@@ -70,10 +62,9 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	for i := range room.Spectators {
 		spectators[i] = Spectator{Name: room.Spectators[i].Username}
 	}
-	button := Button{Show: false}
 	boardCards := createBoardCards(room)
 
-	roomData := RoomData{Subheader: Subheader{Toggle: toggle}, Spectators: spectators, Button: button, BoardCards: boardCards}
+	roomData := RoomData{Subheader: Subheader{Toggle: toggle}, Spectators: spectators, BoardCards: boardCards}
 	tmpl.Execute(w, roomData)
 
 }

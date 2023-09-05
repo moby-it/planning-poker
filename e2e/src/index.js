@@ -1,3 +1,4 @@
+import { getDocument } from "pptr-testing-library";
 import { runTest } from "./helpers/foundation.js";
 import { TestChangeRole } from "./tests/changeRole.js";
 import { createRoom } from "./tests/createRoom.js";
@@ -11,7 +12,10 @@ try {
    * @type {(import('puppeteer').Browser)[]}
    */
   let browsers = [];
-  let documents = [];
+  /**
+   * @type {import('puppeteer').Page[]}
+   */
+  let pages = [];
   const username = "fasolakis";
   await runTest("smoke test", () => smokeTest());
   const [roomId, chromeData] = await runTest(
@@ -20,24 +24,25 @@ try {
   );
 
   browsers.push(chromeData.browser);
-  documents.push(chromeData.$document);
+  pages.push(chromeData.page);
   console.log("When a voter joins a room");
   const chromeData2 = await runTest(
     "\tA voter should be able to join the room",
     () => voterJoinsRoom(roomId, "fasolis")
   );
   browsers.push(chromeData2.browser);
-  documents.push(chromeData2.$document);
+  pages.push(chromeData2.page);
   const chromeData3 = await runTest(
     "\tAnother voter should be able to join the room",
     () => voterJoinsRoom(roomId, "manolakis")
   );
   browsers.push(chromeData3.browser);
-  documents.push(chromeData3.$document);
+  pages.push(chromeData3.page);
   //
 
   // Test Suits
   // order matters
+  const documents = await Promise.all(pages.map(p => getDocument(p)));
   await TestChangeRole(documents, username);
   await TestVoting(documents);
   await TestRevealRound(documents, roomId);
