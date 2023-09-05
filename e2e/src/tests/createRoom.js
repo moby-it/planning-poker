@@ -11,7 +11,8 @@ const { getByTestId } = queries;
 
 export const createRoom = async (username, role = "voter") => {
   const browser = await createBrowser();
-  let { $document, page } = await NavigateToHome(browser);
+  const { page } = await NavigateToHome(browser);
+  let $document = await getDocument(page);
   const startBtn = await getByTestId($document, "start-here");
   await startBtn.click();
   await page.waitForTestId('create-room');
@@ -20,5 +21,5 @@ export const createRoom = async (username, role = "voter") => {
   await SubmitCreateRoomForm($document);
   await page.waitForTestId('room');
   const roomId = page.url().split("/").pop();
-  return [roomId, { $document, browser }];
+  return [roomId, { page, browser }];
 };

@@ -2,6 +2,10 @@
  * @type {WebSocket}
  */
 let socket;
+document.addEventListener('revealing', (e) => {
+  document.querySelector('input[name="isSpectator"]').disabled = e.detail;
+});
+import { handleWsMessage } from '/js/messageHandler.js';
 
 function getTcp() {
   return window.location.protocol === 'https:' ? 'wss://' : 'ws://';
@@ -39,6 +43,8 @@ function registeVoteEventHandler() {
     votingCard.addEventListener('click', () => {
       const existingVote = document.querySelector('.voting-card.selected');
       const newVote = votingCard.getAttribute('value');
+      const isSpectator = localStorage.getItem('isSpectator');
+      if (parseInt(isSpectator) === 1) return;
       if (existingVote && existingVote.getAttribute('value') === newVote) return;
       existingVote?.classList.remove('selected');
       votingCard.classList.add('selected');
@@ -59,6 +65,7 @@ function changeRoleEventListener() {
   toggle.addEventListener('change', (e) => {
     console.log(e.target.checked);
     if (typeof e.target.checked === 'boolean') {
+      localStorage.setItem('isSpectator', e.target.checked ? '1' : '0');
       sendWsMessage({
         type: 'changeRole',
         username: localStorage.getItem('username'),
@@ -67,7 +74,7 @@ function changeRoleEventListener() {
     }
   });
 }
-function sendWsMessage(message) {
+export function sendWsMessage(message) {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(message));
   }

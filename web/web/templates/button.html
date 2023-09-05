@@ -1,7 +1,6 @@
 {{define "button"}}
 <button 
-class="btn {{ .Classes }}"
-type="button" data-testid="{{.Testid}}" disabled={{.Disabled}}>
-  {{ .Content }}
+type="button" data-testid="{{.Testid}}" disabled="{{.Disabled}}">
+  {{ .Text }}
 </button>
 {{end}}

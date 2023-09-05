@@ -30,20 +30,7 @@ if (usernameInput) {
 } else {
   console.error('username input not found');
 }
-// save spectator input changes to local storage
-if (isSpectatorInput) {
-  const isSpectator = parseInt(localStorage.getItem(localStorageKeys.isSpectator));
-  if (typeof isSpectator === 'number' && !isNaN(isSpectator)) {
-    isSpectatorInput.checked = !!isSpectator;
-  } else {
-    localStorage.setItem(localStorageKeys.isSpectator, 0);
-    isSpectator.checked = false;
-  }
-  isSpectatorInput.addEventListener('change', (e) => {
-    const isSpectator = e.target.checked;
-    localStorage.setItem(localStorageKeys.isSpectator, isSpectator ? 1 : 0);
-  });
-}
+
 // register submit handler
 if (submit) {
   submit.addEventListener('click', () => {

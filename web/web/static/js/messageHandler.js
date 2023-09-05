@@ -1,4 +1,14 @@
-function handleWsMessage(message) {
+let headerInterval;
+let revealInterval;
+import { registerSpectatorInputEventListener } from "/js/isSpectatorToggle.js";
+import { sendWsMessage } from '/js/room.js';
+registerSpectatorInputEventListener();
+
+function getSubmitButton() {
+  return document.querySelector('.btn.primary');
+}
+
+export function handleWsMessage(message) {
   let data = message.data;
   try {
     data = JSON.parse(data);
@@ -7,30 +17,24 @@ function handleWsMessage(message) {
   }
   switch (data.type) {
     case 'usersUpdated':
-      console.log("update users Updated", data.users);
       updateUsers(data.users);
       break;
     case 'roundRevealAvailable':
-      console.log("round reaveal avaiable", data.revealAvailable);
       updateRoundIsRevealable(data.revealAvailable);
       break;
     case 'userVoted':
-      console.log('user voted', data.username);
       updateUserVoted(data.username);
       break;
     case 'roundToReveal':
-      console.log('round to reveal after', data.after);
       roundToReveal(data.after);
       break;
     case 'cancelReveal':
-      console.log('cancel reveal');
+      cancelReveal();
       break;
     case 'roundRevealed':
-      console.log('round revealed', data.votes);
       revealRound(data.votes);
       break;
     case 'roundStarted':
-      console.log('round started');
       resetRound();
       break;
     case 'pong':
@@ -80,6 +84,7 @@ function resetRound() {
   document.querySelector('.voting-card.selected').classList.remove('selected');
   document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
   document.querySelector('#progress-bar').style.display = 'none';
+  document.querySelector('.btn.primary').remove();
   setHeader("Everyone's Ready");
 }
 function revealRound(votes) {
@@ -94,13 +99,16 @@ function revealRound(votes) {
   const voteSum = Object.values(votes).reduce((prev, curr) => prev + curr);
   const average = voteSum / Object.keys(votes).length;
   setHeader('Average Story Points ' + average);
-  // change button
-  const submitButton = document.querySelector('.btn.primary');
+  // change buttonrevealInterval
+  const submitButton = getSubmitButton();
   submitButton.innerText = "Start New Round";
-  submitButton.removeEventListener('click', handleRevealSubmit);
+  submitButton.setAttribute('data-testid', 'start-new-round');
+  submitButton.removeEventListener('click', cancelReveal);
   submitButton.addEventListener('click', handleRoundToStart);
+  dispatchRevealingEvent(false);
 }
 function roundToReveal(after) {
+  dispatchRevealingEvent(true);
   // add progress bar
   const progressBar = document.querySelector('#progress-bar');
   if (progressBar) progressBar.style.display = 'block';
@@ -108,8 +116,8 @@ function roundToReveal(after) {
   let width = 1;
   let i = 1;
   const intervalTime = 10;
-  const interval = setInterval(() => {
-    if (width >= 100) clearInterval(interval);
+  revealInterval = setInterval(() => {
+    if (width >= 100) clearInterval(revealInterval);
     width = ((i * intervalTime) / after) * 100;
     document.querySelector('#progress-bar #bar').style.width = width + '%';
     i++;
@@ -118,7 +126,7 @@ function roundToReveal(after) {
   // set room header
   setHeader(`Revealing in ${after / 1000}`);
   let remainingTime = after - 1000;
-  const headerInterval = setInterval(() => {
+  headerInterval = setInterval(() => {
     if (remainingTime < 0) {
       clearInterval(headerInterval);
       return;
@@ -128,10 +136,15 @@ function roundToReveal(after) {
     if (remainingTime > 0)
       setHeader(headerText);
   }, 1000);
-
+  // set cancel button
+  const submitButton = getSubmitButton();
+  submitButton.innerText = 'cancel reveal';
+  submitButton.setAttribute('data-testid', 'cancel-reveal');
+  submitButton.removeEventListener('click', handleRevealSubmit);
+  submitButton.addEventListener('click', cancelRevealHandler);
 }
 function updateRoundIsRevealable(revealAvailable) {
-  let submitButton = document.querySelector('.btn.primary');
+  let submitButton = getSubmitButton();
   if (revealAvailable && !submitButton) {
     submitButton = document.createElement('button');
     submitButton.classList.add('btn', 'primary');
@@ -144,13 +157,37 @@ function updateRoundIsRevealable(revealAvailable) {
   }
   if (!revealAvailable && submitButton) submitButton.remove();
 }
+function cancelReveal() {
+  clearInterval(headerInterval);
+  headerInterval = null;
+  clearInterval(revealInterval);
+  revealInterval = null;
+  const progressBar = document.querySelector('#progress-bar');
+  if (progressBar) progressBar.style.display = 'none';
+  const submitButton = getSubmitButton();
+  submitButton.removeEventListener('click', cancelRevealHandler);
+  submitButton.addEventListener('click', handleRevealSubmit);
+  submitButton.innerText = 'Reveal Cards';
+  submitButton.setAttribute('data-testid', 'reveal-round');
+  setHeader("Everyone's Ready");
+  dispatchRevealingEvent(false);
+}
 function handleRevealSubmit() {
-  sendWsMessage({ type: 'roundToReveal' });
+  if (!revealInterval || revealInterval) {
+    sendWsMessage({ type: 'roundToReveal' });
+  }
 }
 function handleRoundToStart() {
   sendWsMessage({ type: 'roundToStart' });
 }
+function cancelRevealHandler() {
+  sendWsMessage({ type: 'cancelReveal' });
+}
 function setHeader(header) {
   const headerText = document.querySelector('.room-header > h2');
   headerText.innerText = header;
+}
+function dispatchRevealingEvent(revealing) {
+  const event = new CustomEvent('revealing', { detail: revealing });
+  document.dispatchEvent(event);
 }

@@ -16,16 +16,13 @@
     <div class="voting-area-wrapper">
       <div class="voting-area">
         {{template "board" .BoardCards}}
-        {{if .Button.Show}}
-        {{template "button" .Button}}
-        {{end}}
         {{template "votingCardList"}}
       </div>
       {{template "spectatorList" .Spectators}}
     </div>
   </div>
-  <script defer src="/js/messageHandler.js"></script>
-  <script defer src="/js/room.js"></script>
+  <script defer type="module" src="/js/messageHandler.js"></script>
+  <script defer type="module" src="/js/room.js"></script>
 </body>
 
 </html>
