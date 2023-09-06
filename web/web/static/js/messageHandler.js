@@ -1,7 +1,9 @@
-let headerInterval;
-let revealInterval;
 import { registerSpectatorInputEventListener } from "/js/isSpectatorToggle.js";
 import { sendWsMessage } from '/js/room.js';
+
+let headerInterval;
+let revealInterval;
+
 registerSpectatorInputEventListener();
 
 function getSubmitButton() {
@@ -44,16 +46,11 @@ export function handleWsMessage(message) {
 
 function updateUsers(users) {
   const board = document.querySelector('.board');
+  if (!board) throw new Error('no board element. cannot update users');
   while (board.children.length > 0) board.removeChild(board.lastChild);
   const spectatorsList = document.querySelector('ul.spectators');
   while (spectatorsList.children.length >= 2) spectatorsList.removeChild(spectatorsList.lastChild);
-  for (const user of users) {
-    if (user.isVoter) {
-      addVoter(user);
-    } else {
-      addSpectator(user);
-    }
-  }
+  users.forEach(user => user.isVoter ? addVoter(user) : addSpectator(user));
 }
 
 function addVoter(voter) {
@@ -71,6 +68,7 @@ function addVoter(voter) {
 }
 function addSpectator(spectator) {
   const spectatorsList = document.querySelector('ul.spectators');
+  if (!spectatorsList) throw new Error('cannot add spectator. no spectator list found');
   const newSpectator = document.createElement('li');
   newSpectator.innerText = spectator.username;
   spectatorsList.appendChild(newSpectator);
