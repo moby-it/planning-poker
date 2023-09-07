@@ -27,6 +27,9 @@ if (!username) {
   connectToWs()();
 }
 
+const copyLinkEl = document.querySelector('#copy-link');
+if (copyLinkEl) copyLinkEl.addEventListener('click', copyLinkToClipboard);
+
 registeVoteEventHandler();
 changeRoleEventListener();
 
@@ -88,7 +91,7 @@ function connectToWs(retries = 0) {
     });
     socket.addEventListener('error', (e) => {
       console.error('ws error', e);
-      if (retries < 10) {
+      if (retries < 5) {
         retries++;
         setTimeout(connectToWs(retries), 1000);
       } else {
@@ -96,4 +99,7 @@ function connectToWs(retries = 0) {
       }
     });
   };
+}
+function copyLinkToClipboard() {
+  navigator.clipboard.writeText(window.location.href);
 }
