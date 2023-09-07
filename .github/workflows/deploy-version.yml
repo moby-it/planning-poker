@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Test api
-        working-directory: api
+      - name: Test web
+        working-directory: web
         run: make test
   test-e2e:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Test ui
+      - name: Test e2e
         run: |
           docker compose -f docker-compose.test.yml build
           docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from e2e
-  build-api:
+  build-web:
     needs: [test-web,test-e2e]
     runs-on: ubuntu-22.04
     steps:

@@ -3,7 +3,7 @@ services:
   web:
     image: mobyit/planning-poker-web:${TAG}
     ports:
-      - 14213:8080
+      - 14219:8080
     deploy:
       rollback_config:
         failure_action: pause

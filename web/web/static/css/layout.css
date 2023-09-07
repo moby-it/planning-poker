@@ -40,6 +40,39 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
 .hidden {
   display: none;
+}
+
+.info {
+  font-size: 16px;
+  margin-left: 1rem;
+  border: 3px solid var(--error);
+  padding: 3px 8px;
+  border-radius: 50%;
+}
+
+.warn-popup {
+  background: #b4686861;
+  padding: 4px 5px;
+  position: relative;
+  top: 23px;
+  left: 30px;
+  width: 400px;
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  opacity: 0.7;
+  animation: fade 500ms linear;
+  z-index: 10;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.7;
+  }
 }
