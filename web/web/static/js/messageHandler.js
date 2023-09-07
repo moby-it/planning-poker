@@ -60,6 +60,7 @@ function addVoter(voter) {
   voteCard.setAttribute('data-testid', `board-card-${voter.username}`);
   const card = document.createElement('div');
   card.classList.add('card');
+  if (voter.hasVoted) card.classList.add('voted');
   voteCard.appendChild(card);
   const usernameText = document.createElement('span');
   usernameText.innerText = voter.username;
