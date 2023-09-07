@@ -15,6 +15,7 @@ function getTcp() {
 function wsUrl() {
   return getTcp() + window.location.host + '/api' + '/v1';
 }
+
 const username = localStorage.getItem("username") || "";
 const role = localStorage.getItem("isSpectator") === "1" ? 'spectator' : 'voter';
 const splitUrl = document.location.pathname.split("/");
@@ -23,17 +24,7 @@ if (!username) {
   sessionStorage.setItem('roomId', roomId);
   window.location.href = `${window.origin}/prejoin`;
 } else {
-  socket = new WebSocket(
-    `${wsUrl()}/joinRoom/${roomId}/${username}/${role}`
-  );
-  socket.addEventListener('open', () => {
-    console.log('ws opened');
-  });
-  socket.addEventListener('error', (e) => {
-    console.error('ws error', e);
-    window.location.href = window.origin;
-  });
-  socket.addEventListener('message', handleWsMessage);
+  connectToWs()();
 }
 
 registeVoteEventHandler();
@@ -81,4 +72,28 @@ export function sendWsMessage(message) {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(message));
   }
+}
+function connectToWs(retries = 0) {
+  return () => {
+    socket = new WebSocket(
+      `${wsUrl()}/joinRoom/${roomId}/${username}/${role}`
+    );
+    socket.addEventListener('open', () => {
+      retries = 0;
+      socket.addEventListener('message', handleWsMessage);
+      console.log('ws opened');
+      setInterval(() => {
+        sendWsMessage({ type: 'ping' });
+      }, 5000);
+    });
+    socket.addEventListener('error', (e) => {
+      console.error('ws error', e);
+      if (retries < 10) {
+        retries++;
+        setTimeout(connectToWs(retries), 1000);
+      } else {
+        window.location.href = window.origin;
+      }
+    });
+  };
 }
