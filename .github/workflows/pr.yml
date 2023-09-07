@@ -5,12 +5,12 @@ on:
     branches:
       - main
 jobs:
-  test-api:
+  test-web:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Test api
-        working-directory: api
+      - name: Test web
+        working-directory: web
         run: make test
   test-ui:
     runs-on: ubuntu-22.04
