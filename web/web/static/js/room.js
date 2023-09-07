@@ -57,9 +57,9 @@ function registeVoteEventHandler() {
 function changeRoleEventListener() {
   const toggle = document.querySelector('input[name="isSpectator"]');
   toggle.addEventListener('change', (e) => {
-    console.log(e.target.checked);
     if (typeof e.target.checked === 'boolean') {
       localStorage.setItem('isSpectator', e.target.checked ? '1' : '0');
+      document.querySelectorAll('.voting-card.selected').forEach(el => el.classList.remove('selected'));
       sendWsMessage({
         type: 'changeRole',
         username: localStorage.getItem('username'),
