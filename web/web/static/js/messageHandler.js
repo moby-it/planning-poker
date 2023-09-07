@@ -7,7 +7,7 @@ let revealInterval;
 registerSpectatorInputEventListener();
 
 function getSubmitButton() {
-  return document.querySelector('.btn.primary');
+  return document.querySelector('#submit-btn');
 }
 
 export function handleWsMessage(message) {
@@ -100,8 +100,10 @@ function revealRound(votes) {
   // change buttonrevealInterval
   const submitButton = getSubmitButton();
   submitButton.innerText = "Start New Round";
+  submitButton.classList.remove('default');
+  submitButton.classList.add('primary');
   submitButton.setAttribute('data-testid', 'start-new-round');
-  submitButton.removeEventListener('click', cancelReveal);
+  submitButton.removeEventListener('click', cancelRevealHandler);
   submitButton.addEventListener('click', handleRoundToStart);
   dispatchRevealingEvent(false);
 }
@@ -136,7 +138,9 @@ function roundToReveal(after) {
   }, 1000);
   // set cancel button
   const submitButton = getSubmitButton();
-  submitButton.innerText = 'cancel reveal';
+  submitButton.innerText = 'Cancel Reveal';
+  submitButton.classList.remove('primary');
+  submitButton.classList.add('default');
   submitButton.setAttribute('data-testid', 'cancel-reveal');
   submitButton.removeEventListener('click', handleRevealSubmit);
   submitButton.addEventListener('click', cancelRevealHandler);
@@ -145,6 +149,7 @@ function updateRoundIsRevealable(revealAvailable) {
   let submitButton = getSubmitButton();
   if (revealAvailable && !submitButton) {
     submitButton = document.createElement('button');
+    submitButton.id = 'submit-btn';
     submitButton.classList.add('btn', 'primary');
     submitButton.setAttribute('data-testid', 'reveal-round');
     submitButton.innerText = "Reveal Cards";
@@ -166,6 +171,8 @@ function cancelReveal() {
   submitButton.removeEventListener('click', cancelRevealHandler);
   submitButton.addEventListener('click', handleRevealSubmit);
   submitButton.innerText = 'Reveal Cards';
+  submitButton.classList.remove('default');
+  submitButton.classList.add('primary');
   submitButton.setAttribute('data-testid', 'reveal-round');
   setHeader("Everyone's Ready");
   dispatchRevealingEvent(false);
