@@ -2,8 +2,10 @@
  * @type {WebSocket}
  */
 let socket;
+let revealing;
 document.addEventListener('revealing', (e) => {
   document.querySelector('input[name="isSpectator"]').disabled = e.detail;
+  revealing = e.detail;
 });
 import { handleWsMessage } from '/js/messageHandler.js';
 
@@ -41,6 +43,7 @@ function registeVoteEventHandler() {
   const votingCards = document.querySelectorAll('.voting-card');
   for (const votingCard of votingCards) {
     votingCard.addEventListener('click', () => {
+      if (revealing) return;
       const existingVote = document.querySelector('.voting-card.selected');
       const newVote = votingCard.getAttribute('value');
       const isSpectator = localStorage.getItem('isSpectator');
