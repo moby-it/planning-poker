@@ -42,7 +42,7 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	room, found := room.Get(roomId)
 	if !found {
-		w.WriteHeader(http.StatusNotFound)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 	roomTemplates := []string{
