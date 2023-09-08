@@ -22,7 +22,7 @@ func StartApp() error {
 	}).Methods("GET")
 
 	// register static files
-	cacheDuration := 24 * time.Hour
+	cacheDuration := 0 * time.Hour
 	r.PathPrefix("/js/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
 	r.PathPrefix("/css/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
 	r.PathPrefix("/assets/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
@@ -79,7 +79,7 @@ func fileServerWithCacheControl(dir http.Dir, cacheDuration time.Duration) http.
 		}
 
 		// Set Cache-Control and ETag headers
-		w.Header().Set("Cache-Control", "max-age="+strconv.Itoa(int(cacheDuration.Seconds())))
+		w.Header().Set("Cache-Control", "max-age=0,must-revalidate")
 		w.Header().Set("ETag", etag)
 
 		// Serve the file using the standard file server
