@@ -6,7 +6,9 @@ document.addEventListener('mouseover', (e) => {
 });
 function removePopupTimeout() {
   setTimeout(() => {
-    if (lastHoveredEl.classList.contains('warn-popup') || lastHoveredEl.classList.contains('moby-link')) {
+    if (lastHoveredEl.classList.contains('info') ||
+      lastHoveredEl.classList.contains('warn-popup') ||
+      lastHoveredEl.classList.contains('moby-link')) {
       removePopupTimeout();
       return;
     }
