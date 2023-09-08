@@ -1,12 +1,8 @@
 package web
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/George-Spanos/poker-planning/web/handlers"
@@ -22,11 +18,10 @@ func StartApp() error {
 	}).Methods("GET")
 
 	// register static files
-	cacheDuration := 0 * time.Hour
-	r.PathPrefix("/js/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.PathPrefix("/css/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.PathPrefix("/assets/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
+	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("web/static")))
+	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("web/static")))
+	r.PathPrefix("/assets/").Handler(http.FileServer(http.Dir("web/static")))
+	r.Handle("/favicon.ico", http.FileServer(http.Dir("web/static")))
 
 	// register templates
 	r.HandleFunc("/room/{roomId}", handlers.ServeRoom).Methods("GET")
@@ -52,48 +47,6 @@ func StartApp() error {
 	}
 	log.Println("Listening on port 8080")
 	return srv.ListenAndServe()
-}
-func fileServerWithCacheControl(dir http.Dir, cacheDuration time.Duration) http.Handler {
-	fs := http.FileServer(dir)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get the file information
-		file, err := dir.Open(r.URL.Path)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		defer file.Close()
-
-		// Calculate ETag based on content hash and timestamp
-		fileInfo, _ := file.Stat()
-		contentHash := calculateContentHash(file)
-		timestamp := fileInfo.ModTime().Unix()
-		etag := "\"" + contentHash + "-" + strconv.FormatInt(timestamp, 10) + "\""
-
-		// Check if the client's ETag matches the resource's ETag
-		if match := r.Header.Get("If-None-Match"); match != "" {
-			if match == etag {
-				w.WriteHeader(http.StatusNotModified)
-				return
-			}
-		}
-
-		// Set Cache-Control and ETag headers
-		w.Header().Set("Cache-Control", "max-age=0,must-revalidate")
-		w.Header().Set("ETag", etag)
-
-		// Serve the file using the standard file server
-		fs.ServeHTTP(w, r)
-	})
-}
-
-func calculateContentHash(file http.File) string {
-	hash := md5.New()
-	_, err := io.Copy(hash, file)
-	if err != nil {
-		return ""
-	}
-	return hex.EncodeToString(hash.Sum(nil))
 }
 
 // func attachProfiler(router *mux.Router) {
