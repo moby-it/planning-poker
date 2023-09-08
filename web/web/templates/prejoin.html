@@ -6,7 +6,7 @@
 
 <body id="root">
   {{template "header"}}
-  <form class="prejoin-form" method="post">
+  <form class="prejoin-form" hx-post="/createRoom">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>
@@ -24,10 +24,9 @@
       </div>
       <span id="change-later">You can change this later</span>
     </div>
-    <button type="button" class="btn primary" id="submit" data-testid="create-room">
+    <button class="btn primary" id="submit" data-testid="create-room">
       <span>{{.Text}}</span>
     </button>
-    <script defer src="/js/prejoin.js"></script>
   </form>
 </body>
 
