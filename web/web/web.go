@@ -79,7 +79,7 @@ func fileServerWithCacheControl(dir http.Dir, cacheDuration time.Duration) http.
 		}
 
 		// Set Cache-Control and ETag headers
-		w.Header().Set("Cache-Control", "max-age=0,must-revalidate")
+		w.Header().Set("Cache-Control", "max-age="+strconv.Itoa(int(cacheDuration.Seconds())))
 		w.Header().Set("ETag", etag)
 
 		// Serve the file using the standard file server
