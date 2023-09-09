@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -24,7 +25,13 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	log.Println(r.Form)
 	room := room.New()
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/room/%s", room.Id))
 	w.Write([]byte(room.Id))
 }
 

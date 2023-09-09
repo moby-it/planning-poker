@@ -8,24 +8,24 @@ import (
 
 func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		data := struct {
+		templateData := struct {
 			Title string
 			Text  string
 		}{
 			Title: "Create a New Room",
-			Text:  "create room",
+			Text:  "Create Room",
 		}
 		create := r.URL.Query().Get("create")
 
 		if create != "1" {
-			data.Title = "Join a Room"
-			data.Text = "join room"
+			templateData.Title = "Join a Room"
+			templateData.Text = "join room"
 		}
 		tmpl, err := template.ParseFiles("web/templates/prejoin.html", "web/templates/head.html", "web/templates/header.html")
 		if err != nil {
 			log.Println(err)
 		}
-		err = tmpl.Execute(w, data)
+		err = tmpl.Execute(w, templateData)
 		if err != nil {
 			log.Println(err)
 		}

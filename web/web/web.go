@@ -37,10 +37,8 @@ func StartApp() error {
 	// attachProfiler(r)
 
 	// register api v1 Handlers
-	apiRouter := r.PathPrefix("/api").Subrouter()
-	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
-	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
-	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
+	r.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
+	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 
 	originsOk := h.AllowedOrigins([]string{"*"})
 

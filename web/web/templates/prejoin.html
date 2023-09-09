@@ -6,7 +6,7 @@
 
 <body id="root">
   {{template "header"}}
-  <form class="prejoin-form" hx-post="/createRoom">
+  <form class="prejoin-form" hx-post="/createRoom" hx-target="body">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>
@@ -15,9 +15,9 @@
     <div class="is-spectator">
       <div class="is-spectator-switch">
         <div class="toggle-container">
-          <label for="isSpectator">Join as Spectator</label>
-          <label class="switch">
-            <input name="isSpectator" type="checkbox" />
+          <span>Join as Spectator</span>
+          <label for="isSpectator" class="switch">
+            <input name="isSpectator" type="checkbox" value="isSpectator" />
             <span class="slider round"></span>
           </label>
         </div>
