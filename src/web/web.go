@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func StartApp() error {
+func Start() error {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +31,11 @@ func StartApp() error {
 	// register templates
 	r.HandleFunc("/room/{roomId}", handlers.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", handlers.ServePrejoin).Methods("GET")
-	r.HandleFunc("/room", handlers.ServeRoom).Methods("GET")
 	r.HandleFunc("/", handlers.ServeHome).Methods("GET")
-
-	// attachProfiler(r)
-
-	// register api v1 Handlers
 	r.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
 	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
+
+	// attachProfiler(r)
 
 	originsOk := h.AllowedOrigins([]string{"*"})
 

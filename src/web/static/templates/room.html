@@ -3,7 +3,16 @@
 
 {{template "head"}}
 
-<body id="root">
+<body id="root" hx-ext="ws">
+  <script>
+    const body = document.querySelector('body');
+    const queryParams = new URLSearchParams(window.location.search);
+    const role = queryParams.get('role');
+    const username = queryParams.get('username');
+    const splitPath = window.location.pathname.split('/');
+    const roomId = splitPath[splitPath.length - 1];
+    body.setAttribute('ws-connect', `/joinRoom/${roomId}/${username}/${role}`)
+  </script>
   {{template "header"}}
   <div class="room" data-testid="room">
     <div class="room-header">

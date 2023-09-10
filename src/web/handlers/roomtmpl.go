@@ -45,6 +45,16 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	role := r.URL.Query().Get("role")
+	if role == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	roomTemplates := []string{
 		"web/templates/room.html", "web/templates/head.html", "web/templates/header.html",
 		"web/templates/board.html", "web/templates/button.html", "web/templates/spectatorList.html",
@@ -57,7 +67,7 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
 	}
 
-	toggle := Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: true, Label: "Join as Spectator"}
+	toggle := Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: role == "spectator", Label: "Join as Spectator"}
 	spectators := make([]Spectator, len(room.Spectators))
 	for i := range room.Spectators {
 		spectators[i] = Spectator{Name: room.Spectators[i].Username}

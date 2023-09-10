@@ -11,11 +11,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/George-Spanos/poker-planning/business/actions"
-	"github.com/George-Spanos/poker-planning/business/events"
 	"github.com/George-Spanos/poker-planning/business/room"
 	"github.com/George-Spanos/poker-planning/business/user"
 	"github.com/George-Spanos/poker-planning/web/handlers"
+	"github.com/George-Spanos/poker-planning/web/websockets"
+	"github.com/George-Spanos/poker-planning/web/websockets/actions"
+	"github.com/George-Spanos/poker-planning/web/websockets/events"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -345,7 +346,7 @@ func TestRoundReveal(t *testing.T) {
 				t.Log("\tUsers should receive a round revealable event")
 			}
 			t.Log("\tWhen a user reveals the round")
-			room.RevealCurrentRound()
+			websockets.RevealCurrentRound(room)
 			{
 				ConnectionReceivedEvent(t, connection, events.RoundRevealed)
 				ConnectionReceivedEvent(t, connection2, events.RoundRevealed)

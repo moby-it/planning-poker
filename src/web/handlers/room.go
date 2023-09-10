@@ -9,6 +9,7 @@ import (
 
 	"github.com/George-Spanos/poker-planning/business/room"
 	"github.com/George-Spanos/poker-planning/business/user"
+	"github.com/George-Spanos/poker-planning/web/websockets"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -25,13 +26,16 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err := r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	username := r.FormValue("username")
+	isSpectator := r.FormValue("isSpectator")
+	var role string
+	if isSpectator == "" {
+		role = "voter"
+	} else {
+		role = "spectator"
 	}
-	log.Println(r.Form)
 	room := room.New()
-	w.Header().Add("HX-Redirect", fmt.Sprintf("/room/%s", room.Id))
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/room/%s?username=%s&role=%s", room.Id, username, role))
 	w.Write([]byte(room.Id))
 }
 
@@ -66,7 +70,7 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		client := user.Connection{User: user.User{Username: username, IsVoter: role == "voter"}, Conn: conn}
-		room.AddClient(&client, role)
+		websockets.AddClient(&client, room, role)
 	} else {
 		log.Println(ErrRoomNotFound.Error())
 		w.WriteHeader(http.StatusNotFound)

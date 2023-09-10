@@ -1,5 +1,5 @@
 {{define "board"}}
-<div class="board">
+<div class="board" hx-swap-oob="outerHTML .board">
   {{range .}}
   {{template "card" .}}
   <span class="username">{{.Username}}</span>

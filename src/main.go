@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := web.StartApp()
+	err := web.Start()
 	if err != nil {
 		log.Fatalln(err)
 	}

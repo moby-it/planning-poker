@@ -3,7 +3,7 @@ package events
 import (
 	"log"
 
-	"github.com/George-Spanos/poker-planning/business/user"
+	"github.com/George-Spanos/poker-planning/business/room"
 )
 
 const (
@@ -18,6 +18,7 @@ const (
 )
 
 type Broadcastable interface {
+	Html(room *room.Room) string
 	UserVotedEvent | RoundRevealedEvent | RoundRevealAvailableEvent | RoundStartedEvent | UsersUpdatedEvent | CancelRevealEvent | RoundToRevealEvent
 }
 type Event struct {
@@ -26,11 +27,6 @@ type Event struct {
 type PongEvent struct {
 	Event
 }
-type UsersUpdatedEvent struct {
-	Event
-	Users []user.User `json:"users"`
-}
-
 type UserVotedEvent struct {
 	Event
 	Username string `json:"username"`
@@ -55,11 +51,11 @@ type RoundStartedEvent struct {
 	Event
 }
 
-func Broadcast[T Broadcastable](event T, connections ...*user.Connection) {
-	for _, connection := range connections {
+func Broadcast[T Broadcastable](event T, room *room.Room) {
+	for _, connection := range room.Connections() {
 		connection.Mu.Lock()
 		defer connection.Mu.Unlock()
-		if err := connection.WriteJSON(event); err != nil {
+		if err := connection.WriteMessage(1, []byte(event.Html(room))); err != nil {
 			log.Println(err)
 		}
 	}
