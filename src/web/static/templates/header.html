@@ -1,10 +1,12 @@
 {{define "header"}}
 <div class="header row align-center {{if .ShowLogo }}justify-between{{else}}justify-end{{end}}">
   {{if .ShowLogo}}
-  <div class="logo cursor-pointer">
-    <img src="/assets/favicon.ico" width="26" alt="" />
-    <h4>Poker Planning</h4>
-  </div>
+  <a  href="/">
+    <div class="logo cursor-pointer">
+      <img src="/assets/favicon.ico" width="26" alt="" />
+      <h4>Poker Planning</h4>
+    </div>
+  <a/>
   {{end}}
   <span>
     Made By
