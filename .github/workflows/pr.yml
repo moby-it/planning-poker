@@ -13,9 +13,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
-          cache-dependency-path: web/go.sum
-      - name: Test web
-        working-directory: web
+          cache-dependency-path: src/go.sum
+      - name: unit test
+        working-directory: src
         run: make test
   test-ui:
     runs-on: ubuntu-22.04
