@@ -21,7 +21,8 @@ func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 			templateData.Title = "Join a Room"
 			templateData.Text = "join room"
 		}
-		tmpl, err := template.ParseFiles("web/templates/prejoin.html", "web/templates/head.html", "web/templates/header.html")
+		templates := []string{"prejoin.html", "head.html", "header.html"}
+		tmpl, err := template.ParseFiles(AddPrefix(templates)...)
 		if err != nil {
 			log.Println(err)
 		}

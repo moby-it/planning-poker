@@ -1,9 +1,7 @@
 package events
 
 import (
-	"log"
-
-	"github.com/George-Spanos/poker-planning/business/room"
+	"github.com/George-Spanos/poker-planning/business/user"
 )
 
 const (
@@ -17,15 +15,15 @@ const (
 	Pong                 = "pong"
 )
 
-type Broadcastable interface {
-	Html(room *room.Room) string
-	UserVotedEvent | RoundRevealedEvent | RoundRevealAvailableEvent | RoundStartedEvent | UsersUpdatedEvent | CancelRevealEvent | RoundToRevealEvent
-}
 type Event struct {
 	Type string `json:"type"`
 }
 type PongEvent struct {
 	Event
+}
+type UsersUpdatedEvent struct {
+	Event
+	Users []user.User `json:"users"`
 }
 type UserVotedEvent struct {
 	Event
@@ -49,14 +47,4 @@ type CancelRevealEvent struct {
 }
 type RoundStartedEvent struct {
 	Event
-}
-
-func Broadcast[T Broadcastable](event T, room *room.Room) {
-	for _, connection := range room.Connections() {
-		connection.Mu.Lock()
-		defer connection.Mu.Unlock()
-		if err := connection.WriteMessage(1, []byte(event.Html(room))); err != nil {
-			log.Println(err)
-		}
-	}
 }

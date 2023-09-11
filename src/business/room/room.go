@@ -11,11 +11,11 @@ import (
 
 type Room struct {
 	Id           string
-	Voters       []*user.Connection
-	Spectators   []*user.Connection
+	Voters       []user.User
+	Spectators   []user.User
 	CurrentRound *Round
 	CancelReveal chan bool
-	Mu           sync.RWMutex
+	mu           sync.Mutex
 }
 
 var rooms = make(map[string]*Room)
@@ -47,9 +47,9 @@ func GetLength() int {
 	return len(rooms)
 }
 func (room *Room) UserHasVoted(username string) bool {
-	room.Mu.RLock()
+	room.mu.Lock()
 	_, found := room.CurrentRound.Votes[username]
-	room.Mu.RUnlock()
+	room.mu.Unlock()
 	return found
 }
 func (room *Room) IncludeUsername(username string) bool {
@@ -67,7 +67,7 @@ func (room *Room) IncludeUsername(username string) bool {
 }
 func New() *Room {
 	roomId := uuid.New().String()
-	room := Room{Id: roomId, Voters: make([]*user.Connection, 0), Spectators: make([]*user.Connection, 0), CurrentRound: nil}
+	room := Room{Id: roomId, Voters: make([]user.User, 0), Spectators: make([]user.User, 0), CurrentRound: nil}
 	round := NewRound()
 	room.CurrentRound = round
 	rooms[roomId] = &room
@@ -80,29 +80,33 @@ func (room *Room) ConvertUserRole(username string, role string) {
 		room.convertVoterToSpectator(username)
 	}
 }
-func (room *Room) Connections() []*user.Connection {
-	return append(room.Voters, room.Spectators...)
-}
 func (room *Room) IsEmpty() bool {
 	return len(room.Voters) == 0 && len(room.Spectators) == 0
 }
 
 func (r *Room) Close() {
-	r.Mu.RLock()
-	defer r.Mu.RUnlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	delete(rooms, r.Id)
 }
 func (room *Room) Vote(username string, storyPoints int) {
 	if !room.CurrentRound.Revealed {
-		room.Mu.RLock()
+		room.mu.Lock()
 		room.CurrentRound.Votes[username] = storyPoints
-		room.Mu.RUnlock()
+		room.mu.Unlock()
 	}
 }
-func (room *Room) RemoveClient(client *user.Connection) {
-	room.Mu.RLock()
+func (room *Room) AddUser(u user.User) {
+	if u.IsVoter {
+		room.Voters = append(room.Voters, u)
+	} else {
+		room.Spectators = append(room.Spectators, u)
+	}
+}
+func (room *Room) RemoveUser(u user.User) {
+	room.mu.Lock()
 	for i, c := range room.Voters {
-		if c == client {
+		if c.Username == u.Username {
 			room.Voters = append(room.Voters[:i], room.Voters[i+1:]...)
 			if !room.CurrentRound.Revealed {
 				delete(room.CurrentRound.Votes, c.Username)
@@ -110,11 +114,21 @@ func (room *Room) RemoveClient(client *user.Connection) {
 		}
 	}
 	for i, c := range room.Spectators {
-		if c == client {
+		if c.Username == u.Username {
 			room.Spectators = append(room.Spectators[:i], room.Spectators[i+1:]...)
 		}
 	}
-	room.Mu.RUnlock()
+	room.mu.Lock()
 
-	log.Printf("%v left room %v", client.Username, room.Id)
+	log.Printf("%v left room %v", u.Username, room.Id)
+}
+func (r *Room) CreateCancelRevealChan() {
+	r.mu.Lock()
+	r.CancelReveal = make(chan bool, 1)
+	r.mu.Unlock()
+}
+func (r *Room) ResetCancelReveal() {
+	r.mu.Lock()
+	r.CancelReveal = nil
+	r.mu.Unlock()
 }

@@ -7,7 +7,8 @@ import (
 )
 
 func ServeHome(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("web/templates/index.html", "web/templates/head.html", "web/templates/header.html")
+	templates := []string{"index.html", "head.html", "header.html"}
+	tmpl, err := template.ParseFiles(AddPrefix(templates)...)
 	if err != nil {
 		log.Println(err)
 	}

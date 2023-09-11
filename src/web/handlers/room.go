@@ -68,9 +68,9 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
+		u := user.User{Username: username, IsVoter: role == "voter"}
+		websockets.AddClient(u, conn, room)
 
-		client := user.Connection{User: user.User{Username: username, IsVoter: role == "voter"}, Conn: conn}
-		websockets.AddClient(&client, room, role)
 	} else {
 		log.Println(ErrRoomNotFound.Error())
 		w.WriteHeader(http.StatusNotFound)
