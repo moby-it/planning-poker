@@ -1,6 +1,6 @@
 {{define "button"}}
-<button 
-type="button" data-testid="{{.Testid}}" disabled="{{.Disabled}}" hx-swap-oob="{{.Swap}}">
+<button id="submit-btn" class="{{.Classes}}" type="button" data-testid="{{.TestId}}" ws-send>
+  <input type="text" class="hidden" name="type" value="{{.EventType}}">
   {{ .Text }}
 </button>
 {{end}}

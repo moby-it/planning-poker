@@ -24,10 +24,11 @@
     {{template "subheader" .Subheader}}
     <div class="voting-area-wrapper">
       <div class="voting-area">
-        {{template "board" .BoardCards}}
-        {{template "votingCardList"}}
+        {{ template "board" .BoardCards }}
+        {{ template "button" }}
+        {{ template "votingCardList" .VotingCards }}
       </div>
-      {{template "spectatorList" .Spectators}}
+      {{ template "spectatorList" .Spectators }}
     </div>
   </div>
 </body>

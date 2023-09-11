@@ -65,7 +65,7 @@ func (e UsersUpdatedEvent) HTML(r *room.Room) string {
 	if err != nil {
 		log.Fatalln("failed to parse templates for UsersUpdatedEvent")
 	}
-	cards := render.CreateBoardCards(r)
+	cards := render.BoardCards(r)
 	var buffer bytes.Buffer
 	err = tmpl.ExecuteTemplate(&buffer, "board", cards)
 	if err != nil {
@@ -75,15 +75,17 @@ func (e UsersUpdatedEvent) HTML(r *room.Room) string {
 	return boardHtml
 }
 func (e UserVotedEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/board.html")
+	tmpl, err := template.ParseFiles("web/static/templates/board.html",
+		"web/static/templates/card.html",
+		"web/static/templates/votingCardList.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for UserVotedEvent")
 	}
-	cards := render.CreateBoardCards(r)
+	cards := render.BoardCards(r)
 	var buffer bytes.Buffer
-	err = tmpl.Execute(&buffer, cards)
+	err = tmpl.ExecuteTemplate(&buffer, "board", cards)
 	if err != nil {
-		log.Fatalln("failed to parse templates for UserVotedEvent")
+		log.Fatalln("failed to parse board template for UserVotedEvent")
 	}
 	boardHtml := buffer.String()
 	return boardHtml
@@ -91,14 +93,14 @@ func (e UserVotedEvent) HTML(r *room.Room) string {
 func (e RoundRevealAvailableEvent) HTML(r *room.Room) string {
 	tmpl, err := template.ParseFiles("web/static/templates/button.html")
 	if err != nil {
-		log.Fatalln("failed to parse templates for UsersUpdatedEvent")
+		log.Fatalln("failed to parse templates for RoundRevealAvailableEvent")
 	}
-	if !e.RevealAvailable {
-		return ""
-	}
-	btn := render.Button{Swap: "afterend .board", Text: "Reveal Round", TestId: "reveal-round", Disabled: false}
+	btn := render.SubmitButton(r)
 	var buffer bytes.Buffer
-	tmpl.Execute(&buffer, btn)
-	boardHtml := buffer.String()
-	return boardHtml
+	err = tmpl.ExecuteTemplate(&buffer, "button", btn)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	button := buffer.String()
+	return button
 }
