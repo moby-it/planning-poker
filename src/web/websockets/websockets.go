@@ -20,7 +20,6 @@ type Connection struct {
 }
 
 type Broadcastable interface {
-	// Html(room *room.Room) string
 	events.UserVotedEvent | events.RoundRevealedEvent |
 		events.RoundRevealAvailableEvent | events.RoundStartedEvent |
 		events.UsersUpdatedEvent | events.CancelRevealEvent |
@@ -99,8 +98,8 @@ func readMessage(u user.User, r *room.Room) {
 			revealEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: r.CurrentRound.IsRevealable(len(r.Voters))}
 			Broadcast(revealEvent, r)
 		case actions.RoundToReveal:
-			event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
-			Broadcast(event, r)
+			// event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
+			// Broadcast(event, r)
 			reveal, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			r.CreateCancelRevealChan()
 			go waitForCancelReveal(r, reveal, cancel)
@@ -108,8 +107,8 @@ func readMessage(u user.User, r *room.Room) {
 			r.CancelReveal <- true
 		case actions.RoundToStart:
 			r.CurrentRound = room.NewRound()
-			event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
-			Broadcast(event, r)
+			// event := events.RoundStartedEvent{Event: events.Event{Type: events.RoundStarted}}
+			// Broadcast(event, r)
 			emitUsersAndRevealableRound(r)
 		case actions.ChangeRole:
 			var action actions.ChangeRoleAction
@@ -129,9 +128,9 @@ func RevealCurrentRound(room *room.Room) {
 		log.Println("Cannot reveal round. Not enough votes. RoundId: ", room.Id)
 		return
 	}
-	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
+	// event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: room.CurrentRound.Votes}
 	room.CurrentRound.Revealed = true
-	Broadcast(event, room)
+	// Broadcast(event, room)
 }
 func emitUsersAndRevealableRound(room *room.Room) {
 	users := make([]user.User, 0)
@@ -157,8 +156,8 @@ func waitForCancelReveal(r *room.Room, reveal context.Context, cancel context.Ca
 	select {
 	case <-r.CancelReveal:
 		log.Println("Cancel reveal")
-		event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
-		Broadcast(event, r)
+		// event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
+		// Broadcast(event, r)
 		cancel()
 	case <-reveal.Done():
 		RevealCurrentRound(r)
@@ -187,11 +186,11 @@ func roomConnections(r *room.Room) []*Connection {
 	return connections
 }
 
-func Broadcast[T Broadcastable](event T, room *room.Room) {
+func Broadcast(event events.Renderable, room *room.Room) {
 	for _, connection := range roomConnections(room) {
 		connection.Mu.Lock()
 		defer connection.Mu.Unlock()
-		if err := connection.WriteJSON(event); err != nil {
+		if err := connection.WriteMessage(1, []byte(event.HTML(room))); err != nil {
 			log.Println(err)
 		}
 	}

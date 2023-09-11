@@ -2,7 +2,7 @@ package handlers
 
 import "fmt"
 
-func AddPrefix(templates []string) []string {
+func addPrefix(templates []string) []string {
 	prefix := "web/static/templates"
 	files := make([]string, len(templates))
 	for i := range templates {

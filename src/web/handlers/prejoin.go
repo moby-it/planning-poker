@@ -9,11 +9,13 @@ import (
 func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		templateData := struct {
-			Title string
-			Text  string
+			Title    string
+			Text     string
+			ShowLogo bool
 		}{
-			Title: "Create a New Room",
-			Text:  "Create Room",
+			Title:    "Create a New Room",
+			Text:     "Create Room",
+			ShowLogo: true,
 		}
 		create := r.URL.Query().Get("create")
 
@@ -22,7 +24,7 @@ func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 			templateData.Text = "join room"
 		}
 		templates := []string{"prejoin.html", "head.html", "header.html"}
-		tmpl, err := template.ParseFiles(AddPrefix(templates)...)
+		tmpl, err := template.ParseFiles(addPrefix(templates)...)
 		if err != nil {
 			log.Println(err)
 		}

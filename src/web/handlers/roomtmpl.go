@@ -6,31 +6,9 @@ import (
 	"net/http"
 
 	"github.com/George-Spanos/poker-planning/business/room"
+	"github.com/George-Spanos/poker-planning/web/render"
 	"github.com/gorilla/mux"
 )
-
-type Card struct {
-	Classes  string
-	Points   int
-	Username string
-}
-type Spectator struct {
-	Name string
-}
-type Toggle struct {
-	Label   string
-	Name    string
-	TestId  string
-	Checked bool
-}
-type Subheader struct {
-	Toggle Toggle
-}
-type RoomData struct {
-	Subheader
-	Spectators []Spectator
-	BoardCards []Card
-}
 
 func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -61,39 +39,20 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		"subheader.html", "toggle.html", "votingCard.html",
 		"votingCardList.html", "card.html",
 	}
-	tmpl, err := template.ParseFiles(AddPrefix(roomTemplates)...)
+	tmpl, err := template.ParseFiles(addPrefix(roomTemplates)...)
 	if err != nil {
 		log.Fatalln(err)
 		http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
 	}
 
-	toggle := Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: role == "spectator", Label: "Join as Spectator"}
-	spectators := make([]Spectator, len(room.Spectators))
+	toggle := render.Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: role == "spectator", Label: "Join as Spectator"}
+	spectators := make([]render.Spectator, len(room.Spectators))
 	for i := range room.Spectators {
-		spectators[i] = Spectator{Name: room.Spectators[i].Username}
+		spectators[i] = render.Spectator{Name: room.Spectators[i].Username}
 	}
-	boardCards := createBoardCards(room)
+	boardCards := render.CreateBoardCards(room)
 
-	roomData := RoomData{Subheader: Subheader{Toggle: toggle}, Spectators: spectators, BoardCards: boardCards}
+	roomData := render.RoomViewmodel{Subheader: render.Subheader{Toggle: toggle}, Spectators: spectators, BoardCards: boardCards, ShowLogo: true}
 	tmpl.Execute(w, roomData)
 
-}
-
-func createBoardCards(room *room.Room) []Card {
-	boardCards := make([]Card, len(room.Voters))
-
-	for i := range room.Voters {
-		username := room.Voters[i].Username
-		boardCards[i] = Card{Username: username}
-		if room.CurrentRound.Revealed {
-			boardCards[i].Classes += "revealed"
-			if vote, found := room.CurrentRound.Votes[username]; found {
-				boardCards[i].Points = vote
-			}
-		} else if room.UserHasVoted(username) {
-			boardCards[i].Classes += "voted"
-		}
-
-	}
-	return boardCards
 }

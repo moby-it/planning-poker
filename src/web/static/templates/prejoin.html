@@ -5,8 +5,8 @@
 {{template "head"}}
 
 <body id="root">
-  {{template "header"}}
-  <form class="prejoin-form" hx-post="/createRoom" hx-target="body">
+  {{template "header" .}}
+  <form class="prejoin-form" hx-post="/createRoom">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>

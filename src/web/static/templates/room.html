@@ -13,7 +13,7 @@
     const roomId = splitPath[splitPath.length - 1];
     body.setAttribute('ws-connect', `/joinRoom/${roomId}/${username}/${role}`)
   </script>
-  {{template "header"}}
+  {{template "header" .}}
   <div class="room" data-testid="room">
     <div class="room-header">
       <h2>Everyone's Ready</h2>

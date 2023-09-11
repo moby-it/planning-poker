@@ -1,6 +1,6 @@
 {{define "button"}}
 <button 
-type="button" data-testid="{{.Testid}}" disabled="{{.Disabled}}">
+type="button" data-testid="{{.Testid}}" disabled="{{.Disabled}}" hx-swap-oob="{{.Swap}}">
   {{ .Text }}
 </button>
 {{end}}

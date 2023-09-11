@@ -6,7 +6,9 @@
   {{ if eq .Points 1000 }}
   <img src="/cup-medium.svg" />
   {{ else }}
-  <span>{{ .Points }}</span>
+    {{if gt .Points 0}}
+      <span>{{ .Points }}</span>
+    {{end}}
   {{end}}
 </div>
 {{end}}
