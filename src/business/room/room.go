@@ -118,7 +118,7 @@ func (room *Room) RemoveUser(u user.User) {
 			room.Spectators = append(room.Spectators[:i], room.Spectators[i+1:]...)
 		}
 	}
-	room.mu.Lock()
+	room.mu.Unlock()
 
 	log.Printf("%v left room %v", u.Username, room.Id)
 }

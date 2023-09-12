@@ -1,10 +1,7 @@
-## E2E
-- Voting
-  - [x] User creates room
-  - [x] Voter joins the room
-  - [x] One selects a card, ui changes
-  - [x] Someone clicks reveal, after 5 seconds cards get revealed.
-- Spectating
-  - [ ] Verify that spectator sees the same things without seeing voting card list
-  - [x] Verify that spectator can change role while people are voting
-  - [x] When a new votes joins, the revealing should stop
+# HTMX refactor notes
+
+1. joining and leaving room seems to work
+2. there are error on prejoin with http code but nothing get rendered to the UI yet
+3. reveal round does not work
+4. revealing does not work
+5. canceling reveal does not work

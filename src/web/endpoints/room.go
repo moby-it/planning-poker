@@ -1,14 +1,16 @@
-package handlers
+package endpoints
 
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/George-Spanos/poker-planning/business/room"
 	"github.com/George-Spanos/poker-planning/business/user"
+	"github.com/George-Spanos/poker-planning/web/render"
 	"github.com/George-Spanos/poker-planning/web/websockets"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -20,24 +22,6 @@ var (
 	ErrDuplicateUsername = errors.New("duplicate username in room")
 	ErrRoomNotFound      = errors.New("room id not found")
 )
-
-func CreateRoom(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	username := r.FormValue("username")
-	isSpectator := r.FormValue("isSpectator")
-	var role string
-	if isSpectator == "" {
-		role = "voter"
-	} else {
-		role = "spectator"
-	}
-	room := room.New()
-	w.Header().Add("HX-Redirect", fmt.Sprintf("/room/%s?username=%s&role=%s", room.Id, username, role))
-	w.Write([]byte(room.Id))
-}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -76,6 +60,61 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(ErrRoomNotFound.Error()))
 	}
+}
+
+func ServeRoom(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	roomId, ok := vars["roomId"]
+	if !ok {
+		log.Println("missing room id from request")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	room, found := room.Get(roomId)
+	if !found {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		http.Redirect(w, r, fmt.Sprintf("/prejoin?roomId=%s", roomId), http.StatusSeeOther)
+		return
+	}
+	if room.IncludeUsername(username) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	role := r.URL.Query().Get("role")
+	if role == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	roomTemplates := []string{
+		"room.html", "head.html", "header.html",
+		"board.html", "button.html", "spectatorList.html",
+		"subheader.html", "toggle.html", "votingCard.html",
+		"votingCardList.html", "card.html",
+	}
+	tmpl, err := template.ParseFiles(addPrefix(roomTemplates)...)
+	if err != nil {
+		log.Fatalln(err)
+		http.Error(w, "Unexpected error occured", http.StatusInternalServerError)
+	}
+
+	toggle := render.Toggle{Name: "isSpectator", TestId: "spectator-toggle", Checked: role == "spectator", Label: "Join as Spectator"}
+	spectators := make([]render.Spectator, len(room.Spectators))
+	for i := range room.Spectators {
+		spectators[i] = render.Spectator{Name: room.Spectators[i].Username}
+	}
+	boardCards := render.BoardCards(room)
+
+	roomData := render.RoomViewmodel{
+		Subheader:  render.Subheader{Toggle: toggle},
+		Spectators: spectators,
+		BoardCards: boardCards, ShowLogo: true,
+		VotingCards: render.VotingCards(room, username),
+	}
+	tmpl.Execute(w, roomData)
 }
 
 // takes a map with the route params

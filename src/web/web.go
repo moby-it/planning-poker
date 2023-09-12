@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/George-Spanos/poker-planning/web/handlers"
+	"github.com/George-Spanos/poker-planning/web/endpoints"
 	h "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -28,12 +28,11 @@ func Start() error {
 	r.PathPrefix("/assets/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
 	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
 
-	// register templates
-	r.HandleFunc("/room/{roomId}", handlers.ServeRoom).Methods("GET")
-	r.HandleFunc("/prejoin", handlers.ServePrejoin).Methods("GET")
-	r.HandleFunc("/", handlers.ServeHome).Methods("GET")
-	r.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
-	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
+	r.HandleFunc("/room/{roomId}", endpoints.ServeRoom).Methods("GET")
+	r.HandleFunc("/prejoin", endpoints.ServePrejoin).Methods("GET")
+	r.HandleFunc("/prejoin", endpoints.Prejoin).Methods("POST")
+	r.HandleFunc("/", endpoints.ServeHome).Methods("GET")
+	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
 
 	// attachProfiler(r)
 

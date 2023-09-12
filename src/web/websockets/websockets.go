@@ -64,9 +64,7 @@ func readMessage(u user.User, r *room.Room) {
 				r.CancelReveal <- true
 			}
 			r.RemoveUser(u)
-			if !r.CurrentRound.Revealed {
-				emitUsersAndRevealableRound(r)
-			}
+			emitUsersAndRevealableRound(r)
 			if r.IsEmpty() {
 				log.Printf("Room %s is empty. Closing room", r.Id)
 				r.Close()
