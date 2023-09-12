@@ -12,6 +12,7 @@ document.addEventListener('htmx:wsOpen', (e) => {
   const votingCards = document.querySelectorAll('.voting-card');
   for (const votingCard of votingCards) {
     votingCard.addEventListener('click', (e) => {
+      if (document.querySelector("[data-testid='cancel-reveal']")) return;
       const storyPoints = +votingCard.getAttribute('value');
       websocket.send(JSON.stringify({ type: "userToVote", username, storyPoints }));
       const votedCard = document.querySelector('.selected');

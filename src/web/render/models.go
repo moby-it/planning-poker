@@ -24,7 +24,6 @@ type Subheader struct {
 }
 type Button struct {
 	Text      string
-	Swap      string
 	TestId    string
 	Classes   string
 	EventType string
@@ -53,12 +52,11 @@ func BoardCards(room *room.Room) []VoteCard {
 		} else if room.UserHasVoted(username) {
 			boardCards[i].Classes += "voted"
 		}
-
 	}
 	return boardCards
 }
 func SubmitButton(room *room.Room) Button {
-	button := Button{Swap: "#submit-btn"}
+	button := Button{}
 	if room.CancelReveal != nil {
 		button.Text = "Cancel Reveal"
 		button.TestId = "cancel-reveal"

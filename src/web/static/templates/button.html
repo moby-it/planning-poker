@@ -1,6 +1,8 @@
 {{define "button"}}
-<button id="submit-btn" class="{{.Classes}}" type="button" data-testid="{{.TestId}}" ws-send>
+<form id="submit-btn" ws-send>
   <input type="text" class="hidden" name="type" value="{{.EventType}}">
-  {{ .Text }}
-</button>
+  <button  class="{{.Classes}}" data-testid="{{.TestId}}">
+    {{ .Text }}
+  </button>
+</form>
 {{end}}

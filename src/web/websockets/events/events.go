@@ -104,3 +104,18 @@ func (e RoundRevealAvailableEvent) HTML(r *room.Room) string {
 	button := buffer.String()
 	return button
 }
+func (e RoundToRevealEvent) HTML(r *room.Room) string {
+	tmpl, err := template.ParseFiles("web/static/templates/button.html")
+	if err != nil {
+		log.Fatalln("failed to parse templates for RoundRevealAvailableEvent")
+	}
+	btn := render.SubmitButton(r)
+	var buffer bytes.Buffer
+	err = tmpl.ExecuteTemplate(&buffer, "button", btn)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	button := buffer.String()
+
+	return button
+}

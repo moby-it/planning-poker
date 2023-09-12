@@ -84,6 +84,9 @@ func readMessage(u user.User, r *room.Room) {
 			// conn.WriteJSON(events.PongEvent{Event: events.Event{Type: events.Pong}})
 			conn.WriteMessage(websocket.PongMessage, []byte("hi"))
 		case actions.UserToVote:
+			if r.CancelReveal != nil {
+				continue
+			}
 			var action actions.UserToVoteAction
 			err = json.Unmarshal(message, &action)
 			if err != nil {
@@ -96,10 +99,10 @@ func readMessage(u user.User, r *room.Room) {
 			revealEvent := events.RoundRevealAvailableEvent{Event: events.Event{Type: events.RoundRevealAvailable}, RevealAvailable: r.CurrentRound.IsRevealable(len(r.Voters))}
 			Broadcast(revealEvent, r)
 		case actions.RoundToReveal:
-			// event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
-			// Broadcast(event, r)
 			reveal, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			r.CreateCancelRevealChan()
+			event := events.RoundToRevealEvent{Event: events.Event{Type: events.RoundToReveal}, After: 5000} // after in ms
+			Broadcast(event, r)
 			go waitForCancelReveal(r, reveal, cancel)
 		case actions.CancelReveal:
 			r.CancelReveal <- true
