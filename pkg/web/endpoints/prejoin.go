@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/George-Spanos/poker-planning/business/room"
+	"github.com/George-Spanos/poker-planning/pkg/business/room"
 )
 
 type PrejoinTemplateData struct {

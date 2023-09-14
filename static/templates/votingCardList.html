@@ -3,7 +3,7 @@
   {{range .}}
   <div class="{{.Classes}}" data-testid="voting-card-{{.Points}}" value="{{.Points}}">
     {{if eq .Points 1000}}
-    <img src="/assets/cup-small-black.svg" />
+    <img src="/static/assets/cup-small-black.svg" />
     {{else if eq 100 .Points}}
     <span>?</span>
     {{else}}
@@ -11,6 +11,6 @@
     {{end}}
   </div>
   {{end}}
-  <script defer type="module" src="/js/vote.js"></script>
+  <script defer type="module" src="/static/js/vote.js"></script>
 </div>
 {{end}}

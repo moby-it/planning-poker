@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/George-Spanos/poker-planning/business/user"
+	"github.com/George-Spanos/poker-planning/pkg/business/user"
 	"github.com/google/uuid"
 )
 

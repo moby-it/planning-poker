@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/George-Spanos/poker-planning/business/room"
-	"github.com/George-Spanos/poker-planning/business/user"
-	"github.com/George-Spanos/poker-planning/web/render"
-	"github.com/George-Spanos/poker-planning/web/websockets"
+	"github.com/George-Spanos/poker-planning/pkg/business/room"
+	"github.com/George-Spanos/poker-planning/pkg/business/user"
+	"github.com/George-Spanos/poker-planning/pkg/web/render"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -38,9 +38,9 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	room, roomExists := room.Get(roomId)
+	currentRoom, roomExists := room.Get(roomId)
 	if roomExists {
-		if room.IncludeUsername(username) {
+		if currentRoom.IncludeUsername(username) {
 			log.Println("username already exists")
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte(ErrDuplicateUsername.Error()))
@@ -53,7 +53,7 @@ func ConnectToRoom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		u := user.User{Username: username, IsVoter: role == "voter"}
-		websockets.AddClient(u, conn, room)
+		websockets.AddClient(u, conn, currentRoom)
 
 	} else {
 		log.Println(ErrRoomNotFound.Error())

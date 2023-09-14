@@ -5,9 +5,9 @@ import (
 	"html/template"
 	"log"
 
-	"github.com/George-Spanos/poker-planning/business/room"
-	"github.com/George-Spanos/poker-planning/business/user"
-	"github.com/George-Spanos/poker-planning/web/render"
+	"github.com/George-Spanos/poker-planning/pkg/business/room"
+	"github.com/George-Spanos/poker-planning/pkg/business/user"
+	"github.com/George-Spanos/poker-planning/pkg/web/render"
 )
 
 const (
@@ -61,7 +61,7 @@ type RoundStartedEvent struct {
 }
 
 func (e UsersUpdatedEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/board.html", "web/static/templates/card.html")
+	tmpl, err := template.ParseFiles("static/templates/board.html", "static/templates/card.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for UsersUpdatedEvent")
 	}
@@ -75,9 +75,9 @@ func (e UsersUpdatedEvent) HTML(r *room.Room) string {
 	return boardHtml
 }
 func (e UserVotedEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/board.html",
-		"web/static/templates/card.html",
-		"web/static/templates/votingCardList.html")
+	tmpl, err := template.ParseFiles("static/templates/board.html",
+		"static/templates/card.html",
+		"static/templates/votingCardList.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for UserVotedEvent")
 	}
@@ -91,7 +91,7 @@ func (e UserVotedEvent) HTML(r *room.Room) string {
 	return boardHtml
 }
 func (e RoundRevealAvailableEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/button.html")
+	tmpl, err := template.ParseFiles("static/templates/button.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for RoundRevealAvailableEvent")
 	}
@@ -105,7 +105,7 @@ func (e RoundRevealAvailableEvent) HTML(r *room.Room) string {
 	return button
 }
 func (e RoundToRevealEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/button.html")
+	tmpl, err := template.ParseFiles("static/templates/button.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for RoundRevealAvailableEvent")
 	}
@@ -120,7 +120,7 @@ func (e RoundToRevealEvent) HTML(r *room.Room) string {
 	return button
 }
 func (e CancelRevealEvent) HTML(r *room.Room) string {
-	tmpl, err := template.ParseFiles("web/static/templates/button.html")
+	tmpl, err := template.ParseFiles("static/templates/button.html")
 	if err != nil {
 		log.Fatalln("failed to parse templates for CancelRevealEvent")
 	}

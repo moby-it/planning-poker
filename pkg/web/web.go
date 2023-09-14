@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/George-Spanos/poker-planning/web/endpoints"
+	"github.com/George-Spanos/poker-planning/pkg/web/endpoints"
 	h "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -23,10 +23,8 @@ func Start() error {
 
 	// register static files
 	cacheDuration := 0 * time.Hour
-	r.PathPrefix("/js/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.PathPrefix("/css/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.PathPrefix("/assets/").Handler(fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
-	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("web/static"), cacheDuration))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fileServerWithCacheControl(http.Dir("static"), cacheDuration)))
+	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("static"), cacheDuration))
 
 	r.HandleFunc("/room/{roomId}", endpoints.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", endpoints.ServePrejoin).Methods("GET")

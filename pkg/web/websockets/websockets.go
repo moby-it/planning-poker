@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/George-Spanos/poker-planning/business/room"
-	"github.com/George-Spanos/poker-planning/business/user"
-	"github.com/George-Spanos/poker-planning/web/websockets/actions"
-	"github.com/George-Spanos/poker-planning/web/websockets/events"
+	"github.com/George-Spanos/poker-planning/pkg/business/room"
+	"github.com/George-Spanos/poker-planning/pkg/business/user"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets/actions"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets/events"
 	"github.com/gorilla/websocket"
 )
 

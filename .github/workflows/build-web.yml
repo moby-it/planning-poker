@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - "main"
-    paths:
-      - "src/**"
   workflow_dispatch:
 
 jobs:
@@ -18,7 +16,6 @@ jobs:
           go-version: '1.20'
           cache-dependency-path: src/go.sum
       - name: Test
-        working-directory: ./src
         run: make test
   build:
     runs-on: "ubuntu-latest"
@@ -39,4 +36,3 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-web:${{ github.sha }},${{ secrets.REPOSITORY_NAME }}/planning-poker-web:latest,
-          context: ./src
