@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strconv"
 	"sync"
 	"time"
 
@@ -75,14 +76,18 @@ func readMessage(u user.User, r *room.Room) {
 		err = json.Unmarshal(message, &a)
 		if err != nil {
 			log.Println(err)
-			continue
+			msg, err := strconv.Atoi(string(message))
+			if err != nil {
+				continue
+			}
+			if msg == websocket.PingMessage {
+				conn.SetReadDeadline(time.Now().Add(pongWait))
+				log.Printf("%v refreshed connection deadline", u.Username)
+				conn.WriteMessage(websocket.PongMessage, []byte(strconv.Itoa(websocket.PongMessage)))
+				continue
+			}
 		}
 		switch a.Type {
-		case actions.Ping:
-			conn.SetReadDeadline(time.Now().Add(pongWait))
-			log.Printf("%v refreshed connection deadline", u.Username)
-			// conn.WriteJSON(events.PongEvent{Event: events.Event{Type: events.Pong}})
-			conn.WriteMessage(websocket.PongMessage, []byte("hi"))
 		case actions.UserToVote:
 			if r.CancelReveal != nil {
 				continue
@@ -157,8 +162,9 @@ func waitForCancelReveal(r *room.Room, reveal context.Context, cancel context.Ca
 	select {
 	case <-r.CancelReveal:
 		log.Println("Cancel reveal")
-		// event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
-		// Broadcast(event, r)
+		r.CancelReveal = nil
+		event := events.CancelRevealEvent{Event: events.Event{Type: events.CancelReveal}}
+		Broadcast(event, r)
 		cancel()
 	case <-reveal.Done():
 		RevealCurrentRound(r)

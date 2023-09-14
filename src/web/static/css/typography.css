@@ -27,6 +27,9 @@ h4 {
 span.primary {
   color: var(--primary);
 }
+span#error {
+  color: var(--error);
+}
 
 .text-center {
   text-align: center;

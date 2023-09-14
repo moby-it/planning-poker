@@ -6,11 +6,12 @@
 
 <body id="root">
   {{template "header" .}}
-  <form class="prejoin-form" hx-post>
+  <form class="prejoin-form" hx-post hx-swap="none">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>
       <input data-testid="username-input" type="text" name="username" />
+      <span id="error" class="hidden"></span>
     </div>
     <div class="is-spectator">
       <div class="is-spectator-switch">
