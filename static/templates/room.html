@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+{{template "head"}}
+
+<body id="root">
+  {{template "header"}}
+  <div class="room" data-testid="room">
+    <div class="room-header">
+      <h2>Everyone's Ready</h2>
+      <div id="progress-bar">
+        <div id="bar"></div>
+      </div>
+    </div>
+    {{template "subheader" .Subheader}}
+    <div class="voting-area-wrapper">
+      <div class="voting-area">
+        {{template "board" .BoardCards}}
+        {{template "votingCardList"}}
+      </div>
+      {{template "spectatorList" .Spectators}}
+    </div>
+  </div>
+  <script defer type="module" src="/static/js/messageHandler.js"></script>
+  <script defer type="module" src="/static/js/room.js"></script>
+</body>
+
+</html>

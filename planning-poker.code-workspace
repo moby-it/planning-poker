@@ -25,7 +25,16 @@
         "type": "go",
         "request": "launch",
         "mode": "debug",
-        "program": "${workspaceFolder}/web/main.go"
+        "program": "${workspaceFolder}/cmd/web/main.go"
+      },
+      {
+        "name": "Minify",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/cmd/minify/main.go",
+        "args": ["--root","bin/static"],
+        "cwd": "${workspaceFolder}"
       }
     ]
   }
