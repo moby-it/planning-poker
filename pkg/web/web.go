@@ -9,13 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/handlers"
-
 	"github.com/George-Spanos/poker-planning/pkg/web/endpoints"
+	h "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-func StartApp() error {
+func Start() error {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -27,24 +26,18 @@ func StartApp() error {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fileServerWithCacheControl(http.Dir("static"), cacheDuration)))
 	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("static"), cacheDuration))
 
-	// register templates
 	r.HandleFunc("/room/{roomId}", endpoints.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", endpoints.ServePrejoin).Methods("GET")
-	r.HandleFunc("/room", endpoints.ServeRoom).Methods("GET")
+	r.HandleFunc("/prejoin", endpoints.Prejoin).Methods("POST")
 	r.HandleFunc("/", endpoints.ServeHome).Methods("GET")
+	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
 
 	// attachProfiler(r)
 
-	// register api v1 Handlers
-	apiRouter := r.PathPrefix("/api").Subrouter()
-	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
-	v1Router.HandleFunc("/createRoom", endpoints.CreateRoom).Methods("POST")
-	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
-
-	originsOk := handlers.AllowedOrigins([]string{"*"})
+	originsOk := h.AllowedOrigins([]string{"*"})
 
 	srv := &http.Server{
-		Handler:      handlers.CORS(originsOk)(r),
+		Handler:      h.CORS(originsOk)(r),
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,

@@ -3,71 +3,64 @@ package web_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 	"unicode/utf8"
 
-	"github.com/George-Spanos/poker-planning/pkg/business/actions"
-	"github.com/George-Spanos/poker-planning/pkg/business/events"
 	"github.com/George-Spanos/poker-planning/pkg/business/room"
-	"github.com/George-Spanos/poker-planning/pkg/business/user"
 	"github.com/George-Spanos/poker-planning/pkg/web/endpoints"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets/actions"
+	"github.com/George-Spanos/poker-planning/pkg/web/websockets/events"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
 func CreateRoomAndGetId(t *testing.T) []byte {
 	t.Helper()
-	r := httptest.NewRequest(http.MethodPost, "/createRoom", nil)
-	w := httptest.NewRecorder()
-	endpoints.CreateRoom(w, r)
-	res := w.Result()
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		t.Fatal("A room should be created", err)
-	}
-	return data
+	room := room.New()
+	return []byte(room.Id)
 }
 func CreateTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	r := mux.NewRouter()
-	r.HandleFunc("/createRoom", endpoints.CreateRoom)
+	r.HandleFunc("/prejoin", endpoints.ServePrejoin).Methods("GET")
+	r.HandleFunc("/prejoin", endpoints.Prejoin).Methods("POST")
 	r.HandleFunc("/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
 	return httptest.NewServer(r)
 }
 
-func ConnectVoterToRoom(t *testing.T, roomId string, username string, url string) *websocket.Conn {
+func ConnectVoterToRoom(t *testing.T, roomId string, username string, url string) *websockets.Connection {
 	t.Helper()
 	wsURL := "ws" + strings.TrimPrefix(url, "http")
 	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "voter"), nil)
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
 	}
-	return ws
+	return &websockets.Connection{Conn: ws}
 }
-func ConnectSpectatorToRoom(t *testing.T, roomId string, username string, url string) *websocket.Conn {
+func ConnectSpectatorToRoom(t *testing.T, roomId string, username string, url string) *websockets.Connection {
 	t.Helper()
 	wsURL := "ws" + strings.TrimPrefix(url, "http")
 	ws, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%v/%v/%v/%v", wsURL, roomId, username, "spectator"), nil)
 	if err != nil {
 		t.Fatalf("User should be able to connect to the room %v", err)
 	}
-	return ws
+	return &websockets.Connection{Conn: ws}
+
 }
-func UserVotesOnRoom(t *testing.T, connection *user.Connection, roomId string, username string, storyPoints int) {
+func UserVotesOnRoom(t *testing.T, connection *websockets.Connection, roomId string, username string, storyPoints int) {
 	t.Helper()
 	room, found := room.Get(roomId)
 	room.Vote(username, storyPoints)
+	connection.WriteJSON(actions.UserToVoteAction{Action: actions.Action{Type: actions.UserToVote}, Username: username, StoryPoints: storyPoints})
 	if !found {
 		t.Fatalf("Room %v should exist", roomId)
 	}
 }
-func UserChangesRole(t *testing.T, connection *user.Connection, roomId string, username string, role string) {
+func UserChangesRole(t *testing.T, connection *websocket.Conn, roomId string, username string, role string) {
 	t.Helper()
 	room, found := room.Get(roomId)
 	room.ConvertUserRole(username, role)
@@ -77,7 +70,7 @@ func UserChangesRole(t *testing.T, connection *user.Connection, roomId string, u
 }
 
 // testing if connection will receive the given event in the next 3 seconds
-func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expectedEvent string) {
+func ConnectionReceivedEvent(t *testing.T, username string, connection *websocket.Conn, expectedEvent string) {
 	t.Helper()
 	for {
 		err := connection.SetReadDeadline(time.Now().Add(3 * time.Second))
@@ -94,7 +87,7 @@ func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expected
 			t.Fatalf("Unmarshal:User should receive an event %v", err)
 		}
 		if event.Type == expectedEvent {
-			t.Logf("\tUser %v got expected event %v", connection.Username, expectedEvent)
+			t.Logf("\tUser %v got expected event %v", username, expectedEvent)
 			break
 		}
 	}
@@ -137,13 +130,11 @@ func TestConnectVoter(t *testing.T) {
 		username := "fasolakis"
 		ws := ConnectVoterToRoom(t, roomId, username, s.URL)
 		defer ws.Close()
-		connection := &user.Connection{Conn: ws, User: user.User{Username: username, IsVoter: true}}
-		ConnectionReceivedEvent(t, connection, events.UsersUpdated)
+		ConnectionReceivedEvent(t, username, ws.Conn, events.UsersUpdated)
 		t.Log("\t\tUser should be able to connect to the room")
 		{
 
 			room, _ := room.Get(roomId)
-			room.Mu.Lock()
 			if len(room.Voters) != 1 {
 				t.Fatal("\t\tRoom should have one voter. Expected length of 1. Got: ", len(room.Voters))
 			}
@@ -153,7 +144,6 @@ func TestConnectVoter(t *testing.T) {
 				t.Fatal("\t\tUser should be added to the room. Expected username: ", username, "Got: ", room.Voters[0].Username)
 			}
 			t.Logf("\t\tUser named %v should be added to the room", username)
-			room.Mu.Unlock()
 		}
 	}
 
@@ -169,16 +159,14 @@ func TestSpectatorJoinsRoom(t *testing.T) {
 		username1 := "fasolakis"
 		username2 := "george"
 		ws1 := ConnectVoterToRoom(t, string(roomId), username1, s.URL)
-		// defer ws1.Close()
+		defer ws1.Close()
 		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2, s.URL)
-		// defer ws2.Close()
-		connection1 := &user.Connection{Conn: ws1, User: user.User{Username: username1, IsVoter: true}}
-		connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: false}}
+		defer ws2.Close()
 		{
 			t.Log("\tWhen another user connects to the room")
 			{
-				ConnectionReceivedEvent(t, connection1, events.UsersUpdated)
-				ConnectionReceivedEvent(t, connection2, events.UsersUpdated)
+				ConnectionReceivedEvent(t, username1, ws1.Conn, events.UsersUpdated)
+				ConnectionReceivedEvent(t, username2, ws2.Conn, events.UsersUpdated)
 			}
 			t.Log("\t\tUsers should reveive a userList update event")
 		}
@@ -192,31 +180,26 @@ func TestUserVotes(t *testing.T) {
 	{
 		s := CreateTestServer(t)
 		roomId := CreateRoomAndGetId(t)
-		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
+		username := "fasolakis"
+		ws := ConnectVoterToRoom(t, string(roomId), username, s.URL)
 		username2 := "george"
 		ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
 		username3 := "spiros"
 		ws3 := ConnectVoterToRoom(t, string(roomId), username3, s.URL)
 		t.Log("\tWhen a user votes")
 		{
-			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
-			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
-			connection3 := &user.Connection{Conn: ws3, User: user.User{Username: username3, IsVoter: true}}
-			UserVotesOnRoom(t, connection, string(roomId), usename, 1)
-			ConnectionReceivedEvent(t, connection, events.UserVoted)
-			ConnectionReceivedEvent(t, connection2, events.UserVoted)
-			ConnectionReceivedEvent(t, connection3, events.UserVoted)
+			UserVotesOnRoom(t, ws, string(roomId), username, 1)
+			ConnectionReceivedEvent(t, username, ws.Conn, events.UserVoted)
+			ConnectionReceivedEvent(t, username2, ws2.Conn, events.UserVoted)
+			ConnectionReceivedEvent(t, username3, ws3.Conn, events.UserVoted)
 			t.Log("\t\tUsers should reveive a vote update event")
 		}
 		t.Log("\t After all users have voted")
 		{
 			room, _ := room.Get(string(roomId))
-			room.Mu.RLock()
 			if room.CurrentRound.Revealed {
 				t.Fatal("\t\tCurrent round should not be revealed. Expected: ", false, "Got: ", room.CurrentRound.Revealed)
 			}
-			room.Mu.RUnlock()
 			t.Log("\t\tCurrent round should not be revealed")
 		}
 	}
@@ -227,19 +210,17 @@ func TestUserChangesRole(t *testing.T) {
 	{
 		s := CreateTestServer(t)
 		roomId := CreateRoomAndGetId(t)
-		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
+		username := "fasolakis"
+		ws := ConnectVoterToRoom(t, string(roomId), username, s.URL)
 		username2 := "george"
 		ws2 := ConnectSpectatorToRoom(t, string(roomId), username2, s.URL)
 		t.Log("\tWhen a user changes role")
 		{
-			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
-			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
-			connection.WriteJSON(actions.ChangeRoleAction{Username: usename, Role: "spectator", Action: actions.Action{Type: actions.ChangeRole}})
+			ws.WriteJSON(actions.ChangeRoleAction{Username: username, Role: "spectator", Action: actions.Action{Type: actions.ChangeRole}})
 			t.Log("\t\tUsers should receive users list")
 			{
-				ConnectionReceivedEvent(t, connection, events.UsersUpdated)
-				ConnectionReceivedEvent(t, connection2, events.UsersUpdated)
+				ConnectionReceivedEvent(t, username, ws.Conn, events.UsersUpdated)
+				ConnectionReceivedEvent(t, username2, ws2.Conn, events.UsersUpdated)
 			}
 		}
 
@@ -251,65 +232,64 @@ func TestToRevealRound(t *testing.T) {
 	{
 		roomId := CreateRoomAndGetId(t)
 		s := CreateTestServer(t)
-		usename := "fasolakis"
-		ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
+		username := "fasolakis"
+		ws := ConnectVoterToRoom(t, string(roomId), username, s.URL)
 		username2 := "george"
 		ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
+
 		t.Log("\tAfter users have voted")
 		{
-			connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
-			connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
-			UserVotesOnRoom(t, connection, string(roomId), usename, 3)
-			UserVotesOnRoom(t, connection2, string(roomId), username2, 3)
+			UserVotesOnRoom(t, ws, string(roomId), username, 3)
+			UserVotesOnRoom(t, ws2, string(roomId), username2, 3)
 			room, _ := room.Get(string(roomId))
 			if !room.CurrentRound.IsRevealable(len(room.Voters)) {
 				t.Errorf("\tRound should be revealable")
 			}
 			t.Log("\t\t When a user tries to reveal a round")
 			{
-				connection.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
+				ws.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
 				t.Log("\t\t\tUsers should receive a round to reveal event")
 				{
-					ConnectionReceivedEvent(t, connection, events.RoundToReveal)
+					ConnectionReceivedEvent(t, username, ws.Conn, events.RoundToReveal)
 				}
-			}
-			t.Log("\t\t When a user cancels a round reveal")
-			{
-				connection.WriteJSON(actions.CancelRevealAction{Action: actions.Action{Type: actions.CancelReveal}})
-				t.Log("\t\t\tUsers should receive a cancel reveal event")
+				t.Log("\t\t When a user cancels a round reveal")
 				{
-					ConnectionReceivedEvent(t, connection, events.CancelReveal)
+					ws.WriteJSON(actions.CancelRevealAction{Action: actions.Action{Type: actions.CancelReveal}})
+					t.Log("\t\t\tUsers should receive a cancel reveal event")
+					{
+						ConnectionReceivedEvent(t, username, ws.Conn, events.CancelReveal)
+					}
 				}
-			}
-			t.Log("\t\t When a user tries to reveal a round")
-			{
-				connection.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
-				t.Log("\t\t\tUsers should receive the round votes after the 5 seconds")
+				t.Log("\t\t When a user tries to reveal a round")
 				{
-					time.AfterFunc(5*time.Second, func() {
-						ConnectionReceivedEvent(t, connection, events.RoundRevealed)
-						done <- true
-					})
+					ws.WriteJSON(actions.RoundToRevealAction{Action: actions.Action{Type: actions.RoundToReveal}})
+					t.Log("\t\t\tUsers should receive the round votes after the 5 seconds")
+					{
+						time.AfterFunc(5*time.Second, func() {
+							ConnectionReceivedEvent(t, username, ws.Conn, events.RoundRevealed)
+							done <- true
+						})
+					}
 				}
-			}
-			t.Log("\t\t Before a round is revealed")
-			{
-				if room.CurrentRound.Revealed {
-					t.Error("\t\t\tRound should not be revealed")
+				t.Log("\t\t Before a round is revealed")
+				{
+					if room.CurrentRound.Revealed {
+						t.Error("\t\t\tRound should not be revealed")
+					}
+					t.Log("\t\t\tRound should not be revealed")
 				}
-				t.Log("\t\t\tRound should not be revealed")
-			}
-			select {
-			case <-done:
-			case <-time.After(6 * time.Second):
-				t.Errorf("\t\t\tShould have received a round revealed event")
-			}
-			t.Log("\t\t After a round is revealed")
-			{
-				if !room.CurrentRound.Revealed {
-					t.Error("\t\t\tRound should be revealed")
+				select {
+				case <-done:
+				case <-time.After(6 * time.Second):
+					t.Errorf("\t\t\tShould have received a round revealed event")
 				}
-				t.Log("\t\t\tRound should be revealed")
+				t.Log("\t\t After a round is revealed")
+				{
+					if !room.CurrentRound.Revealed {
+						t.Error("\t\t\tRound should be revealed")
+					}
+					t.Log("\t\t\tRound should be revealed")
+				}
 			}
 		}
 	}
@@ -318,18 +298,16 @@ func TestRoundReveal(t *testing.T) {
 	t.Log("Given a room is created and users have already joined and already voted")
 	roomId := CreateRoomAndGetId(t)
 	s := CreateTestServer(t)
-	usename := "fasolakis"
-	ws := ConnectVoterToRoom(t, string(roomId), usename, s.URL)
+	username := "fasolakis"
+	ws := ConnectVoterToRoom(t, string(roomId), username, s.URL)
 	username2 := "george"
 	ws2 := ConnectVoterToRoom(t, string(roomId), username2, s.URL)
 	username3 := "spiros"
 	_ = ConnectSpectatorToRoom(t, string(roomId), username3, s.URL)
 	t.Log("\tAfter users have voted")
 	{
-		connection := &user.Connection{Conn: ws, User: user.User{Username: usename, IsVoter: true}}
-		UserVotesOnRoom(t, connection, string(roomId), usename, 3)
-		connection2 := &user.Connection{Conn: ws2, User: user.User{Username: username2, IsVoter: true}}
-		UserVotesOnRoom(t, connection2, string(roomId), username2, 2)
+		UserVotesOnRoom(t, ws, string(roomId), username, 3)
+		UserVotesOnRoom(t, ws2, string(roomId), username2, 2)
 		room, _ := room.Get(string(roomId))
 		{
 			{
@@ -340,15 +318,15 @@ func TestRoundReveal(t *testing.T) {
 
 			}
 			{
-				ConnectionReceivedEvent(t, connection, events.RoundRevealAvailable)
-				ConnectionReceivedEvent(t, connection2, events.RoundRevealAvailable)
+				ConnectionReceivedEvent(t, username, ws.Conn, events.RoundRevealAvailable)
+				ConnectionReceivedEvent(t, username, ws2.Conn, events.RoundRevealAvailable)
 				t.Log("\tUsers should receive a round revealable event")
 			}
 			t.Log("\tWhen a user reveals the round")
-			room.RevealCurrentRound()
+			websockets.RevealCurrentRound(room)
 			{
-				ConnectionReceivedEvent(t, connection, events.RoundRevealed)
-				ConnectionReceivedEvent(t, connection2, events.RoundRevealed)
+				ConnectionReceivedEvent(t, username, ws.Conn, events.RoundRevealed)
+				ConnectionReceivedEvent(t, username2, ws2.Conn, events.RoundRevealed)
 				t.Log("\tUsers should receive a round revealed event")
 			}
 		}
