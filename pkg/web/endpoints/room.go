@@ -76,12 +76,8 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username := r.URL.Query().Get("username")
-	if username == "" {
+	if username == "" || room.IncludeUsername(username) {
 		http.Redirect(w, r, fmt.Sprintf("/prejoin?roomId=%s", roomId), http.StatusSeeOther)
-		return
-	}
-	if room.IncludeUsername(username) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 	role := r.URL.Query().Get("role")

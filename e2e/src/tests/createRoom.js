@@ -9,7 +9,7 @@ import { createBrowser } from "../helpers/foundation.js";
 
 const { getByTestId } = queries;
 
-export const createRoom = async (username, role = "voter") => {
+export const createRoom = async (username, role) => {
   const browser = await createBrowser();
   const { page } = await NavigateToHome(browser);
   let $document = await getDocument(page);

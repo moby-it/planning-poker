@@ -25,7 +25,9 @@
         "type": "go",
         "request": "launch",
         "mode": "debug",
-        "program": "${workspaceFolder}/cmd/web/main.go"
+        "program": "${workspaceFolder}/cmd/web/main.go",
+        "cwd": "${workspaceFolder}"
+
       },
       {
         "name": "Minify",

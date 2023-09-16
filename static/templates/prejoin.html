@@ -6,7 +6,7 @@
 
 <body id="root">
   {{template "header"}}
-  <form class="prejoin-form" method="post">
+  <form class="prejoin-form">
     <h2>{{.Title}}</h2>
     <div class="input-wrapper">
       <label for="username">Username</label>
@@ -14,9 +14,9 @@
     </div>
     <div class="is-spectator">
       <div class="is-spectator-switch">
-        <div class="toggle-container">
+        <div class="toggle-container" >
           <label for="isSpectator">Join as Spectator</label>
-          <label class="switch">
+          <label class="switch" data-testid="spectator-toggle">
             <input name="isSpectator" type="checkbox" />
             <span class="slider round"></span>
           </label>
@@ -27,7 +27,7 @@
     <button type="button" class="btn primary" id="submit" data-testid="create-room">
       <span>{{.Text}}</span>
     </button>
-    <script defer src="/static/js/prejoin.js"></script>
+    <script defer type="module" src="/static/js/prejoin.js"></script>
   </form>
 </body>
 

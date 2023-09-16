@@ -1,6 +1,10 @@
 FROM golang:1.21.1-alpine as build
 WORKDIR /app
-COPY . .
+COPY cmd ./cmd
+COPY pkg ./pkg
+COPY static ./static
+COPY vendor ./vendor
+COPY go.mod go.sum ./
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 EXPOSE 8080

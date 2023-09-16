@@ -20,7 +20,7 @@ try {
   await runTest("smoke test", () => smokeTest());
   const [roomId, chromeData] = await runTest(
     "User should be able to create room",
-    () => createRoom(username)
+    () => createRoom(username, "voter")
   );
 
   browsers.push(chromeData.browser);

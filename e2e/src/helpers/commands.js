@@ -28,12 +28,18 @@ export async function NavigateToRoom(browser, roomId) {
   const $document = await getDocument(page);
   return { $document, page };
 }
-export async function FillCreateRoomForm($document, username, role = "voter") {
+export async function FillCreateRoomForm($document, username, role) {
   const $usernameInput = await getByTestId($document, "username-input");
   await $usernameInput.type(username);
-  if (role !== "voter") {
-    const $roleInput = await getByTestId($document, "spectator-toggle");
+  const $roleInput = await getByTestId($document, "spectator-toggle");
+  const isSpectator = await $roleInput.evaluate(e => e.checked);
+  if (isSpectator && role === "voter") {
     $roleInput.click();
+    return;
+  }
+  if (!isSpectator && role === "spectator") {
+    $roleInput.click();
+    return;
   }
 }
 export async function SubmitCreateRoomForm($document) {

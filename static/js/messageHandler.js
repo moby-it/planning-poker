@@ -169,12 +169,14 @@ function cancelReveal() {
   const progressBar = document.querySelector('#progress-bar');
   if (progressBar) progressBar.style.display = 'none';
   const submitButton = getSubmitButton();
-  submitButton.removeEventListener('click', cancelRevealHandler);
-  submitButton.addEventListener('click', handleRevealSubmit);
-  submitButton.innerText = 'Reveal Cards';
-  submitButton.classList.remove('default');
-  submitButton.classList.add('primary');
-  submitButton.setAttribute('data-testid', 'reveal-round');
+  if (submitButton) {
+    submitButton.removeEventListener('click', cancelRevealHandler);
+    submitButton.addEventListener('click', handleRevealSubmit);
+    submitButton.innerText = 'Reveal Cards';
+    submitButton.classList.remove('default');
+    submitButton.classList.add('primary');
+    submitButton.setAttribute('data-testid', 'reveal-round');
+  }
   setHeader("Everyone's Ready");
   dispatchRevealingEvent(false);
 }

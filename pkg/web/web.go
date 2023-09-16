@@ -25,12 +25,14 @@ func Start() error {
 	cacheDuration := 0 * time.Hour
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fileServerWithCacheControl(http.Dir("static"), cacheDuration)))
 	r.Handle("/favicon.ico", fileServerWithCacheControl(http.Dir("static"), cacheDuration))
-
+	r.HandleFunc("/", endpoints.ServeHome).Methods("GET")
 	r.HandleFunc("/room/{roomId}", endpoints.ServeRoom).Methods("GET")
 	r.HandleFunc("/prejoin", endpoints.ServePrejoin).Methods("GET")
-	r.HandleFunc("/prejoin", endpoints.Prejoin).Methods("POST")
-	r.HandleFunc("/", endpoints.ServeHome).Methods("GET")
-	r.HandleFunc("/joinRoom/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
+
+	apiRouter := r.PathPrefix("/api").Subrouter()
+	v1Router := apiRouter.PathPrefix("/v1").Subrouter()
+	v1Router.HandleFunc("/prejoin", endpoints.Prejoin).Methods("POST")
+	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", endpoints.ConnectToRoom)
 
 	// attachProfiler(r)
 

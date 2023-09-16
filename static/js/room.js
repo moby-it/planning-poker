@@ -15,17 +15,13 @@ function getTcp() {
 function wsUrl() {
   return getTcp() + window.location.host + '/api' + '/v1';
 }
-
-const username = localStorage.getItem("username") || "";
-const role = localStorage.getItem("isSpectator") === "1" ? 'spectator' : 'voter';
+const urlParams = new URLSearchParams(window.location.search);
+const username = urlParams.get('username');
+const role = urlParams.get("role");
 const splitUrl = document.location.pathname.split("/");
 const roomId = splitUrl[splitUrl.length - 1];
-if (!username) {
-  sessionStorage.setItem('roomId', roomId);
-  window.location.href = `${window.origin}/prejoin`;
-} else {
-  connectToWs()();
-}
+
+connectToWs()();
 
 const copyLinkEl = document.querySelector('#copy-link');
 if (copyLinkEl) copyLinkEl.addEventListener('click', copyLinkToClipboard);
@@ -101,5 +97,5 @@ function connectToWs(retries = 0) {
   };
 }
 function copyLinkToClipboard() {
-  navigator.clipboard.writeText(window.location.href);
+  navigator.clipboard.writeText(window.location.origin + window.location.pathname);
 }

@@ -1,4 +1,4 @@
-const isSpectatorInput = document.querySelector('input[name="isSpectator"]');
+export const isSpectatorInput = document.querySelector('input[name="isSpectator"]');
 
 export function registerSpectatorInputEventListener() {
   // save spectator input changes to local storage
@@ -8,7 +8,7 @@ export function registerSpectatorInputEventListener() {
       isSpectatorInput.checked = !!isSpectator;
     } else {
       localStorage.setItem('isSpectator', 0);
-      isSpectator.checked = false;
+      isSpectatorInput.checked = false;
     }
     isSpectatorInput.addEventListener('change', (e) => {
       const isSpectator = e.target.checked;

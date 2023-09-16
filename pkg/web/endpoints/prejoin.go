@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -40,13 +41,30 @@ func ServePrejoin(w http.ResponseWriter, r *http.Request) {
 
 func Prejoin(w http.ResponseWriter, r *http.Request) {
 	roomId := r.URL.Query().Get("roomId")
-	username := r.FormValue("username")
-	if len(username) >= 12 {
+	var payload struct {
+		Username string `json:"username"`
+		Role     string `json:"role"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&payload)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	username := payload.Username
+	role := payload.Role
+
+	if len(username) >= 12 || len(username) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !(role == "voter" || role == "spectator") {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if roomId == "" {
-		room.New()
+		r := room.New()
+		w.Write([]byte(r.Id))
 	} else {
 		room, found := room.Get(roomId)
 		if !found {
@@ -58,5 +76,4 @@ func Prejoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.WriteHeader(http.StatusCreated)
 }

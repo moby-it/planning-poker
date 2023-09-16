@@ -1,11 +1,16 @@
+import { registerSpectatorInputEventListener, isSpectatorInput } from "/static/js/isSpectatorToggle.js";
+
+registerSpectatorInputEventListener();
+
 const usernameInput = document.querySelector('input[name="username"]');
-const isSpectatorInput = document.querySelector('input[name="isSpectator"]');
 const submit = document.querySelector('#submit');
 const apiUrl = window.location.origin + "/api/v1";
 const localStorageKeys = {
   username: 'username',
   isSpectator: 'isSpectator',
 };
+const existingUsername = localStorage.getItem(localStorageKeys.username);
+if (existingUsername) usernameInput.value = existingUsername;
 // validate user input changes and save to local storage
 if (usernameInput) {
   usernameInput.addEventListener('input', (e) => {
@@ -35,18 +40,25 @@ if (usernameInput) {
 if (submit) {
   submit.addEventListener('click', () => {
     const username = usernameInput.value;
+    const isSpectator = isSpectatorInput.checked;
+    const role = isSpectator ? 'spectator' : 'voter';
     const url = new URLSearchParams(window.location.search);
     const shouldCreate = Boolean(+url.get("create"));
     if (username.length) {
       if (shouldCreate) {
-        fetch(apiUrl + "/createRoom", { method: "POST" }).then(r => r.text()).then(roomId => {
-          window.location.href = `${window.origin}/room/${roomId}`;
+        fetch(apiUrl + `/prejoin`, {
+          headers: { "Content-Type": "application/json" },
+          method: "POST", body: JSON.stringify({
+            username, role
+          })
+        }).then(r => r.text()).then(roomId => {
+          window.location.href = `${window.origin}/room/${roomId}?username=${username}&role=${role}`;
         });
       } else {
-        const roomId = sessionStorage.getItem('roomId');
-        window.location.href = `${window.origin}/room/${roomId}`;
+        const roomId = url.get("roomId");
+        console.log(roomId, role, username);
+        window.location.href = `${window.origin}/room/${roomId}?username=${username}&role=${role}`;
       }
-      sessionStorage.removeItem('roomId')
     }
   });
 }
