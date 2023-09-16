@@ -15,7 +15,6 @@ jobs:
           go-version: '1.21'
           cache-dependency-path: web/go.sum
       - name: Test web
-        working-directory: web
         run: make test
   test-ui:
     runs-on: ubuntu-22.04
