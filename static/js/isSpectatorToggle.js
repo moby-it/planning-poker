@@ -1,4 +1,5 @@
 export const isSpectatorInput = document.querySelector('input[name="isSpectator"]');
+export const role = () => document.querySelector('input[name="isSpectator"]').checked ? 'spectator' : 'voter';
 
 export function registerSpectatorInputEventListener() {
   // save spectator input changes to local storage

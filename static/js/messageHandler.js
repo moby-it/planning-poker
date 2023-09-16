@@ -1,4 +1,4 @@
-import { registerSpectatorInputEventListener } from "/static/js/isSpectatorToggle.js";
+import { registerSpectatorInputEventListener, role } from "/static/js/isSpectatorToggle.js";
 import { sendWsMessage } from '/static/js/room.js';
 
 let headerInterval;
@@ -46,7 +46,7 @@ export function handleWsMessage(message) {
 
 function updateUsers(users) {
   const board = document.querySelector('.board');
-  if (!board) throw new Error('no board element. cannot update users');
+  if (!board) throw new Error('no bhttp://localhost:8080/room/48e48eaf-b2fb-4700-869b-1ecc6c1cb46aoard element. cannot update users');
   while (board.children.length > 0) board.removeChild(board.lastChild);
   const spectatorsList = document.querySelector('ul.spectators');
   while (spectatorsList.children.length >= 2) spectatorsList.removeChild(spectatorsList.lastChild);
@@ -80,10 +80,10 @@ function updateUserVoted(username) {
 }
 function resetRound() {
   document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
-  document.querySelector('.voting-card.selected').classList.remove('selected');
+  document.querySelector('.voting-card.selected')?.classList.remove('selected');
   document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
   document.querySelector('#progress-bar').style.display = 'none';
-  document.querySelector('.btn.primary').remove();
+  document.querySelector('.btn.primary')?.remove();
   setHeader("Everyone's Ready");
 }
 function revealRound(votes) {
@@ -100,12 +100,14 @@ function revealRound(votes) {
   setHeader('Average Story Points ' + average);
   // change buttonrevealInterval
   const submitButton = getSubmitButton();
-  submitButton.innerText = "Start New Round";
-  submitButton.classList.remove('default');
-  submitButton.classList.add('primary');
-  submitButton.setAttribute('data-testid', 'start-new-round');
-  submitButton.removeEventListener('click', cancelRevealHandler);
-  submitButton.addEventListener('click', handleRoundToStart);
+  if (submitButton) {
+    submitButton.innerText = "Start New Round";
+    submitButton.classList.remove('default');
+    submitButton.classList.add('primary');
+    submitButton.setAttribute('data-testid', 'start-new-round');
+    submitButton.removeEventListener('click', cancelRevealHandler);
+    submitButton.addEventListener('click', handleRoundToStart);
+  }
   dispatchRevealingEvent(false);
 }
 function roundToReveal(after) {
@@ -139,15 +141,21 @@ function roundToReveal(after) {
   }, 1000);
   // set cancel button
   const submitButton = getSubmitButton();
-  submitButton.innerText = 'Cancel Reveal';
-  submitButton.classList.remove('primary');
-  submitButton.classList.add('default');
-  submitButton.setAttribute('data-testid', 'cancel-reveal');
-  submitButton.removeEventListener('click', handleRevealSubmit);
-  submitButton.addEventListener('click', cancelRevealHandler);
+  if (submitButton) {
+    submitButton.innerText = 'Cancel Reveal';
+    submitButton.classList.remove('primary');
+    submitButton.classList.add('default');
+    submitButton.setAttribute('data-testid', 'cancel-reveal');
+    submitButton.removeEventListener('click', handleRevealSubmit);
+    submitButton.addEventListener('click', cancelRevealHandler);
+  }
 }
 function updateRoundIsRevealable(revealAvailable) {
   let submitButton = getSubmitButton();
+  if (role() === 'spectator') {
+    submitButton?.remove();
+    return;
+  }
   if (revealAvailable && !submitButton) {
     submitButton = document.createElement('button');
     submitButton.id = 'submit-btn';
