@@ -55,6 +55,10 @@ function registeVoteEventHandler() {
 }
 function changeRoleEventListener() {
   const toggle = document.querySelector('input[name="isSpectator"]');
+  const toggleWrapper = document.querySelector('label.switch');
+  toggleWrapper.addEventListener('click', () => {
+    if (revealing) showError("Cannot change role while a round is revealing");
+  });
   toggle.addEventListener('change', (e) => {
     if (typeof e.target.checked === 'boolean') {
       localStorage.setItem('isSpectator', e.target.checked ? '1' : '0');
@@ -98,4 +102,5 @@ function connectToWs(retries = 0) {
 }
 function copyLinkToClipboard() {
   navigator.clipboard.writeText(window.location.origin + window.location.pathname);
+  showSuccess('Link Copied');
 }

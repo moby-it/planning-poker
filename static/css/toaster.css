@@ -1,0 +1,28 @@
+#toaster-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.toaster {
+  margin: 5px;
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.toaster.success {
+  background-color: #4CAF50;
+}
+
+.toaster.error {
+  background-color: #f44336;
+}
+
+.toaster.warn {
+  background-color: #ff9800;
+}
