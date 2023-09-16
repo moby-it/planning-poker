@@ -16,11 +16,10 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-          cache-dependency-path: web/go.sum
+          cache-dependency-path: go.sum
       - name: Test web
-        working-directory: ./web
         run: make test
-  build:
+  build-push:
     runs-on: "ubuntu-latest"
     needs: test
     steps:
@@ -39,4 +38,3 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-web:${{ github.sha }},${{ secrets.REPOSITORY_NAME }}/planning-poker-web:latest,
-          context: ./web

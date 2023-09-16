@@ -46,7 +46,7 @@ export function handleWsMessage(message) {
 
 function updateUsers(users) {
   const board = document.querySelector('.board');
-  if (!board) throw new Error('no bhttp://localhost:8080/room/48e48eaf-b2fb-4700-869b-1ecc6c1cb46aoard element. cannot update users');
+  if (!board) throw new Error('no board element. cannot update users');
   while (board.children.length > 0) board.removeChild(board.lastChild);
   const spectatorsList = document.querySelector('ul.spectators');
   while (spectatorsList.children.length >= 2) spectatorsList.removeChild(spectatorsList.lastChild);
