@@ -1,10 +1,17 @@
 import { registerSpectatorInputEventListener, role } from "/static/js/isSpectatorToggle.js";
 import { sendWsMessage } from '/static/js/room.js';
+import store from './store.js';
+
+import { html, render } from 'https://unpkg.com/lit-html?module';
 
 let headerInterval;
 let revealInterval;
 
 registerSpectatorInputEventListener();
+
+window.addEventListener("planningupdate", () => {
+  renderBoard();
+});
 
 function getSubmitButton() {
   return document.querySelector('#submit-btn');
@@ -45,12 +52,7 @@ export function handleWsMessage(message) {
 }
 
 function updateUsers(users) {
-  const board = document.querySelector('.board');
-  if (!board) throw new Error('no bhttp://localhost:8080/room/48e48eaf-b2fb-4700-869b-1ecc6c1cb46aoard element. cannot update users');
-  while (board.children.length > 0) board.removeChild(board.lastChild);
-  const spectatorsList = document.querySelector('ul.spectators');
-  while (spectatorsList.children.length >= 2) spectatorsList.removeChild(spectatorsList.lastChild);
-  users.forEach(user => user.isVoter ? addVoter(user) : addSpectator(user));
+  store.users = [...users];
 }
 
 function addVoter(voter) {
@@ -79,6 +81,8 @@ function updateUserVoted(username) {
   vote.classList.add('voted');
 }
 function resetRound() {
+  store.votes = [];
+  store.roundStatus = 'started';
   document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
   document.querySelector('.voting-card.selected')?.classList.remove('selected');
   document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
@@ -87,6 +91,8 @@ function resetRound() {
   setHeader("Everyone's Ready");
 }
 function revealRound(votes) {
+  store.votes = [...votes];
+  store.roundStatus = 'revealed';
   document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
   for (const [username, pointsVoted] of Object.entries(votes)) {
     const vote = document.querySelector(`[data-testid='board-card-${username}'] > .card`);
@@ -111,6 +117,7 @@ function revealRound(votes) {
   dispatchRevealingEvent(false);
 }
 function roundToReveal(after) {
+  store.roundStatus = 'revealing';
   dispatchRevealingEvent(true);
   // add progress bar
   const progressBar = document.querySelector('#progress-bar');
@@ -151,6 +158,12 @@ function roundToReveal(after) {
   }
 }
 function updateRoundIsRevealable(revealAvailable) {
+  if (revealAvailable) {
+    store.roundStatus = 'revealable';
+  }
+  else {
+    store.roundStatus = 'started';
+  }
   let submitButton = getSubmitButton();
   if (role() === 'spectator') {
     submitButton?.remove();
@@ -170,6 +183,7 @@ function updateRoundIsRevealable(revealAvailable) {
   if (!revealAvailable && submitButton) submitButton.remove();
 }
 function cancelReveal() {
+  store.roundStatus = 'started';
   clearInterval(headerInterval);
   headerInterval = null;
   clearInterval(revealInterval);
@@ -207,3 +221,23 @@ function dispatchRevealingEvent(revealing) {
   const event = new CustomEvent('revealing', { detail: revealing });
   document.dispatchEvent(event);
 }
+
+function renderBoard() {
+  const voters = html`${store.users.filter(u => u.IsVoter).map(u =>
+    renderVoter(u)
+  )}`;
+  render(voters, document.querySelector('.board'));
+  const spectators = html`
+  <ul class="spectators">
+    <li>Spectators</li>
+    ${store.users.filter(u => !u.IsVoter).map(s => html`${s.username}`)}
+  </ul>`;
+  render(spectators, document.querySelector('ul.specators'));
+}
+function renderVoter(user) {
+  return html`
+  <div class="vote" data-testid="board-card-${user.username}">
+    <div class="card"></div>
+      <span class="username">${user.username}</span>
+    </div>`;
+};

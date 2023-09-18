@@ -7,7 +7,7 @@ document.addEventListener('revealing', (e) => {
   document.querySelector('input[name="isSpectator"]').disabled = e.detail;
   revealing = e.detail;
 });
-import { handleWsMessage } from '/static/js/messageHandler.js';
+import { handleWsMessage } from './messageHandler.js';
 
 function getTcp() {
   return window.location.protocol === 'https:' ? 'wss://' : 'ws://';
