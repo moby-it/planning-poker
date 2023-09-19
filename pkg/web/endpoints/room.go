@@ -102,12 +102,13 @@ func ServeRoom(w http.ResponseWriter, r *http.Request) {
 	for i := range room.Spectators {
 		spectators[i] = render.Spectator{Name: room.Spectators[i].Username}
 	}
-	boardCards := render.BoardCards(room)
+	boardCards := []render.VoteCard{}
 
 	roomData := render.RoomViewmodel{
-		Subheader:  render.Subheader{Toggle: toggle},
-		Spectators: spectators,
-		BoardCards: boardCards, ShowLogo: true,
+		Subheader:   render.Subheader{Toggle: toggle},
+		Spectators:  spectators,
+		BoardCards:  boardCards,
+		ShowLogo:    true,
 		VotingCards: render.VotingCards(room, username),
 	}
 	tmpl.Execute(w, roomData)

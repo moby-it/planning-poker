@@ -1,8 +1,10 @@
 {{define "board"}}
 <div class="board">
   {{range .}}
-  {{template "card" .}}
-  <span class="username">{{.Username}}</span>
+    <div class="vote" data-testid="board-card-{{.Username}}">
+      {{template "card" .}}
+      <span class="username">{{.Username}}</span>
+    </div>
   {{end}}
 </div>
 {{end}}

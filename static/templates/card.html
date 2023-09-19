@@ -2,10 +2,9 @@
 <div class="card {{ .Classes }}">
   {{ if eq .Points 100 }}
   <span>?</span>
-  {{end}}
-  {{ if eq .Points 1000 }}
+  {{ else if eq .Points 1000}}
   <img src="/cup-medium.svg" />
-  {{ else }}
+  {{ else if gt .Points -1}}
   <span>{{ .Points }}</span>
   {{end}}
 </div>

@@ -11,6 +11,7 @@ registerSpectatorInputEventListener();
 
 window.addEventListener("planningupdate", () => {
   renderBoard();
+  if (store.prevRoundStatus === 'revealed' && store.roundStatus === 'started') renderRoundReset();
 });
 
 function getSubmitButton() {
@@ -20,6 +21,7 @@ function getSubmitButton() {
 export function handleWsMessage(message) {
   let data = message.data;
   try {
+    this;
     data = JSON.parse(data);
   } catch (e) {
     console.error(e);
@@ -54,28 +56,6 @@ export function handleWsMessage(message) {
 function updateUsers(users) {
   store.users = [...users];
 }
-
-function addVoter(voter) {
-  const board = document.querySelector('.board');
-  const voteCard = document.createElement('div');
-  voteCard.classList.add('vote');
-  voteCard.setAttribute('data-testid', `board-card-${voter.username}`);
-  const card = document.createElement('div');
-  card.classList.add('card');
-  if (voter.hasVoted) card.classList.add('voted');
-  voteCard.appendChild(card);
-  const usernameText = document.createElement('span');
-  usernameText.innerText = voter.username;
-  voteCard.appendChild(usernameText);
-  board.appendChild(voteCard);
-}
-function addSpectator(spectator) {
-  const spectatorsList = document.querySelector('ul.spectators');
-  if (!spectatorsList) throw new Error('cannot add spectator. no spectator list found');
-  const newSpectator = document.createElement('li');
-  newSpectator.innerText = spectator.username;
-  spectatorsList.appendChild(newSpectator);
-}
 function updateUserVoted(username) {
   const vote = document.querySelector(`[data-testid='board-card-${username}'] > .card`);
   vote.classList.add('voted');
@@ -83,12 +63,6 @@ function updateUserVoted(username) {
 function resetRound() {
   store.votes = [];
   store.roundStatus = 'started';
-  document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
-  document.querySelector('.voting-card.selected')?.classList.remove('selected');
-  document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
-  document.querySelector('#progress-bar').style.display = 'none';
-  document.querySelector('.btn.primary')?.remove();
-  setHeader("Everyone's Ready");
 }
 function revealRound(votes) {
   store.votes = [...votes];
@@ -114,11 +88,9 @@ function revealRound(votes) {
     submitButton.removeEventListener('click', cancelRevealHandler);
     submitButton.addEventListener('click', handleRoundToStart);
   }
-  dispatchRevealingEvent(false);
 }
 function roundToReveal(after) {
   store.roundStatus = 'revealing';
-  dispatchRevealingEvent(true);
   // add progress bar
   const progressBar = document.querySelector('#progress-bar');
   if (progressBar) progressBar.style.display = 'block';
@@ -199,7 +171,27 @@ function cancelReveal() {
     submitButton.classList.add('primary');
     submitButton.setAttribute('data-testid', 'reveal-round');
   }
-  setHeader("Everyone's Ready");
+  setHeader("Everyone's Ready"); function addVoter(voter) {
+    const board = document.querySelector('.board');
+    const voteCard = document.createElement('div');
+    voteCard.classList.add('vote');
+    voteCard.setAttribute('data-testid', `board-card-${voter.username}`);
+    const card = document.createElement('div');
+    card.classList.add('card');
+    if (voter.hasVoted) card.classList.add('voted');
+    voteCard.appendChild(card);
+    const usernameText = document.createElement('span');
+    usernameText.innerText = voter.username;
+    voteCard.appendChild(usernameText);
+    board.appendChild(voteCard);
+  }
+  function addSpectator(spectator) {
+    const spectatorsList = document.querySelector('ul.spectators');
+    if (!spectatorsList) throw new Error('cannot add spectator. no spectator list found');
+    const newSpectator = document.createElement('li');
+    newSpectator.innerText = spectator.username;
+    spectatorsList.appendChild(newSpectator);
+  }
   dispatchRevealingEvent(false);
 }
 function handleRevealSubmit() {
@@ -223,21 +215,32 @@ function dispatchRevealingEvent(revealing) {
 }
 
 function renderBoard() {
-  const voters = html`${store.users.filter(u => u.IsVoter).map(u =>
+  const board = document.querySelector('.board');
+  const voters = html`${store.users.filter(u => u.isVoter).map(u =>
     renderVoter(u)
   )}`;
-  render(voters, document.querySelector('.board'));
+  render(voters, board);
+  const spectatorsList = document.querySelector('ul.spectators');
   const spectators = html`
   <ul class="spectators">
-    <li>Spectators</li>
-    ${store.users.filter(u => !u.IsVoter).map(s => html`${s.username}`)}
+    ${store.users.filter(u => !u.isVoter).map(s => html`<li>${s.username}</li>`)}
   </ul>`;
-  render(spectators, document.querySelector('ul.specators'));
+  render(spectators, spectatorsList);
 }
 function renderVoter(user) {
+  const classes = `card`;
+  if (user.hasVoted) card += ` voted`;
   return html`
   <div class="vote" data-testid="board-card-${user.username}">
-    <div class="card"></div>
+    <div class="${classes}"></div>
       <span class="username">${user.username}</span>
     </div>`;
 };
+function renderRoundReset() {
+  document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
+  document.querySelector('.voting-card.selected')?.classList.remove('selected');
+  document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
+  document.querySelector('#progress-bar').style.display = 'none';
+  document.querySelector('.btn.primary')?.remove();
+  setHeader("Everyone's Ready");
+}
