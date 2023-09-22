@@ -56,7 +56,6 @@ if (submit) {
         });
       } else {
         const roomId = url.get("roomId");
-        console.log(roomId, role, username);
         window.location.href = `${window.origin}/room/${roomId}?username=${username}&role=${role}`;
       }
     }

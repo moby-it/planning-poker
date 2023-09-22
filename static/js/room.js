@@ -1,27 +1,36 @@
+import { handleWsMessage } from './messageHandler.js';
+import { renderBoard, renderSubmitButton } from './render.js';
 /**
  * @type {WebSocket}
  */
 let socket;
 let revealing;
-document.addEventListener('revealing', (e) => {
+
+window.addEventListener('revealing', (e) => {
   document.querySelector('input[name="isSpectator"]').disabled = e.detail;
   revealing = e.detail;
 });
-import { handleWsMessage } from './messageHandler.js';
 
+window.addEventListener('app:users:update', () => {
+  renderBoard();
+});
+window.addEventListener('app:roundStatus:update', () => {
+  renderSubmitButton();
+});
 function getTcp() {
   return window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 }
 function wsUrl() {
   return getTcp() + window.location.host + '/api' + '/v1';
 }
+
 const urlParams = new URLSearchParams(window.location.search);
 const username = urlParams.get('username');
 const role = urlParams.get("role");
 const splitUrl = document.location.pathname.split("/");
 const roomId = splitUrl[splitUrl.length - 1];
 
-connectToWs()();
+connectToWs(5)();
 
 const copyLinkEl = document.querySelector('#copy-link');
 if (copyLinkEl) copyLinkEl.addEventListener('click', copyLinkToClipboard);
@@ -76,7 +85,7 @@ export function sendWsMessage(message) {
     socket.send(JSON.stringify(message));
   }
 }
-function connectToWs(retries = 0) {
+function connectToWs(retries) {
   return () => {
     socket = new WebSocket(
       `${wsUrl()}/joinRoom/${roomId}/${username}/${role}`

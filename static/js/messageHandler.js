@@ -1,21 +1,14 @@
-import { registerSpectatorInputEventListener, role } from "/static/js/isSpectatorToggle.js";
-import { sendWsMessage } from '/static/js/room.js';
+import { registerSpectatorInputEventListener, } from "./isSpectatorToggle.js";
+import { sendWsMessage } from './room.js';
 import store from './store.js';
 
-import { html, render } from 'https://unpkg.com/lit-html?module';
 
 let headerInterval;
 let revealInterval;
 
 registerSpectatorInputEventListener();
 
-window.addEventListener("planningupdate", () => {
-  renderBoard();
-  if (store.prevRoundStatus === 'revealed' && store.roundStatus === 'started') renderRoundReset();
-});
-
 function getSubmitButton() {
-  return document.querySelector('#submit-btn');
 }
 
 export function handleWsMessage(message) {
@@ -28,13 +21,14 @@ export function handleWsMessage(message) {
   }
   switch (data.type) {
     case 'usersUpdated':
-      updateUsers(data.users);
+      store.users = [...data.users];
       break;
     case 'roundRevealAvailable':
-      updateRoundIsRevealable(data.revealAvailable);
+      store.roundStatus = data.revealAvailable ? 'revealable' : null;
       break;
     case 'userVoted':
-      updateUserVoted(data.username);
+      const vote = document.querySelector(`[data-testid='board-card-${data.username}'] > .card`);
+      vote.classList.add('voted');
       break;
     case 'roundToReveal':
       roundToReveal(data.after);
@@ -46,23 +40,12 @@ export function handleWsMessage(message) {
       revealRound(data.votes);
       break;
     case 'roundStarted':
-      resetRound();
+      store.votes = [];
+      store.roundStatus = 'started';
       break;
     case 'pong':
     // ignore
   }
-}
-
-function updateUsers(users) {
-  store.users = [...users];
-}
-function updateUserVoted(username) {
-  const vote = document.querySelector(`[data-testid='board-card-${username}'] > .card`);
-  vote.classList.add('voted');
-}
-function resetRound() {
-  store.votes = [];
-  store.roundStatus = 'started';
 }
 function revealRound(votes) {
   store.votes = [...votes];
@@ -77,7 +60,7 @@ function revealRound(votes) {
   // show average
   const voteSum = Object.values(votes).reduce((prev, curr) => prev + curr);
   const average = voteSum / Object.keys(votes).length;
-  setHeader('Average Story Points ' + average);
+  renderHeader('Average Story Points ' + average);
   // change buttonrevealInterval
   const submitButton = getSubmitButton();
   if (submitButton) {
@@ -106,7 +89,7 @@ function roundToReveal(after) {
   }, intervalTime);
 
   // set room header
-  setHeader(`Revealing in ${after / 1000}`);
+  renderHeader(`Revealing in ${after / 1000}`);
   let remainingTime = after - 1000;
   headerInterval = setInterval(() => {
     if (remainingTime < 0) {
@@ -116,7 +99,7 @@ function roundToReveal(after) {
     const headerText = `Revealing in ${remainingTime / 1000}`;
     remainingTime = remainingTime - 1000;
     if (remainingTime > 0)
-      setHeader(headerText);
+      renderHeader(headerText);
   }, 1000);
   // set cancel button
   const submitButton = getSubmitButton();
@@ -127,7 +110,7 @@ function roundToReveal(after) {
     submitButton.setAttribute('data-testid', 'cancel-reveal');
     submitButton.removeEventListener('click', handleRevealSubmit);
     submitButton.addEventListener('click', cancelRevealHandler);
-  }
+  } users;
 }
 function updateRoundIsRevealable(revealAvailable) {
   if (revealAvailable) {
@@ -136,23 +119,7 @@ function updateRoundIsRevealable(revealAvailable) {
   else {
     store.roundStatus = 'started';
   }
-  let submitButton = getSubmitButton();
-  if (role() === 'spectator') {
-    submitButton?.remove();
-    return;
-  }
-  if (revealAvailable && !submitButton) {
-    submitButton = document.createElement('button');
-    submitButton.id = 'submit-btn';
-    submitButton.classList.add('btn', 'primary');
-    submitButton.setAttribute('data-testid', 'reveal-round');
-    submitButton.innerText = "Reveal Cards";
-    submitButton.removeEventListener('click', handleRoundToStart);
-    submitButton.addEventListener('click', handleRevealSubmit);
-    const board = document.querySelector('.board');
-    board.parentNode.insertBefore(submitButton, board.nextSibling);
-  }
-  if (!revealAvailable && submitButton) submitButton.remove();
+
 }
 function cancelReveal() {
   store.roundStatus = 'started';
@@ -171,7 +138,7 @@ function cancelReveal() {
     submitButton.classList.add('primary');
     submitButton.setAttribute('data-testid', 'reveal-round');
   }
-  setHeader("Everyone's Ready"); function addVoter(voter) {
+  renderHeader("Everyone's Ready"); function addVoter(voter) {
     const board = document.querySelector('.board');
     const voteCard = document.createElement('div');
     voteCard.classList.add('vote');
@@ -192,12 +159,6 @@ function cancelReveal() {
     newSpectator.innerText = spectator.username;
     spectatorsList.appendChild(newSpectator);
   }
-  dispatchRevealingEvent(false);
-}
-function handleRevealSubmit() {
-  if (!revealInterval || revealInterval) {
-    sendWsMessage({ type: 'roundToReveal' });
-  }
 }
 function handleRoundToStart() {
   sendWsMessage({ type: 'roundToStart' });
@@ -205,42 +166,4 @@ function handleRoundToStart() {
 function cancelRevealHandler() {
   sendWsMessage({ type: 'cancelReveal' });
 }
-function setHeader(header) {
-  const headerText = document.querySelector('.room-header > h2');
-  headerText.innerText = header;
-}
-function dispatchRevealingEvent(revealing) {
-  const event = new CustomEvent('revealing', { detail: revealing });
-  document.dispatchEvent(event);
-}
 
-function renderBoard() {
-  const board = document.querySelector('.board');
-  const voters = html`${store.users.filter(u => u.isVoter).map(u =>
-    renderVoter(u)
-  )}`;
-  render(voters, board);
-  const spectatorsList = document.querySelector('ul.spectators');
-  const spectators = html`
-  <ul class="spectators">
-    ${store.users.filter(u => !u.isVoter).map(s => html`<li>${s.username}</li>`)}
-  </ul>`;
-  render(spectators, spectatorsList);
-}
-function renderVoter(user) {
-  const classes = `card`;
-  if (user.hasVoted) card += ` voted`;
-  return html`
-  <div class="vote" data-testid="board-card-${user.username}">
-    <div class="${classes}"></div>
-      <span class="username">${user.username}</span>
-    </div>`;
-};
-function renderRoundReset() {
-  document.querySelectorAll('.card.voted').forEach(e => e.classList.remove('voted'));
-  document.querySelector('.voting-card.selected')?.classList.remove('selected');
-  document.querySelectorAll('.reveal').forEach(e => e.removeChild(e.lastChild));
-  document.querySelector('#progress-bar').style.display = 'none';
-  document.querySelector('.btn.primary')?.remove();
-  setHeader("Everyone's Ready");
-}

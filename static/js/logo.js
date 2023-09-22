@@ -1,4 +1,3 @@
-
 const header = document.querySelector(".header.row");
 const pokerPlanningLogo = document.querySelector(".logo");
 if (document.location.pathname === '/') {

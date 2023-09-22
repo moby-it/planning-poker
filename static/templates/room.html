@@ -17,6 +17,7 @@
     <div class="voting-area-wrapper">
       <div class="voting-area">
         {{template "board" .BoardCards}}
+        <button class="hidden" id="submit-btn"></button>
         {{template "votingCardList"}}
       </div>
       {{template "spectatorList" .Spectators}}
