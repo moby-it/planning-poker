@@ -12,7 +12,6 @@ services:
       restart_policy:
         condition: any
         delay: 3s
-        max_attempts: 3
       update_config:
         monitor: 5s
         failure_action: rollback
@@ -31,7 +30,6 @@ services:
       restart_policy:
         condition: any
         delay: 3s
-        max_attempts: 3
       update_config:
         monitor: 5s
         failure_action: rollback
