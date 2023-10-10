@@ -5,6 +5,8 @@ services:
       - 3000:80
     build:
       context: ui
+      args:
+        - MODE=docker
   api:
     ports:
       - 8080:8080
