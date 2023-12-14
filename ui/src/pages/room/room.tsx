@@ -27,7 +27,7 @@ const Room: Component = () => {
   const { setSpectators, setVoters, revealing, voters, handleWsMessage } = useRoomContext();
   const navigate = useNavigate();
   const params = useParams();
-  const roomId = params["roomId"];
+  const roomId = params["roomId"]
   const pingMSInterval = 5 * 1000; // 15 seconds
   let pingInterval: NodeJS.Timer | undefined;
   setRoomId(roomId);
