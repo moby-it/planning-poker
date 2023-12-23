@@ -2,11 +2,12 @@
 defineProps<{
   testId?: string,
   color: string,
-  disabled: boolean;
+  disabled?: boolean;
 }>();
 defineEmits<{
   (e: 'clicked'): void;
 }>();
+
 
 </script>
 <template>
@@ -15,7 +16,7 @@ defineEmits<{
     <slot />
   </button>
 </template>
-<style>
+<style scoped>
 .btn {
   display: block;
   width: 164px;

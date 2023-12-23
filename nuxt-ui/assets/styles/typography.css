@@ -1,10 +1,10 @@
 @font-face {
   font-family: Sora;
-  src: url(~/assets/Sora-VariableFont.ttf);
+  src: url(~/assets/fonts/Sora-VariableFont.ttf);
 }
 @font-face {
   font-family: IBM Plex Mono;
-  src: url(~/assets/IBMPlexMono-Regular.ttf);
+  src: url(~/assets/fonts/IBMPlexMono-Regular.ttf);
 }
 
 h1,

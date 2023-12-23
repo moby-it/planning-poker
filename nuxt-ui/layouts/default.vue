@@ -7,8 +7,8 @@
     <slot />
   </section>
 </template>
-<style>
-  :root {
-    padding: 24px 138px;
-  }
+<style scoped>
+section {
+  padding: 24px 46px;
+}
 </style>

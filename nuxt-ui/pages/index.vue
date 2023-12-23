@@ -5,30 +5,31 @@ definePageMeta({
 useSeoMeta({
   title: 'Poker Planning',
 });
+useSeoMeta({});
 </script>
 <template>
   <section id="home">
     <section class="bg"></section>
     <hgroup>
-      <img src="~/assets/icon-lg.svg" width="105" height="98" alt="" srcset="" />
+      <img src="/icon-lg.svg" width="105" height="98" />
       <h1 data-testid="title">Poker Planning</h1>
     </hgroup>
     <ul>
-      <li> <img src="~/assets/check.svg" alt="check" srcset="" />user-friendly</li>
-      <li> <img src="~/assets/github.svg" alt="github" srcset="" /><a href="https://github.com/moby-it/planning-poker"
+      <li><img src="/check.svg" alt="check" srcset="" />user-friendly</li>
+      <li><img src="/github.svg" alt="github" srcset="" /><a href="https://github.com/moby-it/planning-poker"
           target="_blank"><em>open-sourced</em></a></li>
-      <li> <img src="~/assets/check.svg" alt="check" srcset="" />free forever</li>
+      <li><img src="/check.svg" alt="check" srcset="" />free forever</li>
     </ul>
     <p>We got tired of searching for free solution for doing <em>Scrum Poker Planning</em>, so we decided to solve the
       issue
       ourselves and open-source it.</p>
-    <img src="~/assets/home-illustration.png">
-    <Button :disabled="false" :color="'primary'" @clicked="navigateTo('/prejoin?create=1')">
+    <img src="/home-illustration.png">
+    <Button :disabled="false" :color="'primary'" @clicked="navigateTo('/prejoin')">
       Start Here
     </Button>
   </section>
 </template>
-<style>
+<style scoped>
 #home {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -37,17 +38,15 @@ useSeoMeta({
     "title title ."
     "tags illustration illustration"
     "description illustration illustration"
-    "button illustration illustration"
-  ;
+    "button illustration illustration";
   gap: 16px;
   margin-top: 72px;
   margin-left: 36px;
-
   font-size: 20px;
 }
 
 #home .bg {
-  background: url(~/assets/home-illustration.png);
+  background: url(/home-illustration.png);
   opacity: 0.6;
   position: absolute;
   left: 0;
@@ -62,10 +61,12 @@ p {
   grid-area: description;
 
 }
+
 button {
   grid-area: button;
   justify-self: center;
 }
+
 em {
   text-decoration: underline;
 }

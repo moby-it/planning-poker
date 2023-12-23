@@ -5,7 +5,7 @@
     <p>Made By <a>Moby IT</a> </p>
   </nav>
 </template>
-<style>
+<style scoped>
 nav {
   height: 42px;
   display: flex;

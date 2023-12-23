@@ -1,6 +1,10 @@
-input {
-  height: 48px;
+html,
+body,
+body>div:first-child {
+  min-height: 100vh;
 }
+
 a {
+  color: inherit;
   cursor: pointer;
 }
