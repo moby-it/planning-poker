@@ -2,6 +2,10 @@
   font-family: Sora;
   src: url(~/assets/Sora-VariableFont.ttf);
 }
+@font-face {
+  font-family: IBM Plex Mono;
+  src: url(~/assets/IBMPlexMono-Regular.ttf);
+}
 
 h1,
 h2,
@@ -9,7 +13,7 @@ h3,
 h4,
 body {
   font-size: 16px;
-  font-family: Sora;
+  font-family: Sora, sans-serif;
 }
 
 h1 {

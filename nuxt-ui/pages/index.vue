@@ -19,21 +19,25 @@ useSeoMeta({
           target="_blank"><em>open-sourced</em></a></li>
       <li> <img src="~/assets/check.svg" alt="check" srcset="" />free forever</li>
     </ul>
-    <p>We got tired of searching for free solution for doing Scrum Poker Planning, so we decided to solve the issue
+    <p>We got tired of searching for free solution for doing <em>Scrum Poker Planning</em>, so we decided to solve the
+      issue
       ourselves and open-source it.</p>
     <img src="~/assets/home-illustration.png">
+    <Button :disabled="false" :color="'primary'" @clicked="navigateTo('/prejoin?create=1')">
+      Start Here
+    </Button>
   </section>
 </template>
 <style>
 #home {
-
   display: grid;
-  grid-template-columns: 1.5fr 0.5fr;
-  grid-template-rows: 168px 30px 90px;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 168px 30px 90px 1fr;
   grid-template-areas:
-    "title illustration"
-    "tags illustration"
-    "description illustration"
+    "title title ."
+    "tags illustration illustration"
+    "description illustration illustration"
+    "button illustration illustration"
   ;
   gap: 16px;
   margin-top: 72px;
@@ -55,9 +59,13 @@ useSeoMeta({
 
 p {
   line-height: 30px;
+  grid-area: description;
 
 }
-
+button {
+  grid-area: button;
+  justify-self: center;
+}
 em {
   text-decoration: underline;
 }
@@ -75,13 +83,15 @@ li {
   gap: 6px;
 }
 
-p {
-  grid-area: description;
+p,
+li {
+  font-family: IBM Plex Mono, monospace;
 }
 
 img {
   grid-area: illustration;
-  width: 100%;
+  /* width: 100%; */
+  height: 500px;
 }
 
 hgroup {

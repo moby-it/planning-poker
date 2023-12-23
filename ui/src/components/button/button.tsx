@@ -1,3 +1,4 @@
+
 import { Component, JSXElement, mergeProps } from "solid-js";
 import "./button.css";
 export const Button: Component<{
