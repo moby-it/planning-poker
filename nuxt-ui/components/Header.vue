@@ -5,7 +5,7 @@
   <nav>
     <NuxtLink to="/">
       <hgroup>
-        <img src="/favicon.ico" height="26">
+        <NuxtImg src="/favicon.svg" height="26" />
         <h4>Poker Planning</h4>
       </hgroup>
     </NuxtLink>

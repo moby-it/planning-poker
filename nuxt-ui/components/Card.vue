@@ -8,7 +8,7 @@ defineProps<{
 <template>
   <div :class="{ revealed, voted }" class="vote">
     <div class="card"></div>
-    <p v-if="points === 1000"><img src="/cup-medium.svg" /></p>
+    <p v-if="points === 1000"><NuxtImg src="/cup-medium.svg" /></p>
     <p v-else-if="points === 100">?</p>
     <p v-else>{{ points }}</p>
   </div>

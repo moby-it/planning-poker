@@ -9,25 +9,25 @@ useSeoMeta({
 <template>
   <section>
     <hgroup>
-      <img src="/icon-lg.svg" width="105" height="98" />
+      <NuxtImg src="/icon-lg.svg" width="105" height="98" />
       <h1 data-testid="title">Poker Planning</h1>
     </hgroup>
     <ul>
       <li>
-        <img src="/check.svg" alt="check" srcset="" />user-friendly
+        <NuxtImg src="/check.svg" alt="check" srcset="" />user-friendly
       </li>
       <li>
-        <img src="/github.svg" alt="github" srcset="" />
+        <NuxtImg src="/github.svg" alt="github" srcset="" />
         <a href="https://github.com/moby-it/planning-poker" target="_blank"><em>open-sourced</em></a>
       </li>
       <li>
-        <img src="/check.svg" alt="check" srcset="" />free forever
+        <NuxtImg src="/check.svg" alt="check" srcset="" />free forever
       </li>
     </ul>
     <p>We got tired of searching for free solution for doing <em>Scrum Poker Planning</em>, so we decided to solve the
       issue
       ourselves and open-source it.</p>
-    <img id="home-illustration" src="/home-illustration.png">
+    <NuxtImg id="home-illustration" src="/home-illustration.png" />
     <Button :disabled="false" :color="'primary'" @clicked="navigateTo('/prejoin')">
       Start Here
     </Button>
