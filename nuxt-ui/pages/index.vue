@@ -5,66 +5,59 @@ definePageMeta({
 useSeoMeta({
   title: 'Poker Planning',
 });
-useSeoMeta({});
 </script>
 <template>
-  <section id="home">
-    <section class="bg"></section>
+  <section>
     <hgroup>
       <img src="/icon-lg.svg" width="105" height="98" />
       <h1 data-testid="title">Poker Planning</h1>
     </hgroup>
     <ul>
-      <li><img src="/check.svg" alt="check" srcset="" />user-friendly</li>
-      <li><img src="/github.svg" alt="github" srcset="" /><a href="https://github.com/moby-it/planning-poker"
-          target="_blank"><em>open-sourced</em></a></li>
-      <li><img src="/check.svg" alt="check" srcset="" />free forever</li>
+      <li>
+        <img src="/check.svg" alt="check" srcset="" />user-friendly
+      </li>
+      <li>
+        <img src="/github.svg" alt="github" srcset="" />
+        <a href="https://github.com/moby-it/planning-poker" target="_blank"><em>open-sourced</em></a>
+      </li>
+      <li>
+        <img src="/check.svg" alt="check" srcset="" />free forever
+      </li>
     </ul>
     <p>We got tired of searching for free solution for doing <em>Scrum Poker Planning</em>, so we decided to solve the
       issue
       ourselves and open-source it.</p>
-    <img src="/home-illustration.png">
+    <img id="home-illustration" src="/home-illustration.png">
     <Button :disabled="false" :color="'primary'" @clicked="navigateTo('/prejoin')">
       Start Here
     </Button>
   </section>
 </template>
 <style scoped>
-#home {
+section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 168px 30px 90px 1fr;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 168px min-content min-content 1fr;
   grid-template-areas:
-    "title title ."
-    "tags illustration illustration"
-    "description illustration illustration"
-    "button illustration illustration";
-  gap: 16px;
+    "title title"
+    "tags ."
+    "description ."
+    "button button";
+
   margin-top: 72px;
   margin-left: 36px;
   font-size: 20px;
-}
-
-#home .bg {
-  background: url(/home-illustration.png);
-  opacity: 0.6;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: auto;
 
 }
 
 p {
   line-height: 30px;
   grid-area: description;
-
+  margin-bottom: 42px;
 }
 
 button {
   grid-area: button;
-  justify-self: center;
 }
 
 em {
@@ -76,6 +69,7 @@ ul {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-bottom: 24px;
 }
 
 li {
@@ -89,12 +83,6 @@ li {
   font-family: IBM Plex Mono, monospace;
 }
 
-img {
-  grid-area: illustration;
-  /* width: 100%; */
-  height: 500px;
-}
-
 hgroup {
   grid-area: title;
   display: flex;
@@ -102,15 +90,11 @@ hgroup {
   font-size: 4.25rem;
 }
 
-hgroup img {
-  width: 98px;
-}
-
-hgroup h1 {
-  flex: 1;
-}
-
-li img {
-  width: 20px;
+#home-illustration {
+  position: absolute;
+  right: 0;
+  bottom: 0px;
+  width: 40%;
+  opacity: 0.3;
 }
 </style>

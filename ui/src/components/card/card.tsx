@@ -1,3 +1,4 @@
+
 import { Component, Match, mergeProps, Show, Switch } from "solid-js";
 import "./card.css";
 
