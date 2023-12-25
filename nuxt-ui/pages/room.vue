@@ -4,6 +4,11 @@ const username = params.username;
 const isSpectator = ref(params.isSpectator === "true");
 const roomHeader = ref("Voting Task...");
 function copyLink() { navigator.clipboard.writeText(location.href); }
+const users = [
+  { username: 'george', voted: false, points: null },
+  { username: 'maria', voted: false, points: null },
+  { username: 'konnos', voted: true, points: null }
+];
 </script>
 <template>
   <section class="room-header">
@@ -16,9 +21,12 @@ function copyLink() { navigator.clipboard.writeText(location.href); }
       <IsSpectatorInput @changed="(v) => isSpectator = v" :model="isSpectator" />
     </li>
   </ul>
-  <h1>Hello from room</h1>
-  <p>username: {{ username }}</p>
-  <p>is Spectator: {{ isSpectator }} </p>
+  <section class="board">
+    <section class="user-vote" v-for="user of users">
+      <Card :points="user.points" :revealed="user.revealed" :voted="user.voted" />
+      <p>{{ user.username }}</p>
+    </section>
+  </section>
 </template>
 <style scoped>
 .room-header h2 {
@@ -36,4 +44,24 @@ function copyLink() { navigator.clipboard.writeText(location.href); }
   align-items: center;
   gap: 16px;
 }
+.board {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  max-width: 770px;
+  flex-wrap: wrap;
+}
+.vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 138px;
+  height: 128px;
+}
+.vote .username {
+  font-size: 1rem;
+  line-height: 20px;
+}
+
 </style>
