@@ -69,6 +69,7 @@ jobs:
         with:
           remote_host: ${{ secrets.HOST }}
           remote_user: ${{ secrets.USERNAME }}
+          remote_port: ${{ secrets.PORT }}
           remote_private_key: ${{ secrets.KEY }}
           registry: "docker.io"
           deploy_timeout: 180
