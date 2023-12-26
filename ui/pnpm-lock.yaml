@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -8,12 +8,18 @@ dependencies:
   '@solidjs/router':
     specifier: ^0.7.0
     version: 0.7.0(solid-js@1.6.10)
+  animejs:
+    specifier: ^3.2.2
+    version: 3.2.2
   solid-js:
     specifier: ^1.6.10
     version: 1.6.10
   solid-toast:
     specifier: ^0.4.0
     version: 0.4.0(solid-js@1.6.10)
+  solid-transition-group:
+    specifier: ^0.2.3
+    version: 0.2.3(solid-js@1.6.10)
   zod:
     specifier: ^3.21.4
     version: 3.21.4
@@ -25,6 +31,9 @@ devDependencies:
   '@testing-library/jest-dom':
     specifier: ^5.16.5
     version: 5.16.5
+  '@types/animejs':
+    specifier: ^3.1.12
+    version: 3.1.12
   '@types/testing-library__jest-dom':
     specifier: ^5.14.5
     version: 5.14.5
@@ -645,6 +654,31 @@ packages:
     resolution: {integrity: sha512-gFukHN4t8K4+wVC+ECqeqwzBDeFeTzBXroBTqE6vcWrQGbEUpHO7LYdG0f4xnvYq4VOEwITSlHlp0JBAIFMS/g==}
     dev: true
 
+  /@solid-primitives/refs@1.0.5(solid-js@1.6.10):
+    resolution: {integrity: sha512-5hmYmYbm6rs43nMHHozyyUngGA7P7q2WtlaCLJEfmlUJf67GWI1PZmqAiol6m9F37XSMZRuvZLoQ7HA/0q3GYg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/utils': 6.2.1(solid-js@1.6.10)
+      solid-js: 1.6.10
+    dev: false
+
+  /@solid-primitives/transition-group@1.0.3(solid-js@1.6.10):
+    resolution: {integrity: sha512-TnFADZhx9sibdoW5gxkU1QmLabzV2H2OBKYGS2aR5IC61Q/+7v8wlxOJEevxXNbPiRo6qlE3STLU3L9XS8hDbA==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.6.10
+    dev: false
+
+  /@solid-primitives/utils@6.2.1(solid-js@1.6.10):
+    resolution: {integrity: sha512-TsecNzxiO5bLfzqb4OOuzfUmdOROcssuGqgh5rXMMaasoFZ3GoveUgdY1wcf17frMJM7kCNGNuK34EjErneZkg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.6.10
+    dev: false
+
   /@solidjs/router@0.7.0(solid-js@1.6.10):
     resolution: {integrity: sha512-8HI84twe5FjYRebSLMAhtkL9bRuTDIlxJK56kjfjU9WKGoUCTaWpCnkuj8Hqde1bWZ0X+GOZxKDfNkn1CjtjxA==}
     peerDependencies:
@@ -695,6 +729,10 @@ packages:
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
+    dev: true
+
+  /@types/animejs@3.1.12:
+    resolution: {integrity: sha512-fpdH+ZtlO0kqjTOqRaBdsEmvpRNOayI8k4EVkEtitL5l6wducDOXk0rgQgfZqWf/ZX9DzXrHf257S5i9xTcISQ==}
     dev: true
 
   /@types/aria-query@5.0.1:
@@ -820,6 +858,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /animejs@3.2.2:
+    resolution: {integrity: sha512-Ao95qWLpDPXXM+WrmwcKbl6uNlC5tjnowlaRYtuVDHHoygjtIPfDUoK9NthrlZsQSKjZXlmji2TrBUAVbiH0LQ==}
+    dev: false
 
   /ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -2000,6 +2042,17 @@ packages:
     peerDependencies:
       solid-js: ^1.5.4
     dependencies:
+      solid-js: 1.6.10
+    dev: false
+
+  /solid-transition-group@0.2.3(solid-js@1.6.10):
+    resolution: {integrity: sha512-iB72c9N5Kz9ykRqIXl0lQohOau4t0dhel9kjwFvx81UZJbVwaChMuBuyhiZmK24b8aKEK0w3uFM96ZxzcyZGdg==}
+    engines: {node: '>=18.0.0', pnpm: '>=8.6.0'}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/refs': 1.0.5(solid-js@1.6.10)
+      '@solid-primitives/transition-group': 1.0.3(solid-js@1.6.10)
       solid-js: 1.6.10
     dev: false
 
