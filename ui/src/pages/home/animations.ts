@@ -57,7 +57,7 @@ export function registerAnimations() {
     setTimer(v => v += 1);
     if (timer() > 10)
       clearInterval(interval);
-  }, 500);
+  }, 400);
 
   // header
   createEffect((prev) => {
