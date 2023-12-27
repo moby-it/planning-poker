@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { Component, createSignal, Show } from "solid-js";
+import { Component, createSignal, onMount, Show } from "solid-js";
 import {
   BrowserStorageKeys,
   isSpectator,
@@ -14,7 +14,13 @@ import { Toggle } from "../../components/toggle/toggle";
 import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
 import { log } from "../../common/analytics";
+import anime from 'animejs/lib/anime.es.js';
+import { fade } from "../home/animations";
+
 const PrejoinForm: Component = () => {
+  onMount(() => {
+    anime(fade('.prejoin-form'));
+  });
   const navigate = useNavigate();
   const [params] = useSearchParams<{ create: string; }>();
   const isCreatingRoom = Boolean(params.create);
@@ -47,7 +53,7 @@ const PrejoinForm: Component = () => {
     navigate(`/room/${roomId()}`);
   }
   return (
-    <div class="prejoin-form">
+    <div class="prejoin-form" style="opacity:0;">
       <h2>{title}</h2>
       <div class="input-wrapper">
         <label for="username">Username</label>

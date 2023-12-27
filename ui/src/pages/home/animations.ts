@@ -1,5 +1,5 @@
-import { createEffect, createSignal } from "solid-js";
 import anime from 'animejs/lib/anime.es.js';
+import { createEffect, createSignal } from "solid-js";
 
 export function transformH1() {
   const title: any = document.querySelector('h1');
@@ -9,13 +9,13 @@ export function transformH1() {
 export function hide(...selectors: string[]) {
   selectors.forEach(s => document.querySelectorAll(s).forEach(v => (v as any).style.opacity = 0));
 }
-function fade(selector: string, duration = 1000) {
-  anime({
+export function fade(selector: string, duration = 1000) {
+  return {
     targets: selector,
     opacity: [0, 1],
     easing: 'easeInOutQuad',
     duration
-  });
+  };
 };
 function staggerEnterFromRight(selector: string, duration = 1000) {
   anime({
@@ -78,14 +78,21 @@ export function registerAnimations() {
   // button
   createEffect((prev) => {
     if (showButton() && !prev) {
-      fade('#start-here');
+      anime(
+        {
+          targets: '#start-here',
+          rotate: '1turn',
+          opacity: 1,
+          duration: 2000
+        }
+      );
     }
     return showButton();
   });
   // show 'made by moby' on top right
   createEffect((prev) => {
     if (showBy() && !prev) {
-      fade('.header span');
+      anime(fade('.header span'));
     }
     return showBy();
   });

@@ -6,8 +6,8 @@ import {
   createEffect,
   createResource,
   onCleanup,
+  onMount,
 } from "solid-js";
-import { log } from "../../common/analytics";
 import { isSpectator, setRoomId, username } from "../../common/state";
 import { Board } from "../../components/board/board";
 import { SpectatorList } from "../../components/spectatorList/spectatorList";
@@ -16,18 +16,23 @@ import {
   selectedCard,
   setSelectedCard,
 } from "../../components/votingCardList/votingCardList";
+import { fade } from "../home/animations";
 import { connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
 import "./room.css";
+import { useRoomContext } from "./roomState";
 import { RoomSubheader } from "./subheader";
 import { SubmitBtn } from "./submitBtn";
-import { useRoomContext } from "./roomState";
+import anime from 'animejs/lib/anime.es.js';
 
 const Room: Component = () => {
+  onMount(() => {
+    anime(fade('.room'));
+  });
   const { setSpectators, setVoters, revealing, voters, handleWsMessage } = useRoomContext();
   const navigate = useNavigate();
   const params = useParams();
-  const roomId = params["roomId"]
+  const roomId = params["roomId"];
   const pingMSInterval = 5 * 1000; // 15 seconds
   let pingInterval: NodeJS.Timer | undefined;
   setRoomId(roomId);
