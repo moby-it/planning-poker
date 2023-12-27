@@ -20,7 +20,7 @@ const Home: Component = () => {
   });
   return (
     <div class="col home">
-      <div class="row align-center title" style="position:relative; top:-100px">
+      <div class="row align-center title">
         <img src="/icon-lg.svg" width="105" height="98" alt="" srcset="" />
         <h1 data-testid="title">Poker Planning</h1>
       </div>

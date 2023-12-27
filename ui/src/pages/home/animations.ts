@@ -31,7 +31,7 @@ function animateWord(selector: string) {
   const textNodes = document.querySelectorAll(selector);
   anime({
     targets: textNodes,
-    translateY: [0, 100],
+    translateY: [-100, 0],
     opacity: [0, 1],
     easing: 'easeInOutQuad',
     delay: anime.stagger(100),
@@ -42,7 +42,7 @@ function fromTop(selector: string) {
   anime({
     targets: selector,
     opacity: 1,
-    translateY: [0, 100],
+    translateY: [-100, 0],
     duration: 1000
   });
 }
