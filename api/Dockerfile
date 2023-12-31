@@ -1,4 +1,5 @@
 FROM golang:1.20.6-alpine as build
+LABEL org.opencontainers.image.source=https://github.com/moby-it/planning-poker
 WORKDIR /app
 COPY ./ ./
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
