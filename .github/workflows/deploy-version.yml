@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
 jobs:
   test-api:
@@ -36,7 +38,7 @@ jobs:
         with:
           push: true
           context: ./api
-          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-api:stable
+          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }}
   build-ui:
     needs: test-ui
     runs-on: ubuntu-22.04
@@ -47,33 +49,21 @@ jobs:
         with:
           username: ${{ secrets.CONTAINER_USERNAME }}
           password: ${{ secrets.CONTAINER_PASSWORD }}
-      - name: 'Create env file'
-        run: |
-          echo "${{ secrets.UI_ENV }}" > ui/.env.production
       - name: Build and Push image
         uses: docker/build-push-action@v4
         with:
           push: true
           context: ./ui
-          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }},${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:stable
+          tags: ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }}
   deploy:
     needs: [build-ui, build-api]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Change docker stack tag
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: deploy ui
         run: |
-          sed -i "s/\${TAG}/${{ github.ref_name }}/g" docker-stack.yml
-      - name: Deploy Stack
-        uses: kitconcept/docker-stack-deploy@v1.2.0
-        with:
-          remote_host: ${{ secrets.HOST }}
-          remote_user: ${{ secrets.USERNAME }}
-          remote_port: ${{ secrets.PORT }}
-          remote_private_key: ${{ secrets.KEY }}
-          registry: "docker.io"
-          deploy_timeout: 180
-          username: ${{ secrets.CONTAINER_USERNAME }}
-          password: ${{ secrets.CONTAINER_PASSWORD }}
-          stack_file: "docker-stack.yml"
-          stack_name: "planning-poker"
+          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }} --remote-only ui
+      - name: deploy web-api
+        run: | 
+          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }} --remote-only api
