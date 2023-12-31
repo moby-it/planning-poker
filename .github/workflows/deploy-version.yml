@@ -74,7 +74,11 @@ jobs:
           docker pull ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }}
       - name: deploy ui
         run: |
-          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }} --local-only ui
+          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-ui:${{ github.ref_name }} \
+            --image-label ${{ github.ref_name }} \
+            --local-only ui
       - name: deploy web-api
         run: | 
-          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }} --local-only api
+          flyctl deploy --image ${{ secrets.REPOSITORY_NAME }}/planning-poker-api:${{ github.ref_name }} \
+            --image-label ${{ github.ref_name }} \
+            --local-only api
