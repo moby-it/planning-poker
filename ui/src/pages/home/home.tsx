@@ -14,7 +14,6 @@ const Home: Component = () => {
       'h1 .letter',
       '#start-here',
       '.subtitle > *',
-      '.home-illustration'
     );
     registerAnimations();
   });

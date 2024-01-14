@@ -49,10 +49,8 @@ function fromTop(selector: string) {
 export function registerAnimations() {
   const [timer, setTimer] = createSignal(0);
   const showHeader = () => timer() > 1;
-  const showImg = () => timer() > 1;
-  const showTags = () => timer() > 3;
-  const showButton = () => timer() > 8;
-  const showBy = () => timer() > 9;
+  const showTags = () => timer() > 5;
+  const showBy = () => timer() > 6;
   const interval = setInterval(() => {
     setTimer(v => v += 1);
     if (timer() > 10)
@@ -70,24 +68,10 @@ export function registerAnimations() {
   // tags
   createEffect((prev) => {
     if (showTags() && !prev) {
-      staggerEnterFromRight('.subtitle > *');
+      anime(fade('#start-here'));
+      anime(fade('.subtitle > *'));
     }
     return showTags();
-  });
-
-  // button
-  createEffect((prev) => {
-    if (showButton() && !prev) {
-      anime(
-        {
-          targets: '#start-here',
-          rotate: '1turn',
-          opacity: 1,
-          duration: 2000
-        }
-      );
-    }
-    return showButton();
   });
   // show 'made by moby' on top right
   createEffect((prev) => {
@@ -95,29 +79,5 @@ export function registerAnimations() {
       anime(fade('.header span'));
     }
     return showBy();
-  });
-  // img animation
-  createEffect((prev) => {
-    if (showImg() && !prev) {
-      const timeline = anime.timeline();
-      timeline
-        .add({
-          targets: '.home-illustration',
-          opacity: [0, 1],
-          duration: 2000,
-          easing: 'easeInOutQuad',
-        })
-        .add({
-          targets: '.home-illustration path',
-          strokeDashoffset: [anime.setDashoffset, 0],
-          easing: 'easeInOutSine',
-          duration: 1000,
-          delay: function (el, i) { return i * 20; },
-          loop: true
-        });
-
-
-    }
-    return showImg();
   });
 }
