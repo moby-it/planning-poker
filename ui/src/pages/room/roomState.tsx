@@ -1,6 +1,5 @@
 import { Accessor, JSX, JSXElement, batch, createContext, createSignal, useContext } from "solid-js";
 import { SetStoreFunction, createStore, produce } from "solid-js/store";
-import { log } from "../../common/analytics";
 import { username } from "../../common/state";
 import { User } from "../../common/user";
 import {
@@ -105,7 +104,6 @@ export function RoomProvider(props: { children: JSX.ArrayElement; }) {
         setRoundStatus(RoundStatuses.Revealable);
     }
     else if (isRoundRevealed(data)) {
-      log("round_revealed");
       const averageScore =
         Object.values(data.votes).reduce((a, b) => a + b, 0) /
         Object.values(data.votes).length;

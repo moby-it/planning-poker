@@ -13,7 +13,6 @@ import { Button } from "../../components/button/button";
 import { Toggle } from "../../components/toggle/toggle";
 import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
-import { log } from "../../common/analytics";
 import anime from 'animejs/lib/anime.es.js';
 import { fade } from "../home/animations";
 
@@ -49,7 +48,6 @@ const PrejoinForm: Component = () => {
     });
     const data = await response.text();
     setRoomId(data);
-    log("new_room");
     navigate(`/room/${roomId()}`);
   }
   return (

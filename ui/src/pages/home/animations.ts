@@ -31,31 +31,29 @@ function animateWord(selector: string) {
   const textNodes = document.querySelectorAll(selector);
   anime({
     targets: textNodes,
-    translateY: [-100, 0],
+    translateY: [-40, 0],
     opacity: [0, 1],
-    easing: 'easeInOutQuad',
-    delay: anime.stagger(100),
-    duration: 300
+    easing: 'easeInOutElastic',
+    delay: anime.stagger(200),
+    duration: 200
   });
 }
 function fromTop(selector: string) {
   anime({
     targets: selector,
     opacity: 1,
-    translateY: [-100, 0],
-    duration: 1000
   });
 }
 export function registerAnimations() {
   const [timer, setTimer] = createSignal(0);
   const showHeader = () => timer() > 1;
-  const showTags = () => timer() > 5;
-  const showBy = () => timer() > 6;
+  const showTags = () => timer() > 6;
+  const showBy = () => timer() > 7;
   const interval = setInterval(() => {
     setTimer(v => v += 1);
     if (timer() > 10)
       clearInterval(interval);
-  }, 400);
+  }, 500);
 
   // header
   createEffect((prev) => {
