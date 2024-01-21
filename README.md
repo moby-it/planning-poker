@@ -65,8 +65,8 @@ Moby IT only aims to provide an open source and free solution to teams that want
 ---
 
 <h3 align="center">
-<img src="https://moby-it.com/assets/MobyIT_Icon_50.png" width="30"/>
+<img src="https://moby-it.com/MobyIT_Icon_50.png" width="30"/>
 Build by Moby IT
-<img src="https://moby-it.com/assets/MobyIT_Icon_50.png"  width="30"/>
+<img src="https://moby-it.com/MobyIT_Icon_50.png"  width="30"/>
 
 </h3>
