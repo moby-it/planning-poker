@@ -1,5 +1,5 @@
 import anime from 'animejs/lib/anime.es.js';
-import { createEffect, createSignal } from "solid-js";
+import { Accessor, Setter, createEffect, createSignal } from "solid-js";
 
 export function transformH1() {
   const title: any = document.querySelector('h1');
@@ -29,13 +29,12 @@ function staggerEnterFromRight(selector: string, duration = 1000) {
 }
 function animateWord(selector: string) {
   const textNodes = document.querySelectorAll(selector);
-  anime({
+  const a = anime({
     targets: textNodes,
     translateY: [-40, 0],
     opacity: [0, 1],
     easing: 'easeInOutElastic',
-    delay: anime.stagger(200),
-    duration: 200
+    delay: anime.stagger(100),
   });
 }
 function fromTop(selector: string) {
@@ -44,11 +43,11 @@ function fromTop(selector: string) {
     opacity: 1,
   });
 }
-export function registerAnimations() {
+export function registerAnimations(): [Accessor<number>, Setter<number>] {
   const [timer, setTimer] = createSignal(0);
   const showHeader = () => timer() > 1;
-  const showTags = () => timer() > 6;
-  const showBy = () => timer() > 7;
+  const showTags = () => timer() > 5;
+  const showBy = () => timer() > 6;
   const interval = setInterval(() => {
     setTimer(v => v += 1);
     if (timer() > 10)
@@ -78,4 +77,5 @@ export function registerAnimations() {
     }
     return showBy();
   });
+  return [timer, setTimer];
 }

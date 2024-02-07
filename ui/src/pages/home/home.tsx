@@ -1,11 +1,11 @@
 import { useNavigate } from "@solidjs/router";
-import { Component, onMount } from "solid-js";
+import { Component, Setter, onMount } from "solid-js";
 import { Button } from "../../components/button/button";
 import { hide, registerAnimations, transformH1 } from "./animations";
 import "./home.css";
 const Home: Component = () => {
   const navigate = useNavigate();
-
+  let timerFn: Setter<number>;
   onMount(() => {
     transformH1();
     hide(
@@ -15,10 +15,11 @@ const Home: Component = () => {
       '#start-here',
       '.subtitle > *',
     );
-    registerAnimations();
+    const [_, setTimer] = registerAnimations();
+    timerFn = setTimer;
   });
   return (
-    <div class="col home">
+    <div class="col home" onClick={() => timerFn(20)}>
       <div class="row align-center title">
         <img src="/icon-lg.svg" width="105" height="98" alt="" srcset="" />
         <h1 data-testid="title">Poker Planning</h1>
