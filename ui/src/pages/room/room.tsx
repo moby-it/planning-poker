@@ -5,6 +5,7 @@ import {
   Suspense,
   createEffect,
   createResource,
+  createSignal,
   onCleanup,
   onMount,
 } from "solid-js";
@@ -17,7 +18,7 @@ import {
   setSelectedCard,
 } from "../../components/votingCardList/votingCardList";
 import { fade } from "../home/animations";
-import { connectToRoom, sendMessageIfOpen } from "./common";
+import { cancelReveal, connectToRoom, sendMessageIfOpen } from "./common";
 import { RoomHeader } from "./header";
 import "./room.css";
 import { useRoomContext } from "./roomState";
@@ -26,6 +27,7 @@ import { SubmitBtn } from "./submitBtn";
 import anime from 'animejs/lib/anime.es.js';
 
 const Room: Component = () => {
+  const [roomEl, setRoomEl] = createSignal<Element | null>(null);
   onMount(() => {
     anime(fade('.room'));
   });
@@ -52,6 +54,8 @@ const Room: Component = () => {
     if (socket.loading) return;
     if (socket.error) return navigate("/");
     const ws = socket();
+    const roomElement = document.querySelector('.room');
+    setRoomEl(roomElement);
     if (!ws) return;
     pingInterval = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN)
@@ -75,6 +79,16 @@ const Room: Component = () => {
       changeRole("voter");
     }
     return isSpectator();
+  });
+  createEffect(() => {
+    if (roomEl()) {
+      console.log('to register esc event lsitener')
+      window.addEventListener('keyup', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && revealing()) {
+          cancelReveal(socket())();
+        }
+      });
+    }
   });
   const userVotes = () =>
     sendMessageIfOpen(socket.latest, {

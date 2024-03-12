@@ -50,8 +50,12 @@ const PrejoinForm: Component = () => {
     setRoomId(data);
     navigate(`/room/${roomId()}`);
   }
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    isCreatingRoom ? await createRoom() : navigate(`/room/${roomId()}`);
+  }
   return (
-    <div class="prejoin-form" style="opacity:0;">
+    <form onSubmit={handleSubmit} class="prejoin-form" style="opacity:0;">
       <h2>{title}</h2>
       <div class="input-wrapper">
         <label for="username">Username</label>
@@ -78,15 +82,13 @@ const PrejoinForm: Component = () => {
         <span id="change-later">You can change this later</span>
       </div>
       <Button
+        options={{ type: 'submit', color: 'primary' }}
         testId="create-room"
         disabled={!!usernameError()}
-        action={async () =>
-          isCreatingRoom ? await createRoom() : navigate(`/room/${roomId()}`)
-        }
       >
         <span>{buttonText}</span>
       </Button>
-    </div>
+    </form>
   );
 };
 export default PrejoinForm;

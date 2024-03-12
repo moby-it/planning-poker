@@ -1,6 +1,6 @@
 import { Component, Match, Switch } from "solid-js";
 import { Button } from "../../components/button/button";
-import { sendMessageIfOpen } from "./common";
+import { cancelReveal, sendMessageIfOpen } from "./common";
 import { useRoomContext } from "./roomState";
 
 export const SubmitBtn: Component<{ socket: WebSocket | undefined; }> = (
@@ -10,11 +10,6 @@ export const SubmitBtn: Component<{ socket: WebSocket | undefined; }> = (
   const toRevealRound = () =>
     sendMessageIfOpen(props.socket, {
       type: "roundToReveal",
-    });
-
-  const cancelReveal = () =>
-    sendMessageIfOpen(props.socket, {
-      type: "cancelReveal",
     });
 
   const startNewRound = () =>
@@ -35,8 +30,8 @@ export const SubmitBtn: Component<{ socket: WebSocket | undefined; }> = (
       </Match>
       <Match when={revealing()}>
         <Button
-          color="default"
-          action={() => cancelReveal()}
+          options={{ color: "default" }}
+          action={cancelReveal(props.socket)}
           testId="cancel-reveal"
         >
           <span>Cancel Reveal</span>

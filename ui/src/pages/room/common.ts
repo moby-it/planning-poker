@@ -21,3 +21,9 @@ export async function connectToRoom(hander: WsEventHandler): Promise<WebSocket> 
 export function sendMessageIfOpen(ws: WebSocket | undefined, message: unknown) {
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
 }
+export function cancelReveal(socket: WebSocket | undefined) {
+  return () => sendMessageIfOpen(socket, {
+    type: "cancelReveal",
+  });
+}
+
