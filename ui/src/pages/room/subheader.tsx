@@ -9,6 +9,7 @@ export const RoomSubheader: Component = () => {
   return (
     <div class="room-subheader">
       <span
+        tabindex="0"
         class="primary cursor-pointer"
         onClick={() => {
           navigator.clipboard.writeText(location.href);

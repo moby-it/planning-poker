@@ -7,7 +7,7 @@ export const VotingCard: Component<{
 }> = (_props) => {
   const props = mergeProps({ selected: false }, _props);
   return (
-    <div
+    <button
       classList={{ "voting-card": true, selected: props.selected }}
       data-testid={`voting-card-${props.points}`}
       onClick={props.action}
@@ -20,6 +20,6 @@ export const VotingCard: Component<{
           <img src={`/cup-small-${props.selected ? "white" : "black"}.svg`} />
         </Match>
       </Switch>
-    </div>
+    </button>
   );
 };

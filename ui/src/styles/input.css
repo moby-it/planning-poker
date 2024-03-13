@@ -1,3 +1,7 @@
 input {
   height: 48px;
+  &:focus {
+    outline: 2px solid black;
+  }
 }
+

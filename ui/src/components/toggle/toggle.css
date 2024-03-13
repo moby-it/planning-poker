@@ -14,10 +14,13 @@
 /* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 10px;
+  height: 10px;
 }
 
+.switch:has(input:focus) {
+  outline: 2px solid black;
+}
 /* The slider */
 .slider {
   position: absolute;

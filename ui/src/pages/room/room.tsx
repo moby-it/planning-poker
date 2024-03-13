@@ -82,7 +82,6 @@ const Room: Component = () => {
   });
   createEffect(() => {
     if (roomEl()) {
-      console.log('to register esc event lsitener')
       window.addEventListener('keyup', (e: KeyboardEvent) => {
         if (e.key === 'Escape' && revealing()) {
           cancelReveal(socket())();

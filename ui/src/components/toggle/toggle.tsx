@@ -15,7 +15,7 @@ export const Toggle: Component<{
   return (
     <div class="toggle-container">
       <label for={props.name}>{props.label}</label>
-      <label class="switch">
+      <label class="switch" >
         <input
           disabled={props.disabled}
           name={props.name}
