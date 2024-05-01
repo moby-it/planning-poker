@@ -29,17 +29,19 @@ const store = {
 
 const proxiedStore = new Proxy(store, {
   set(target, property, value) {
-    target[property] = value;
     switch (property) {
       case 'users':
+        target[property] = value;
         window.dispatchEvent(new Event('app:users:update'));
         break;
       case 'roundStatus':
         target.prevRoundStatus = target.roundStatus;
+        target[property] = value;
         window.dispatchEvent(new Event('app:roundStatus:update'));
         break;
       case 'votes':
         window.dispatchEvent(new Event('app:votes:update'));
+        target[property] = value;
         break;
     }
     return true;

@@ -1,5 +1,6 @@
 import { registerSpectatorInputEventListener, } from "./isSpectatorToggle.js";
 import { sendWsMessage } from './room.js';
+import { renderHeader } from './render.js';
 import store from './store.js';
 
 
@@ -110,7 +111,7 @@ function roundToReveal(after) {
     submitButton.setAttribute('data-testid', 'cancel-reveal');
     submitButton.removeEventListener('click', handleRevealSubmit);
     submitButton.addEventListener('click', cancelRevealHandler);
-  } users;
+  }
 }
 function updateRoundIsRevealable(revealAvailable) {
   if (revealAvailable) {

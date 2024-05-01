@@ -1,6 +1,6 @@
 import store from './store.js';
 import { sendWsMessage } from './room.js';
-import { html, render } from 'https://unpkg.com/lit-html?module';
+import { html, render } from "https://esm.sh/lit-html@3.1.3";
 
 export function renderBoard() {
   const board = document.querySelector('.board');
@@ -32,26 +32,22 @@ export function renderRoundReset() {
   document.querySelector('.btn.primary')?.remove();
   renderHeader("Everyone's Ready");
 }
-function renderHeader(header) {
+export function renderHeader(header) {
   const headerText = document.querySelector('.room-header > h2');
   headerText.innerText = header;
 }
 export function renderSubmitButton() {
-  let submitButton = document.querySelector('#submit-btn');
-  if (store.role === 'spectator') {
-    submitButton.classList.add('hidden');
+  let submitButtonWrapper = document.querySelector('#submit-btn-wrapper');
+  if (store.role === 'spectator' || !store.isRevealable()) {
+    submitButtonWrapper.innerHTML = '';
     return;
   }
-  if (store.isRevealable()) {
-    render(createSubmitButton(store.roundStatus), submitButton);
-  }
-  if (!store.isRevealable()) submitButton.remove();
+
+  render(createSubmitButton(store.roundStatus), submitButtonWrapper);
 }
 
 function handleRevealSubmit() {
-  if (!revealInterval || revealInterval) {
-    sendWsMessage({ type: 'roundToReveal' });
-  }
+  sendWsMessage({ type: 'roundToReveal' });
 }
 function cancelRevealHandler() {
   sendWsMessage({ type: 'cancelReveal' });
