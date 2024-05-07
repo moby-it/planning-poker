@@ -19,7 +19,7 @@
 .voting-area {
   margin-left: 180px;
   flex: 1;
-  min-height: 583px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
