@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import {
   BrowserStorageKeys,
   isSpectator,
@@ -15,8 +15,21 @@ import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
 import anime from 'animejs/lib/anime.es.js';
 import { fade } from "../home/animations";
+import { createQuery } from "@tanstack/solid-query";
 
 const PrejoinForm: Component = () => {
+
+  const createRoomQuery = createQuery<string>(() => ({
+    queryKey: ['createRoomQuery'],
+    queryFn: createRoom,
+    enabled: false
+  }));
+  createEffect(() => {
+    if (createRoomQuery.data) {
+      setRoomId(createRoomQuery.data);
+      navigate(`/room/${roomId()}`);
+    }
+  });
   onMount(() => {
     anime(fade('.prejoin-form'));
   });
@@ -26,6 +39,9 @@ const PrejoinForm: Component = () => {
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
   const [usernameError, setUsernameError] = createSignal<string | null>(null);
+  createEffect(() => {
+    console.log(createRoomQuery.status);
+  });
   const handleInputChanged = (event: KeyboardEvent) => {
     try {
       // @ts-ignore
@@ -46,13 +62,13 @@ const PrejoinForm: Component = () => {
     const response = await fetch(createRoomUrl, {
       method: "POST",
     });
-    const data = await response.text();
-    setRoomId(data);
-    navigate(`/room/${roomId()}`);
+    const roomId = await response.text();
+    return roomId;
+
   }
   async function handleSubmit(e: Event) {
     e.preventDefault();
-    isCreatingRoom ? await createRoom() : navigate(`/room/${roomId()}`);
+    isCreatingRoom ? createRoomQuery.refetch() : navigate(`/room/${roomId()}`);
   }
   return (
     <form onSubmit={handleSubmit} class="prejoin-form" style="opacity:0;">
@@ -84,7 +100,7 @@ const PrejoinForm: Component = () => {
       <Button
         options={{ type: 'submit', color: 'primary' }}
         testId="create-room"
-        disabled={!!usernameError()}
+        disabled={!!usernameError() || createRoomQuery.isLoading}
       >
         <span>{buttonText}</span>
       </Button>
