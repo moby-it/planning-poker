@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import {
   BrowserStorageKeys,
   isSpectator,
@@ -15,23 +15,27 @@ import { apiV1Url } from "../../config";
 import "./prejoinForm.css";
 import anime from 'animejs/lib/anime.es.js';
 import { fade } from "../home/animations";
-import { createQuery } from "@tanstack/solid-query";
+import { createQuery, useQueryClient } from "@tanstack/solid-query";
 
 const PrejoinForm: Component = () => {
-
+  const queryClient = useQueryClient();
+  const roomQueryKey = 'createRoomQuery';
   const createRoomQuery = createQuery<string>(() => ({
-    queryKey: ['createRoomQuery'],
+    queryKey: [roomQueryKey],
     queryFn: createRoom,
     enabled: false
   }));
   createEffect(() => {
     if (createRoomQuery.data) {
       setRoomId(createRoomQuery.data);
-      navigate(`/room/${roomId()}`);
+      navigate(`/room/${roomId()}`, { replace: true });
     }
   });
   onMount(() => {
     anime(fade('.prejoin-form'));
+  });
+  onCleanup(() => {
+    queryClient.resetQueries({ queryKey: [roomQueryKey] });
   });
   const navigate = useNavigate();
   const [params] = useSearchParams<{ create: string; }>();
@@ -39,9 +43,7 @@ const PrejoinForm: Component = () => {
   const title = isCreatingRoom ? "Create a New Room" : "Joining Room";
   const buttonText = isCreatingRoom ? "create room" : "join room";
   const [usernameError, setUsernameError] = createSignal<string | null>(null);
-  createEffect(() => {
-    console.log(createRoomQuery.status);
-  });
+
   const handleInputChanged = (event: KeyboardEvent) => {
     try {
       // @ts-ignore
