@@ -70,6 +70,10 @@ const PrejoinForm: Component = () => {
   }
   async function handleSubmit(e: Event) {
     e.preventDefault();
+    if (!username()) {
+      setUsernameError('Please add a username');
+      return;
+    }
     isCreatingRoom ? createRoomQuery.refetch() : navigate(`/room/${roomId()}`);
   }
   return (
