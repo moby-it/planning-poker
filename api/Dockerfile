@@ -1,4 +1,4 @@
-FROM golang:1.20.6-alpine as build
+FROM golang:1.20.6-alpine AS build
 LABEL org.opencontainers.image.source=https://github.com/moby-it/planning-poker
 WORKDIR /app
 COPY ./ ./
