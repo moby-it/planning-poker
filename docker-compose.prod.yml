@@ -1,9 +1,11 @@
 services:
   ui:
+    restart: always
     image: ghcr.io/moby-it/planning-poker-ui
     ports:
       - 45001:80
   api:
+    restart: always
     image: ghcr.io/moby-it/planning-poker-api
     ports:
       - 45002:8080
