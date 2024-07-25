@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . ./
 
-RUN pnpm build -- --mode $MODE
+RUN pnpm build --mode $MODE
 
 FROM nginx:1.23-alpine
 
