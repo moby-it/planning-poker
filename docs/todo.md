@@ -1,4 +1,5 @@
-## E2E
+# E2E
+
 - Voting
   - [x] User creates room
   - [x] Voter joins the room
