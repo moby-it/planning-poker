@@ -42,6 +42,18 @@ Everything lives under `api/`:
 
 The scales and the reveal statistics live on the server, so every client in a room shows the same numbers, formatted the same way.
 
+### Running it behind a reverse proxy
+
+The pages and the websocket are served from the same origin, so whatever sits in front of the app has to be able to upgrade a connection. For nginx that means the site's `location` block needs these three lines alongside the usual `proxy_pass`:
+
+```nginx
+proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+```
+
+Without them the app loads and a room renders, but nobody ever appears on the board: the browser's `/v1/joinRoom/...` request arrives stripped of its upgrade tokens and the server rejects it.
+
 *Any PR that suggests improvements in code quality and stability of the product is always appreciated.*
 
 ## Contribution guidelines
