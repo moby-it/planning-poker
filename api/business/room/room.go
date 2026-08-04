@@ -11,6 +11,8 @@ import (
 
 	"github.com/George-Spanos/poker-planning/business/actions"
 	"github.com/George-Spanos/poker-planning/business/events"
+	"github.com/George-Spanos/poker-planning/business/scales"
+	"github.com/George-Spanos/poker-planning/business/stats"
 	"github.com/George-Spanos/poker-planning/business/user"
 	"github.com/google/uuid"
 )
@@ -21,17 +23,9 @@ const (
 	DefaultScale   = "fibonacci"
 )
 
-// validScales is the set of scale identifiers the UI knows how to render.
-var validScales = map[string]bool{
-	"fibonacci": true,
-	"tshirt":    true,
-	"powersof2": true,
-	"animals":   true,
-}
-
 // IsValidScale reports whether scale is a known scale identifier.
 func IsValidScale(scale string) bool {
-	return validScales[scale]
+	return scales.IsValid(scale)
 }
 
 type Room struct {
@@ -224,7 +218,11 @@ func (room *Room) RevealCurrentRound() {
 	votes := room.CurrentRound.GetVotesMap()
 
 	connections := room.Connections()
-	event := events.RoundRevealedEvent{Event: events.Event{Type: events.RoundRevealed}, Votes: votes}
+	event := events.RoundRevealedEvent{
+		Event: events.Event{Type: events.RoundRevealed},
+		Votes: votes,
+		Stats: stats.Compute(votes, scales.Get(room.Scale)),
+	}
 	events.Broadcast(event, connections...)
 }
 

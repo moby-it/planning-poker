@@ -1,0 +1,33 @@
+{{define "content"}}
+{{template "header" true}}
+{{/*
+  One form, two jobs: creating a room (and therefore picking a scale) or
+  joining one that already exists. RoomId is empty in the first case.
+*/}}
+<form class="prejoin-form" data-room-id="{{.RoomId}}">
+  <h2>{{if .Creating}}Create a New Room{{else}}Joining Room{{end}}</h2>
+  <div class="input-wrapper">
+    <label for="username">Username</label>
+    <input data-testid="username-input" type="text" name="username" autocomplete="off" />
+  </div>
+  {{if .Creating}}
+  <div class="input-wrapper">
+    <label for="scale">Agile Scale</label>
+    <select data-testid="scale-select" name="scale">
+      {{range .Scales}}
+      <option value="{{.Value}}">{{.Name}}</option>
+      {{end}}
+    </select>
+  </div>
+  {{end}}
+  <div class="is-spectator">
+    <div class="is-spectator-switch">
+      {{template "toggle" toggle "isSpectator" "Join as Spectator" "spectator-toggle"}}
+    </div>
+    <span id="change-later">You can change this later</span>
+  </div>
+  <button type="submit" class="btn primary" data-testid="create-room">
+    <span>{{if .Creating}}create room{{else}}join room{{end}}</span>
+  </button>
+</form>
+{{end}}

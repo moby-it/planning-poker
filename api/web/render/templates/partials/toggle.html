@@ -1,0 +1,16 @@
+{{/*
+  An iOS style switch. The checkbox itself carries the test id, because callers
+  (and the e2e suite) drive it through its `checked` property.
+
+  It renders unchecked; the client ticks it from the visitor's saved preference
+  once the page is live, so the server never has to know who is looking.
+*/}}
+{{define "toggle"}}
+<div class="toggle-container">
+  <label for="{{.Name}}">{{.Label}}</label>
+  <label class="switch">
+    <input name="{{.Name}}" type="checkbox" data-testid="{{.TestId}}" />
+    <span class="slider round"></span>
+  </label>
+</div>
+{{end}}
