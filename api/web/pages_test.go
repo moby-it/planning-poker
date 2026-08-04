@@ -74,6 +74,47 @@ func TestRoomThatDoesNotExistSendsTheVisitorHome(t *testing.T) {
 	}
 }
 
+// A mistyped page URL should land somewhere useful, but a missing asset has to
+// look missing: answering a script request with a page of HTML makes the
+// browser report a syntax error instead of a 404.
+func TestOnlyNavigationsAreSentHome(t *testing.T) {
+	server := httptest.NewServer(web.Router())
+	defer server.Close()
+
+	client := &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	tests := []struct {
+		name   string
+		path   string
+		accept string
+		want   int
+	}{
+		{name: "a mistyped page", path: "/rooom", accept: "text/html,*/*", want: http.StatusSeeOther},
+		{name: "a missing script", path: "/js/script.js", accept: "*/*", want: http.StatusNotFound},
+		{name: "a missing stylesheet", path: "/nope.css", accept: "text/css,*/*", want: http.StatusNotFound},
+		{name: "a missing embedded asset", path: "/static/js/nope.js", accept: "*/*", want: http.StatusNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			request, _ := http.NewRequest(http.MethodGet, server.URL+tt.path, nil)
+			request.Header.Set("Accept", tt.accept)
+			res, err := client.Do(request)
+			if err != nil {
+				t.Fatalf("requesting %v: %v", tt.path, err)
+			}
+			defer res.Body.Close()
+			if res.StatusCode != tt.want {
+				t.Errorf("GET %v: status %v, want %v", tt.path, res.StatusCode, tt.want)
+			}
+		})
+	}
+}
+
 // The pages reference the assets by path, so a rename that misses one has to
 // fail here rather than in a browser.
 func TestAssetsAreServed(t *testing.T) {

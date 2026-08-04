@@ -3,6 +3,7 @@ package web
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/George-Spanos/poker-planning/web/handlers"
@@ -40,10 +41,20 @@ func Router() *mux.Router {
 	v1Router.HandleFunc("/createRoom", handlers.CreateRoom).Methods("POST")
 	v1Router.HandleFunc("/joinRoom/{roomId}/{username}/{role}", handlers.ConnectToRoom)
 
-	// Anything else is a mistyped URL; send the visitor somewhere useful.
-	r.NotFoundHandler = http.RedirectHandler("/", http.StatusSeeOther)
+	r.NotFoundHandler = http.HandlerFunc(notFound)
 
 	return r
+}
+
+// notFound sends a visitor who mistyped a URL back to the home page, but lets
+// anything else fail honestly. Redirecting a missing script or stylesheet would
+// answer it with a page of HTML, which the browser then tries to parse as code.
+func notFound(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet && strings.Contains(r.Header.Get("Accept"), "text/html") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	http.NotFound(w, r)
 }
 
 func StartApp() error {
