@@ -1,9 +1,13 @@
 services:
   # One service now serves the pages, the assets and the websocket. The image
-  # name is unchanged so the existing deploy pipeline keeps working; the host
-  # port is the one the site used to be reached on.
+  # name is unchanged so the existing deploy pipeline keeps working.
+  #
+  # Both host ports are kept so neither hostname has to move: 45001 is where
+  # the site was served from and 45002 is where api.poker-planning.net points.
+  # They now reach the same container.
   app:
     restart: always
     image: ghcr.io/george-spanos/planning-poker-api
     ports:
       - 45001:8080
+      - 45002:8080
