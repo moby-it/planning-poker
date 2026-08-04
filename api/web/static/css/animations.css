@@ -1,0 +1,70 @@
+/*
+ * Entrance animations. These replace the anime.js timelines the SolidJS build
+ * used to run: everything here is declarative CSS, so the markup the server
+ * sends is already in its final shape and nothing has to be measured in JS.
+ *
+ * Every animated element uses `both` fill mode, so it starts hidden without a
+ * script having to set opacity first. Note that opacity does not affect hit
+ * testing — the "Start Here" button is clickable from the first frame.
+ */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fade-in 1s ease-in-out both;
+}
+
+/* Home intro ------------------------------------------------------------- */
+
+/* --i is the letter index, set by the server when it splits the title. */
+.home h1 .letter {
+  display: inline-block;
+  animation: drop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(1s + var(--i) * 0.1s);
+}
+
+.home .title img {
+  animation: fade-in 0.6s ease-in-out 1s both;
+}
+
+.home .subtitle > *,
+.home #start-here {
+  animation: fade-in 1s ease-in-out 3s both;
+}
+
+/*
+ * Clicking anywhere on the home page skips the intro, matching the old
+ * behaviour where a click fast-forwarded the timeline.
+ */
+.home.rushed h1 .letter,
+.home.rushed .title img,
+.home.rushed .subtitle > *,
+.home.rushed #start-here {
+  animation-delay: 0s;
+  animation-duration: 0.2s;
+}
+
+/* Page transitions ------------------------------------------------------- */
+
+.prejoin-form,
+.room {
+  animation: fade-in 1s ease-in-out both;
+}

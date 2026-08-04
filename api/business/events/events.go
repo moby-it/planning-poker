@@ -3,6 +3,7 @@ package events
 import (
 	"log"
 
+	"github.com/George-Spanos/poker-planning/business/stats"
 	"github.com/George-Spanos/poker-planning/business/user"
 )
 
@@ -39,6 +40,9 @@ type UserVotedEvent struct {
 type RoundRevealedEvent struct {
 	Event
 	Votes map[string]int `json:"votes"`
+	// Stats is computed server side so every client in the room agrees on the
+	// numbers, down to their formatting.
+	Stats stats.Stats `json:"stats"`
 }
 type RoundRevealAvailableEvent struct {
 	Event

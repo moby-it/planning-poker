@@ -1,0 +1,33 @@
+{{define "content"}}
+{{template "header" false}}
+<div class="col home">
+  <div class="row align-center title">
+    <img src="/static/assets/icon-lg.svg" width="105" height="98" alt="" />
+    {{/* Split into letters so the CSS can stagger them; the heading still reads as text. */}}
+    <h1 data-testid="title">{{range letters "Poker Planning"}}{{if .Space}} {{else}}<span class="letter"
+        style="{{styleIndex .Index}}">{{.Char}}</span>{{end}}{{end}}</h1>
+  </div>
+  <div class="welcome-box col">
+    <div class="subtitle">
+      <span>
+        <img src="/static/assets/check.svg" alt="check" />
+        user-friendly
+      </span>
+      <a href="https://github.com/moby-it/planning-poker" target="_blank" rel="noreferrer">
+        <img src="/static/assets/github.svg" alt="github" />
+        <u>open-sourced</u>
+      </a>
+      <span>
+        <img src="/static/assets/check.svg" class="primary" alt="check" />
+        free forever
+      </span>
+    </div>
+    <div id="start-here" style="align-self:center;" data-testid="start-here">
+      <button type="button" class="btn primary">
+        <span>Start Here</span>
+      </button>
+    </div>
+  </div>
+  {{template "homeIllustration"}}
+</div>
+{{end}}

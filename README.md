@@ -29,7 +29,18 @@ We are glad that you are reached this section. Before providing some guidelines 
 
 ## Tech stack
 
-The application consists of a simple [Go](https://go.dev/) web api and a Front End UI created with [SolidJS](https://www.solidjs.com/). While our experience lies heavily in the JavaScript (NodeJS, Angular, Typescript) ecosystem, we always like to try new technologies.
+The application is a single [Go](https://go.dev/) binary. It renders the pages with `html/template`, serves the stylesheets and scripts from an embedded filesystem, and runs the live room over a websocket. The browser side is hand-written ES modules — no framework, no bundler, no build step.
+
+Everything lives under `api/`:
+
+| Path | What it holds |
+| --- | --- |
+| `business/` | the domain: rooms, rounds, the agile scales and the statistics of a revealed round |
+| `web/render/templates/` | the pages and the partials they share |
+| `web/static/` | the stylesheets, the ES modules and the images |
+| `web/` | routing, the page handlers and the websocket endpoint |
+
+The scales and the reveal statistics live on the server, so every client in a room shows the same numbers, formatted the same way.
 
 *Any PR that suggests improvements in code quality and stability of the product is always appreciated.*
 
@@ -43,7 +54,9 @@ To spin up the stack you need:
 
 1. [Go](https://go.dev/) installed on your machine. Minimun version v1.20.2
 2. Install [make](https://www.gnu.org/software/make/) if not already included in your system.
-3. Install [Node.js](https://nodejs.org/en). Minimum version LTS
+3. [Docker](https://docs.docker.com/get-docker/), to run the end to end tests. Node.js is only needed for those, and only inside the container.
+
+`cd api && make run` starts the app on `localhost:8080`. There is nothing to build first: the templates and the static files are embedded into the binary, so re-running that one command picks up an edit to a template, a stylesheet or a script.
 
 Inside the scripts folder there is a bunch of conveniece scripts, to help you test your changes before you create your Pull Request. The main one is `test-all.sh` We highly suggest you do so.
 

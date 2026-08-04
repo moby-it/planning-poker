@@ -1,13 +1,7 @@
 services:
-  ui:
+  app:
     ports:
-      - 3000:80
-    build:
-      context: ui
-      args:
-        - MODE=docker
-  api:
-    ports:
-      - 8080:8080
+      # 3000 on the host keeps the address in the README unchanged.
+      - 3000:8080
     build:
       context: api

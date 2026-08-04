@@ -1,0 +1,22 @@
+{{/*
+  The hand a voter picks from. It is rendered from the scale the room was
+  created with, so the server stays the single source of truth for the cards.
+
+  Each card also carries its label, which lets the board resolve a revealed
+  vote (a number on the wire) back to what the voter actually saw.
+
+  Takes a scales.Scale.
+*/}}
+{{define "votingCardList"}}
+<div class="voting-card-list" data-testid="voting-card-list">
+  {{range .Cards}}
+  <button class="voting-card" data-testid="voting-card-{{.Value}}" data-value="{{.Value}}" data-label="{{.Label}}">
+    {{if eq .Value 1000}}
+    <img src="/static/assets/cup-small-black.svg" alt="{{.Label}}" />
+    {{else}}
+    <span>{{.Label}}</span>
+    {{end}}
+  </button>
+  {{end}}
+</div>
+{{end}}

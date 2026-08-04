@@ -1,0 +1,14 @@
+{{/*
+  The top bar. The logo is a way back home, so it is pointless on the home page
+  itself — pass false there.
+*/}}
+{{define "header"}}
+<div class="header row align-center {{if .}}justify-between{{else}}justify-end{{end}}">
+  {{if .}}
+  <a class="logo cursor-pointer" href="/" data-link>
+    <img src="/static/assets/favicon.ico" width="26" alt="" />
+    <h4>Poker Planning</h4>
+  </a>
+  {{end}}
+</div>
+{{end}}

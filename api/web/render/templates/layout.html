@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="/js/script.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init({
+      endpoint: "/api/event"
+    })
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description"
+    content="Scrum Poker Planing Application. User Friendly, Open-Sourced, Free Forever." />
+  <link rel="canonical" href="https://poker-planning.net" />
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora&display=swap"
+    rel="stylesheet" />
+  <meta property="og:title" content="Poker Planning" />
+  <meta property="og:description"
+    content="Scrum Poker Planing Application that is User Friendly, Open-Sourced and Free Forever." />
+  <meta property="og:image" content="/static/assets/home-illustration.svg" />
+  <meta property="og:url" content="https://poker-planning.net" />
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Poker Planning</title>
+
+  <link rel="stylesheet" href="/static/css/reset.css" />
+  <link rel="stylesheet" href="/static/css/normalize.css" />
+  <link rel="stylesheet" href="/static/css/colors.css" />
+  <link rel="stylesheet" href="/static/css/typography.css" />
+  <link rel="stylesheet" href="/static/css/layout.css" />
+  <link rel="stylesheet" href="/static/css/input.css" />
+  <link rel="stylesheet" href="/static/css/animations.css" />
+  <link rel="stylesheet" href="/static/css/components/board.css" />
+  <link rel="stylesheet" href="/static/css/components/button.css" />
+  <link rel="stylesheet" href="/static/css/components/card.css" />
+  <link rel="stylesheet" href="/static/css/components/header.css" />
+  <link rel="stylesheet" href="/static/css/components/home.css" />
+  <link rel="stylesheet" href="/static/css/components/logo.css" />
+  <link rel="stylesheet" href="/static/css/components/prejoinForm.css" />
+  <link rel="stylesheet" href="/static/css/components/progressBar.css" />
+  <link rel="stylesheet" href="/static/css/components/room.css" />
+  <link rel="stylesheet" href="/static/css/components/spectatorList.css" />
+  <link rel="stylesheet" href="/static/css/components/toaster.css" />
+  <link rel="stylesheet" href="/static/css/components/toggle.css" />
+  <link rel="stylesheet" href="/static/css/components/votingCardList.css" />
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root">
+    <!--
+      The client router swaps everything inside #app on navigation, so the
+      header lives in here too and each page decides whether to show the logo.
+    -->
+    <div id="app">{{template "content" .}}</div>
+  </div>
+  <div id="toaster"></div>
+
+  <script type="module" src="/static/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+{{/*
+  What the room header turns into once a round is revealed. It ships as an
+  inert <template> so the markup — including the sort icons — stays in the
+  templates rather than being built by hand in JavaScript.
+
+  The items tagged data-stat are dropped for scales whose numbers are only an
+  ordering (t-shirt sizes, animals), where an average would be meaningless.
+*/}}
+{{define "revealed"}}
+<template id="revealed-template">
+  <div class="stats-container" data-testid="stats-container">
+    <div class="item" data-stat="average">
+      <span class="label">Average</span>
+      <span class="value"></span>
+    </div>
+    <div class="divider" data-stat="average"></div>
+    <div class="item" data-stat="standardDeviation">
+      <span class="label">Standard Deviation</span>
+      <span class="value"></span>
+    </div>
+    <div class="divider" data-stat="standardDeviation"></div>
+    <div class="item verdict" data-stat="verdict">
+      <span class="label">Verdict</span>
+      <span class="value"></span>
+    </div>
+  </div>
+
+  <div class="sort-icon-group" data-testid="sort-controls">
+    <button class="sort-icon-btn" data-testid="sort-btn-none" data-sort="none" title="Unsorted">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <button class="sort-icon-btn" data-testid="sort-btn-asc" data-sort="asc" title="Sort Ascending">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8l4-4 4 4M7 4v16M13 12h8M13 18h8M13 6h8" />
+      </svg>
+    </button>
+    <button class="sort-icon-btn" data-testid="sort-btn-desc" data-sort="desc" title="Sort Descending">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 16l4 4 4-4M7 20V4M13 12h8M13 18h8M13 6h8" />
+      </svg>
+    </button>
+  </div>
+</template>
+{{end}}

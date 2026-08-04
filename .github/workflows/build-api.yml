@@ -1,10 +1,11 @@
-name: Api
+name: App
 on:
   push:
     branches:
       - "main"
     paths:
       - "api/**"
+      - "e2e/**"
   workflow_dispatch:
 
 permissions:
@@ -19,9 +20,17 @@ jobs:
       - name: Test api
         working-directory: ./api
         run: make test
+  test-e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Test end to end
+        run: |
+          docker compose -f docker-compose.test.yml build
+          docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from e2e
   build:
     runs-on: ubuntu-24.04
-    needs: test
+    needs: [test, test-e2e]
     environment: prod
     steps:
       - uses: actions/checkout@v7

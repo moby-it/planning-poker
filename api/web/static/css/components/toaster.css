@@ -1,0 +1,50 @@
+#toaster {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+  max-width: 360px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: var(--white);
+  color: var(--primary--dark);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1), 0 3px 3px rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  line-height: 20px;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Added on the frame after insertion so the transition has something to run from. */
+.toast.shown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.toast.success::before {
+  background-color: var(--primary);
+}
+
+.toast.error::before {
+  background-color: var(--error);
+}

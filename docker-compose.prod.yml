@@ -1,11 +1,9 @@
 services:
-  ui:
-    restart: always
-    image: ghcr.io/george-spanos/planning-poker-ui
-    ports:
-      - 45001:80
-  api:
+  # One service now serves the pages, the assets and the websocket. The image
+  # name is unchanged so the existing deploy pipeline keeps working; the host
+  # port is the one the site used to be reached on.
+  app:
     restart: always
     image: ghcr.io/george-spanos/planning-poker-api
     ports:
-      - 45002:8080
+      - 45001:8080

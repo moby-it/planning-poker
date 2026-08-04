@@ -1,22 +1,16 @@
 services:
-  ui:
+  app:
     ports:
-      - 3000:80
-    build:
-      context: ui
-      args:
-        - MODE=test
-
-  api:
-    ports:
-      - 8080:8080
+      - 3000:8080
     build:
       context: api
+
   e2e:
-    build: 
+    build:
       context: e2e
       dockerfile: Dockerfile
+    environment:
+      # Overrides the default baked into e2e/Dockerfile.
+      - URL=http://app:8080
     depends_on:
-    - ui
-    - api
-
+      - app

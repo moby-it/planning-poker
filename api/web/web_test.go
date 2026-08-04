@@ -79,6 +79,13 @@ func UserChangesRole(t *testing.T, connection *user.Connection, roomId string, u
 // testing if connection will receive the given event in the next 3 seconds
 func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expectedEvent string) {
 	t.Helper()
+	ConnectionReceivedEventPayload(t, connection, expectedEvent)
+}
+
+// ConnectionReceivedEventPayload drains messages until the expected event
+// arrives and hands back its raw JSON, so tests can assert on the payload.
+func ConnectionReceivedEventPayload(t *testing.T, connection *user.Connection, expectedEvent string) []byte {
+	t.Helper()
 	for {
 		err := connection.SetReadDeadline(time.Now().Add(3 * time.Second))
 		if err != nil {
@@ -95,16 +102,18 @@ func ConnectionReceivedEvent(t *testing.T, connection *user.Connection, expected
 		}
 		if event.Type == expectedEvent {
 			t.Logf("\tUser %v got expected event %v", connection.Username, expectedEvent)
-			break
+			return data
 		}
 	}
-
 }
 func TestCreateRoom(t *testing.T) {
 	t.Log("Given a user lands on the platform")
 	{
 		t.Log("\tWhen the user creates a room")
 		{
+			// Rooms live in a registry shared by the whole process, so this
+			// counts the change rather than the total.
+			before := room.GetLength()
 			roomId := CreateRoomAndGetId(t)
 			t.Log("\t\tThen the room should be created")
 
@@ -113,8 +122,8 @@ func TestCreateRoom(t *testing.T) {
 			}
 			t.Log("\t\tRoom id should be a string")
 
-			if room.GetLength() != 1 {
-				t.Fatal("\t\tRoom should be added to the Rooms map. Expected length of 1. Got: ", room.GetLength())
+			if room.GetLength() != before+1 {
+				t.Fatal("\t\tRoom should be added to the Rooms map. Expected length of ", before+1, ". Got: ", room.GetLength())
 			}
 			t.Log("\t\tRoom should be added to the Rooms map")
 
@@ -403,9 +412,26 @@ func TestRoundReveal(t *testing.T) {
 			t.Log("\tWhen a user reveals the round")
 			room.RevealCurrentRound()
 			{
-				ConnectionReceivedEvent(t, connection, events.RoundRevealed)
+				payload := ConnectionReceivedEventPayload(t, connection, events.RoundRevealed)
 				ConnectionReceivedEvent(t, connection2, events.RoundRevealed)
 				t.Log("\tUsers should receive a round revealed event")
+
+				var revealed events.RoundRevealedEvent
+				if err := json.Unmarshal(payload, &revealed); err != nil {
+					t.Fatalf("\t\tRevealed event should be readable. Got: %v", err)
+				}
+				if revealed.Votes[usename] != 3 || revealed.Votes[username2] != 2 {
+					t.Fatalf("\t\tRevealed event should carry every vote. Got: %v", revealed.Votes)
+				}
+				t.Log("\t\tThe event carries the votes")
+
+				// Votes of 3 and 2 on the default scale: mean 2.5, population
+				// deviation 0.5, verdict the card closest to 2.75.
+				if !revealed.Stats.Numeric || revealed.Stats.Average != "2.5" ||
+					revealed.Stats.StandardDeviation != "0.5" || revealed.Stats.Verdict != "3" {
+					t.Fatalf("\t\tRevealed event should carry the computed stats. Got: %+v", revealed.Stats)
+				}
+				t.Log("\t\tThe event carries the stats computed by the server")
 			}
 		}
 	}

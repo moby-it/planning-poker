@@ -1,0 +1,32 @@
+{{define "content"}}
+{{template "header" true}}
+{{/*
+  The shell of a live room. Everything that changes during a round — the board,
+  the spectator list, the submit button, the stats — is driven by websocket
+  events, so it starts empty and the client fills it in.
+
+  data-numeric tells the client whether an average is meaningful for this
+  room's scale.
+*/}}
+<div class="room" data-testid="room" data-room-id="{{.RoomId}}" data-scale="{{.Scale.Value}}"
+  data-numeric="{{.Scale.Numeric}}">
+  <div class="room-header">
+    <h2>Voting is in session!</h2>
+  </div>
+  <div class="room-subheader">
+    <span tabindex="0" class="primary cursor-pointer" id="copy-link">Copy Invite Link</span>
+    <div id="spectator-toggle-wrapper">
+      {{template "toggle" toggle "isSpectator" "Join as Spectator" "spectator-toggle"}}
+    </div>
+  </div>
+  <div class="voting-area-wrapper">
+    <div class="voting-area">
+      {{/* The submit button is inserted right after the board when a round becomes actionable. */}}
+      <div class="board"></div>
+      {{template "votingCardList" .Scale}}
+    </div>
+    <div class="spectators"></div>
+  </div>
+</div>
+{{template "revealed"}}
+{{end}}
